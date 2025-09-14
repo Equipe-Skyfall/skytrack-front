@@ -14,51 +14,23 @@ import Login from './pages/login/Login';
 // Componente para proteger rotas de admin
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  return user?.cargo === 'GERENTE' ? <>{children}</> : <Navigate to="/dashboard" replace />;
-};
-
-// Componente para proteger rotas gerais (apenas usuários logados)
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
-  return user ? <>{children}</> : <Navigate to="/login" replace />;
+  return user?.role === 'ADMIN' ? <>{children}</> : <Navigate to="/dashboard" replace />;
 };
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Routes>
-          {/* Login - acessível sempre (com ou sem login) */}
+          {/* Login - acessível para todos */}
           <Route path="/login" element={<Login />} />
           
-          {/* Páginas com Layout (sidebar) - apenas para usuários logados */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Layout><Dashboard /></Layout>
-            </ProtectedRoute>
-          } />
-          
-          {/* Rotas que qualquer usuário logado pode acessar */}
-          <Route path="/estacoes" element={
-            <ProtectedRoute>
-              <Layout><Estacoes /></Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/alertas" element={
-            <ProtectedRoute>
-              <Layout><Alertas /></Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/educacao" element={
-            <ProtectedRoute>
-              <Layout><Educacao /></Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/perfil" element={
-            <ProtectedRoute>
-              <Layout><Perfil /></Layout>
-            </ProtectedRoute>
-          } />
+          {/* Páginas públicas com Layout (sidebar) */}
+          <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/estacoes" element={<Layout><Estacoes /></Layout>} />
+          <Route path="/alertas" element={<Layout><Alertas /></Layout>} />
+          <Route path="/educacao" element={<Layout><Educacao /></Layout>} />
+          <Route path="/perfil" element={<Layout><Perfil /></Layout>} />
 
           {/* Rotas apenas para admin */}
           <Route path="/parametros" element={
@@ -72,21 +44,15 @@ const App: React.FC = () => {
             </AdminRoute>
           } />
           
-          {/* Default redireciona para dashboard se logado, senão para login */}
-          <Route path="/" element={<RootRedirect />} />
+          {/* Default redireciona para dashboard */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
           {/* Redireciona rotas não encontradas */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
-};
-
-// Componente para redirecionamento inteligente da raiz
-const RootRedirect: React.FC = () => {
-  const { user } = useAuth();
-  return user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
 };
 
 export default App;

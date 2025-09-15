@@ -10,6 +10,7 @@ import Parametros from './pages/parametros/Parametros';
 import Perfil from './pages/perfil/Perfil';
 import Usuarios from './pages/usuarios/Usuarios';
 import Login from './pages/login/Login';
+import NotFoundPage from './components/notFound/notFoundPage';
 
 // Componente para proteger rotas de admin
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -48,7 +49,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
           {/* Redireciona rotas não encontradas */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </Router>

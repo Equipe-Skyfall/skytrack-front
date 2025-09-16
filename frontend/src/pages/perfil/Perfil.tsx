@@ -217,7 +217,6 @@ const Perfil: React.FC = () => {
           onClick={logout}
           className="flex items-center gap-2 text-red-600 font-normal text-xs hover:underline"
         >
-          <span className="material-icons">logout</span> Logoff
         </button>
       </div>
     </div>

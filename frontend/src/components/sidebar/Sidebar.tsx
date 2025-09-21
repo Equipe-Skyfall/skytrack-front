@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FaTachometerAlt, FaMapMarkerAlt, FaExclamationTriangle, FaBook, FaCog, FaUser, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
+import {
+  BookOpen,
+  TriangleAlert,
+  MapPin,
+  Gauge,
+  LogIn,
+  Settings,
+  User
+} from "lucide-react";
 
 const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -13,18 +21,18 @@ const Sidebar: React.FC = () => {
 
   const menuItems = isAdmin
     ? [
-        { path: '/dashboard', label: 'Dashboard', icon: <FaTachometerAlt /> },
-        { path: '/estacoes', label: 'Estações', icon: <FaMapMarkerAlt /> },
-        { path: '/alertas', label: 'Alertas', icon: <FaExclamationTriangle /> },
-        { path: '/educacao', label: 'Educação', icon: <FaBook /> },
-        { path: '/parametros', label: 'Parâmetros', icon: <FaCog /> },
-        { path: '/perfil', label: 'Perfil', icon: <FaUser /> },
+        { path: '/dashboard', label: 'Dashboard', icon: <Gauge /> },
+        { path: '/estacoes', label: 'Estações', icon: <MapPin /> },
+        { path: '/alertas', label: 'Alertas', icon: <TriangleAlert /> },
+        { path: '/educacao', label: 'Educação', icon: <BookOpen /> },
+        { path: '/parametros', label: 'Parâmetros', icon: <Settings /> },
+        { path: '/perfil', label: 'Perfil', icon: <User /> },
       ]
     : [
-        { path: '/dashboard', label: 'Dashboard', icon: <FaTachometerAlt /> },
-        { path: '/estacoes', label: 'Estações', icon: <FaMapMarkerAlt /> },
-        { path: '/alertas', label: 'Alertas', icon: <FaExclamationTriangle /> },
-        { path: '/educacao', label: 'Educação', icon: <FaBook /> },
+        { path: '/dashboard', label: 'Dashboard', icon: <Gauge /> },
+        { path: '/estacoes', label: 'Estações', icon: <MapPin /> },
+        { path: '/alertas', label: 'Alertas', icon: <TriangleAlert /> },
+        { path: '/educacao', label: 'Educação', icon: <BookOpen /> },
       ];
 
   const handleLogoffClick = () => {
@@ -93,7 +101,7 @@ const Sidebar: React.FC = () => {
                 className="flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] bg-white text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
               >
                 <span className="ml-[1.2rem] text-lg">
-                  <FaSignOutAlt />
+                  <LogIn />
                 </span>
                 <span className="flex-1 text-center text-[0.8rem] font-normal font-poppins leading-[1.8rem]">
                   Logoff
@@ -108,7 +116,7 @@ const Sidebar: React.FC = () => {
                 className="flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] bg-white text-black transition-colors hover:bg-gray-100"
               >
                 <span className="ml-[1.2rem] text-lg">
-                  <FaSignInAlt />
+                  <LogIn />
                 </span>
                 <span className="flex-1 text-center text-[0.8rem] font-normal font-poppins leading-[1.8rem]">
                   Login

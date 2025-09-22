@@ -1,4 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
+import AddUserModal from './AddUserModal';
+import { User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 type Usuario = {
@@ -26,9 +29,37 @@ interface ApiResponse {
 
 const Perfil: React.FC = () => {
   const { user, token, logout } = useAuth();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Função para adicionar usuário
+  const handleAddUser = async (data: { email: string; username: string; password: string; role: string }) => {
+    try {
+      const response = await fetch('https://authservice-brown.vercel.app/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          email: data.email,
+          username: data.username,
+          password: data.password,
+          role: data.role,
+        }),
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Erro ao adicionar usuário');
+      }
+      setIsAddModalOpen(false);
+      window.location.reload();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao adicionar usuário');
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -136,8 +167,8 @@ const Perfil: React.FC = () => {
           <div className="flex-1 bg-slate-900 rounded-lg border border-zinc-500 p-8 flex flex-col ml-2 relative">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-6">
-                <div className="w-16 h-16 rounded-lg bg-zinc-100 flex items-center justify-center text-4xl text-gray-400">
-                  <span className="material-icons">account_circle</span>
+                <div className="w-16 h-16 rounded-lg bg-zinc-100 flex items-center justify-center text-gray-400">
+                  <User size={40} />
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-2xl font-bold text-zinc-100">{usuarioPrincipal.nome}</span>
@@ -176,9 +207,19 @@ const Perfil: React.FC = () => {
       <div>
         <div className="flex items-center justify-between mb-4">
           <span className="text-xl font-bold text-black">Outros usuários</span>
-          <button className="flex items-center gap-2 w-48 h-11 bg-slate-900 rounded-lg text-white text-sm font-normal px-4 py-2 hover:bg-blue-900 transition">
+          <button
+            className="flex items-center gap-2 w-48 h-11 bg-slate-900 rounded-lg text-white text-sm font-normal px-4 py-2 hover:bg-blue-900 transition"
+            onClick={() => setIsAddModalOpen(true)}
+            type="button"
+          >
             <span className="text-3xl">+</span> Adicionar Usuário
           </button>
+      {/* Modal de adicionar usuário */}
+      <AddUserModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={({ email, username, password, role }) => handleAddUser({ email, username, password, role })}
+      />
         </div>
         <div className="flex flex-col gap-6">
           {outrosUsuarios.length > 0 ? (
@@ -186,18 +227,16 @@ const Perfil: React.FC = () => {
               <div key={u.id} className="flex flex-row items-stretch">
                 <div className={`w-1.5 rounded-lg ${u.status === 'Ativo' ? 'bg-lime-500' : 'bg-zinc-400'}`} />
                 <div className="flex-1 bg-white rounded-lg border border-zinc-500 flex items-center justify-between px-8 py-5 ml-2">
-                  <div className="flex items-center gap-6">
-                    <div className="w-9 h-9 rounded-lg bg-zinc-100 flex items-center justify-center text-2xl text-gray-400">
-                      <span className="material-icons">account_circle</span>
+                  <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 w-full">
+                    <div className="w-9 h-9 rounded-lg bg-zinc-100 flex items-center justify-center text-gray-400">
+                      <User size={28} />
                     </div>
                     <span className="text-base font-bold text-black">{u.nome}</span>
-                    <div className="flex-1 flex justify-end">
-                      <span className={`px-4 py-1 rounded-xl text-xs font-normal min-w-[64px] text-center ${u.status === 'Ativo' ? 'bg-lime-500 text-black' : 'bg-neutral-300 text-black'}`}>
-                        {u.status}
-                      </span>
-                    </div>
+                    <span className={`px-4 py-1 rounded-xl text-xs font-normal min-w-[64px] text-center ${u.status === 'Ativo' ? 'bg-lime-500 text-black' : 'bg-neutral-300 text-black'}`}>
+                      {u.status}
+                    </span>
                   </div>
-                  <button className="w-32 h-10 bg-white/60 rounded-md border border-black text-black text-sm font-normal flex items-center justify-center hover:bg-gray-100 transition">
+                  <button className="w-32 h-10 bg-white/60 rounded-md border border-black text-black text-sm font-normal flex items-center justify-center hover:bg-gray-100 transition ml-6">
                     <span className="material-icons text-gray-600 mr-2">settings</span>Configurar
                   </button>
                 </div>

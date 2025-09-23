@@ -1,10 +1,12 @@
 import React from 'react';
-import Education from '../../components/conteudoPaginas/educacional/Educacao';
+import ConteudoEducacao from '../../components/conteudoPaginas/educacao/ConteudoEducacao';
 
-const Estacoes: React.FC = () => {
+const Educacao: React.FC = () => {
   return (
-    <Education />
+    <div className="Educacao">
+      <ConteudoEducacao />
+    </div>
   );
 };
 
-export default Estacoes;
+export default Educacao;

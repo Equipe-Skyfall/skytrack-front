@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield,
@@ -12,7 +12,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 
-const Login: React.FC = () => {
+const ConteudoLogin: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -174,4 +174,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default ConteudoLogin;

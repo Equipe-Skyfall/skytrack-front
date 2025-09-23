@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowLeft, BarChart2, Calculator, BookOpen } from 'lucide-react';
 import SecaoEducacao from './SecaoEducacao';
 import CardEducacao from './CardEducacao';
-import { useEducacao } from '../../hooks/educacao/useEducacao';
+import { useEducacao } from '../../../hooks/educacao/useEducacao';
 
 const ConteudoEducacao: React.FC = () => {
   const { voltarParaDashboard } = useEducacao();

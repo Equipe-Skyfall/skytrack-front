@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Função para decodificar JWT
+// Função para decodificar JWT (usada como fallback)
 const decodeJWT = (token: string) => {
   try {
     const base64Url = token.split('.')[1];
@@ -22,53 +22,75 @@ interface User {
   id: string;
   email: string;
   username: string;
-  role: 'ADMIN';
+  role: 'ADMIN' | 'USER';
 }
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // Verifica a autenticação via cookie
   useEffect(() => {
-    // Carrega user e token do localStorage ao carregar o app
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
-    }
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('https://authservice-brown.vercel.app/auth/profile', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Falha ao verificar autenticação');
+        }
+
+        const newUser: User = {
+          id: data.data.id,
+          email: data.data.email,
+          username: data.data.username,
+          role: data.data.role,
+        };
+        setUser(newUser);
+      } catch (error) {
+        setUser(null); // Usuário não autenticado
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       const response = await fetch('https://authservice-brown.vercel.app/auth/login', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
       if (!response.ok || !data.success) {
-        throw new Error(data.message || `Login failed with status ${response.status}`);
+        throw new Error(data.message || 'Falha no login');
       }
 
-      // Decodifica o token para obter userId, username e role
+      // Fallback: usa o token do JSON se o cookie não estiver disponível
       const decodedToken = decodeJWT(data.data.token);
       if (!decodedToken) {
-        throw new Error('Failed to decode JWT');
+        throw new Error('Falha ao decodificar o token');
       }
 
       const newUser: User = {
@@ -78,28 +100,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         role: decodedToken.role,
       };
       setUser(newUser);
-      setToken(data.data.token);
-
-      // Salva no localStorage
-      localStorage.setItem('user', JSON.stringify(newUser));
-      localStorage.setItem('token', data.data.token);
 
       navigate('/dashboard');
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Login failed');
+      throw new Error(error instanceof Error ? error.message : 'Falha no login');
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      const response = await fetch('https://authservice-brown.vercel.app/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha no logout');
+      }
+    } catch (error) {
+      // Mesmo com erro (ex.: 404), limpa o estado local
+    }
+
     setUser(null);
-    setToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    navigate('/dashboard');
+    navigate('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -108,7 +139,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 };

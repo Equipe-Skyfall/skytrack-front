@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from "react";
 import ModalCadastroEstacao from "../../modalCadastroEstacao/cadastroEstacaoModal";
-import { useAuth } from "../../../context/AuthContext"; 
+// Importe o modal de edição que criamos
+import ModalEdicaoEstacao from "../../modalEdicaoEstacao/modalEdicaoEstacao";
+import { useAuth } from "../../../context/AuthContext";
+import Pagination from "../../pagination/pagination";
 
 const API_URL = 'https://sky-track-backend.vercel.app/api/stations';
 
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 interface StationsListResponse {
   data: StationDto[];
-  pagination: { /* ... */ };
+  pagination: PaginationData;
 }
 
 interface StationDto {
@@ -17,15 +27,13 @@ interface StationDto {
   longitude: number;
   address: string | null;
   description: string | null;
-  status: "ACTIVE" | "INACTIVE"; 
+  status: "ACTIVE" | "INACTIVE";
   createdAt: string;
   updatedAt: string;
 }
-
 interface Station extends StationDto {
   statusColor: string;
 }
-
 interface StationFormData {
   name: string;
   address: string;
@@ -33,14 +41,21 @@ interface StationFormData {
   latitude: string;
   longitude: string;
   description: string;
-  status: "ACTIVE" | "INACTIVE"; 
+  status: "ACTIVE" | "INACTIVE";
 }
 
 interface EstacaoCardProps {
   station: Station;
+  onConfigurarClick: () => void;
+  onVerHistoricoClick: () => void;
 }
 
-const EstacaoCard: React.FC<EstacaoCardProps> = ({ station }) => {
+
+const EstacaoCard: React.FC<EstacaoCardProps> = ({
+  station,
+  onConfigurarClick,
+  onVerHistoricoClick
+}) => {
   const displayStatus = {
     ACTIVE: "Ativo",
     INACTIVE: "Inativo",
@@ -102,33 +117,56 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({ station }) => {
           Atualizado em: {new Date(station.updatedAt).toLocaleDateString("pt-BR")}
         </div>
       </div>
+
+      <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-gray-200">
+        <button
+          onClick={onConfigurarClick}
+          className="text-sm font-medium text-slate-700 hover:text-slate-900"
+        >
+          Configurar
+        </button>
+        <button
+          onClick={onVerHistoricoClick}
+          className="text-sm font-medium text-slate-700 hover:text-slate-900"
+        >
+          Ver Histórico
+        </button>
+      </div>
     </div>
   );
 };
 
-
 function getStatusColor(status: "ACTIVE" | "INACTIVE"): string {
   if (status === "ACTIVE") return "bg-lime-400";
-  return "bg-red-500"; 
+  return "bg-red-500";
 }
 
 const Estacao: React.FC = () => {
   const { token } = useAuth();
-  
+
   const [listaDeEstacoes, setListaDeEstacoes] = useState<Station[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [editingStation, setEditingStation] = useState<Station | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
 
-  useEffect(() => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paginationData, setPaginationData] = useState<PaginationData | null>(null);
 
-    const fetchStations = async () => {
+  const STATIONS_PER_PAGE = 6;
+
+
+
+  useEffect(() => {
+    const fetchStations = async (page: number) => {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`${API_URL}?limit=10&page=1`, {
+        const response = await fetch(`${API_URL}?limit=${STATIONS_PER_PAGE}&page=${page}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -152,6 +190,8 @@ const Estacao: React.FC = () => {
         }));
 
         setListaDeEstacoes(displayStations);
+        setPaginationData(responseData.pagination);
+
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
         console.error('Erro:', err);
@@ -160,8 +200,8 @@ const Estacao: React.FC = () => {
       }
     };
 
-    fetchStations();
-  }, []); 
+    fetchStations(currentPage);
+  }, [currentPage]);
 
   const handleAddStation = async (data: StationFormData) => {
     if (!token) {
@@ -187,25 +227,110 @@ const Estacao: React.FC = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json(); 
+        const errorData = await response.json();
         throw new Error(errorData.message || `Erro ao salvar: ${response.status}`);
       }
-      
-      const newStationFromApi: StationDto = await response.json();
 
-      const displayStation: Station = {
-        ...newStationFromApi,
-        statusColor: getStatusColor(newStationFromApi.status),
-      };
-
-      setListaDeEstacoes((listaAnterior) => [...listaAnterior, displayStation]);
       setIsModalOpen(false);
+      const fetchPage = currentPage;
+      setCurrentPage(0);
+      setCurrentPage(fetchPage);
 
     } catch (error: any) {
       console.error("Erro ao criar estação:", error);
       alert(`Erro ao salvar estação: ${error.message}`);
     }
   };
+
+  const handleEditStationSubmit = async (data: StationFormData) => {
+    if (!editingStation) return;
+    if (!token) {
+      alert("Sessão expirada. Faça login para editar estações.");
+      return;
+    }
+
+    try {
+      // 1. Crie um DTO de "diferenças" (o que mudou)
+      const changedData: any = {};
+
+      // 2. Compara cada campo do formulário com a estação original
+      if (data.name !== editingStation.name) {
+        changedData.name = data.name;
+      }
+      if (data.address !== (editingStation.address || '')) {
+        changedData.address = data.address;
+      }
+      if (data.description !== (editingStation.description || '')) {
+        changedData.description = data.description;
+      }
+      if (data.status !== editingStation.status) {
+        changedData.status = data.status;
+      }
+
+      // Converte os dados do formulário (string) para número antes de comparar
+      const formLat = parseFloat(data.latitude || '0');
+      const formLng = parseFloat(data.longitude || '0');
+
+      if (formLat !== editingStation.latitude) {
+        changedData.latitude = formLat;
+      }
+      if (formLng !== editingStation.longitude) {
+        changedData.longitude = formLng;
+      }
+
+      // A VERIFICAÇÃO MAIS IMPORTANTE:
+      // Só adiciona 'macAddress' se ele realmente mudou
+      if (data.macAddress !== (editingStation.macAddress || '')) {
+        changedData.macAddress = data.macAddress;
+      }
+
+      // 3. Verifique se algo realmente mudou
+      if (Object.keys(changedData).length === 0) {
+        alert("Nenhuma alteração foi feita.");
+        setEditingStation(null); // Fechar o modal
+        return;
+      }
+
+      // Se algo mudou (e o macAddress não), o objeto 'changedData'
+      // será enviado SEM o campo 'macAddress', evitando o bug de validação!
+
+      const response = await fetch(`${API_URL}/${editingStation.id}`, {
+        method: 'PUT', // Ainda usando PUT, como você pediu
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(changedData), // 4. Envia APENAS os dados alterados
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erro ao editar: ${response.status}`);
+      }
+
+      setEditingStation(null); // Fecha o modal
+
+      // Atualiza a lista na tela
+      const updatedStation: StationDto = await response.json();
+      setListaDeEstacoes(prevList =>
+        prevList.map(station =>
+          station.id === updatedStation.id
+            ? { ...updatedStation, statusColor: getStatusColor(updatedStation.status) }
+            : station
+        )
+      );
+
+    } catch (error: any) {
+      console.error("Erro ao editar estação:", error);
+      alert(`Erro ao salvar alteração: ${error.message}`);
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
 
   if (loading) {
     return (
@@ -223,11 +348,12 @@ const Estacao: React.FC = () => {
     );
   }
 
+
   return (
     <div className="min-h-screen bg-white p-4 md:px-4">
+
       <div className="flex justify-between items-center mb-1">
         <h1 className="text-3xl font-bold">Estações Pluviométricas</h1>
-
         {token && (
           <button
             onClick={() => setIsModalOpen(true)}
@@ -242,18 +368,42 @@ const Estacao: React.FC = () => {
         Gerencie e monitore todas as estações de medição
       </p>
 
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {listaDeEstacoes.map((station) => (
-          <EstacaoCard key={station.id} station={station} />
+          <EstacaoCard
+            key={station.id}
+            station={station}
+
+            onConfigurarClick={() => setEditingStation(station)}
+            onVerHistoricoClick={() => alert(`Abrir histórico da ${station.name}`)}
+          />
         ))}
       </div>
-      
-      
+
+
+      {paginationData && (
+        <Pagination
+          currentPage={paginationData.page}
+          totalPages={paginationData.totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
+
       <ModalCadastroEstacao
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddStation}
       />
+
+      {editingStation && (
+        <ModalEdicaoEstacao
+          isOpen={!!editingStation}
+          onClose={() => setEditingStation(null)}
+          onSubmit={handleEditStationSubmit}
+          stationToEdit={editingStation}
+        />
+      )}
     </div>
   );
 };

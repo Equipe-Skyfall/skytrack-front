@@ -245,6 +245,31 @@ const Perfil: React.FC = () => {
         isOpen={isEditModalOpen}
         onClose={() => { setIsEditModalOpen(false); setEditUserId(null); }}
         onSubmit={handleEditUser}
+        onDelete={async () => {
+          if (!editUserId) return;
+          try {
+            const response = await fetch(`https://authservice-brown.vercel.app/users/${editUserId}`, {
+              method: 'DELETE',
+              headers: {
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                'Content-Type': 'application/json',
+              },
+            });
+            if (!response.ok) {
+              const err = await response.json();
+              throw new Error(err.message || 'Erro ao deletar usuário');
+            }
+            setIsEditModalOpen(false);
+            setEditUserId(null);
+            setSuccessMessage('Usuário deletado com sucesso!');
+            setTimeout(() => {
+              setSuccessMessage(null);
+              window.location.reload();
+            }, 2000);
+          } catch (err) {
+            alert(err instanceof Error ? err.message : 'Erro ao deletar usuário');
+          }
+        }}
         initialData={editUserInitialData}
       />
             </div>

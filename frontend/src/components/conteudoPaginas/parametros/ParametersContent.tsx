@@ -144,7 +144,7 @@ const ParametersContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-white font-poppins flex">
+    <div className="min-h-screen font-poppins flex">
       <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-8 max-w-full mx-auto">
         <div className="flex justify-between items-center">
           <div className="space-y-2">

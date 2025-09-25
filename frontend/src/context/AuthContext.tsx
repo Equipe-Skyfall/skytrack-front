@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 // Função para decodificar JWT (usada como fallback)
 const decodeJWT = (token: string) => {
@@ -27,6 +27,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -35,12 +36,37 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Verifica a autenticação via cookie
+  // Rotas públicas (acessíveis sem login)
+  const publicRoutes = ['/login', '/estacoes', '/dashboard', '/alertas', '/educacao'];
+  // Rotas exclusivas de admin
+  const adminRoutes = ['/parametros', '/perfil'];
+
+  // Verifica a autenticação
   useEffect(() => {
     const checkAuth = async () => {
+      // Não verifica autenticação em rotas públicas
+      if (publicRoutes.includes(location.pathname)) {
+        setIsCheckingAuth(false);
+        return;
+      }
+
+      // Se há usuário, pula verificação
+      if (user) {
+        // Verifica se é admin nas rotas de admin
+        if (adminRoutes.includes(location.pathname) && user.role !== 'ADMIN') {
+          navigate('/login', { replace: true });
+        }
+        setIsCheckingAuth(false);
+        return;
+      }
+
       try {
+        setIsCheckingAuth(true);
         const response = await fetch('https://authservice-brown.vercel.app/auth/profile', {
           method: 'GET',
           headers: {
@@ -50,8 +76,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           credentials: 'include',
         });
 
+        if (!response.ok) {
+          throw new Error(`Erro ${response.status}`);
+        }
+
         const data = await response.json();
-        if (!response.ok || !data.success) {
+        if (!data.success) {
           throw new Error(data.message || 'Falha ao verificar autenticação');
         }
 
@@ -61,14 +91,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           username: data.data.username,
           role: data.data.role,
         };
+
         setUser(newUser);
       } catch (error) {
-        setUser(null); // Usuário não autenticado
+        setUser(null);
+        setToken(null);
+        if (adminRoutes.includes(location.pathname)) {
+          navigate('/login', { replace: true });
+        }
+      } finally {
+        setIsCheckingAuth(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [navigate, location.pathname, user]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -84,24 +121,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const data = await response.json();
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Falha no login');
+        throw new Error(data.message || `Erro ${response.status}: Falha no login`);
       }
 
-      // Fallback: usa o token do JSON se o cookie não estiver disponível
-      const decodedToken = decodeJWT(data.data.token);
+      const newToken = data.data?.token;
+      if (!newToken) {
+        throw new Error('Token não retornado pelo servidor');
+      }
+
+      setToken(newToken);
+
+      const decodedToken = decodeJWT(newToken);
       if (!decodedToken) {
         throw new Error('Falha ao decodificar o token');
       }
 
       const newUser: User = {
-        id: decodedToken.userId,
-        email: decodedToken.email,
-        username: decodedToken.username,
-        role: decodedToken.role,
+        id: decodedToken.userId || '',
+        email: decodedToken.email || email,
+        username: decodedToken.username || email.split('@')[0],
+        role: decodedToken.role || 'USER',
       };
       setUser(newUser);
 
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Falha no login');
     }
@@ -122,16 +165,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Falha no logout');
       }
     } catch (error) {
-      // Mesmo com erro (ex.: 404), limpa o estado local
+      // Mesmo com erro, limpa o estado local
     }
 
     setUser(null);
-    navigate('/login');
+    setToken(null);
+    navigate('/login', { replace: true });
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, token, login, logout }}>
+      {isCheckingAuth ? (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-lg text-zinc-600">Carregando...</div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-
 import { useNavigate } from 'react-router-dom';
 import {
   Shield,
@@ -12,7 +11,6 @@ import {
   User,
   ArrowLeft
 } from "lucide-react";
-import { useAuth } from '../../../context/AuthContext';
 
 const ConteudoLogin: React.FC = () => {
   const { login } = useAuth();

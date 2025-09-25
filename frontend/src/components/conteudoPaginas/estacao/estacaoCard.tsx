@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ModalCadastroEstacao from "../../modalCadastroEstacao/cadastroEstacaoModal";
-// Importe o modal de edição que criamos
 import ModalEdicaoEstacao from "../../modalEdicaoEstacao/modalEdicaoEstacao";
+import ModalExcluirEstacao from "../../modalExcluirEstacao/modalExcluirEstacao";
 import { useAuth } from "../../../context/AuthContext";
 import Pagination from "../../pagination/pagination";
 
@@ -13,12 +13,10 @@ interface PaginationData {
   total: number;
   totalPages: number;
 }
-
 interface StationsListResponse {
   data: StationDto[];
   pagination: PaginationData;
 }
-
 interface StationDto {
   id: string;
   name: string;
@@ -48,13 +46,16 @@ interface EstacaoCardProps {
   station: Station;
   onConfigurarClick: () => void;
   onVerHistoricoClick: () => void;
+  onDeleteClick: () => void;
+  isUserLoggedIn: boolean;
 }
-
 
 const EstacaoCard: React.FC<EstacaoCardProps> = ({
   station,
   onConfigurarClick,
-  onVerHistoricoClick
+  onVerHistoricoClick,
+  onDeleteClick,
+  isUserLoggedIn,
 }) => {
   const displayStatus = {
     ACTIVE: "Ativo",
@@ -118,16 +119,26 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-gray-200">
-        <button
-          onClick={onConfigurarClick}
-          className="text-sm font-medium text-slate-700 hover:text-slate-900"
-        >
-          Configurar
-        </button>
+      <div className="flex justify-end items-center gap-2 mt-4 pt-4 border-t border-gray-200">
+        {isUserLoggedIn && (
+          <>
+            <button
+              onClick={onDeleteClick}
+              className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1 px-3 rounded"
+            >
+              Excluir
+            </button>
+            <button
+              onClick={onConfigurarClick}
+              className="bg-slate-800 hover:bg-slate-600 text-white text-xs font-bold py-1 px-3 rounded"
+            >
+              Configurar
+            </button>
+          </>
+        )}
         <button
           onClick={onVerHistoricoClick}
-          className="text-sm font-medium text-slate-700 hover:text-slate-900"
+          className="bg-slate-800 hover:bg-slate-600 text-white text-xs font-bold py-1 px-3 rounded"
         >
           Ver Histórico
         </button>
@@ -146,52 +157,40 @@ const Estacao: React.FC = () => {
 
   const [listaDeEstacoes, setListaDeEstacoes] = useState<Station[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [editingStation, setEditingStation] = useState<Station | null>(null);
+  const [deletingStation, setDeletingStation] = useState<Station | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
 
   const [currentPage, setCurrentPage] = useState(1);
   const [paginationData, setPaginationData] = useState<PaginationData | null>(null);
 
   const STATIONS_PER_PAGE = 6;
 
-
-
   useEffect(() => {
     const fetchStations = async (page: number) => {
       try {
         setLoading(true);
         setError(null);
-
         const response = await fetch(`${API_URL}?limit=${STATIONS_PER_PAGE}&page=${page}`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         });
-
         if (!response.ok) {
           throw new Error(`Erro ao buscar estações: ${response.status}`);
         }
-
         const responseData: StationsListResponse = await response.json();
-
         if (!responseData.data) {
           throw new Error('Formato de resposta inesperado da API');
         }
-
         const stationsFromApi = responseData.data;
         const displayStations: Station[] = stationsFromApi.map((station) => ({
           ...station,
           statusColor: getStatusColor(station.status),
         }));
-
         setListaDeEstacoes(displayStations);
         setPaginationData(responseData.pagination);
-
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
         console.error('Erro:', err);
@@ -199,7 +198,6 @@ const Estacao: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchStations(currentPage);
   }, [currentPage]);
 
@@ -208,14 +206,12 @@ const Estacao: React.FC = () => {
       alert("Sessão expirada. Faça login para cadastrar estações.");
       return;
     }
-
     try {
       const createDto = {
         ...data,
         latitude: parseFloat(data.latitude || '0'),
         longitude: parseFloat(data.longitude || '0'),
       };
-
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
@@ -225,17 +221,14 @@ const Estacao: React.FC = () => {
         },
         body: JSON.stringify(createDto),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || `Erro ao salvar: ${response.status}`);
       }
-
       setIsModalOpen(false);
       const fetchPage = currentPage;
       setCurrentPage(0);
       setCurrentPage(fetchPage);
-
     } catch (error: any) {
       console.error("Erro ao criar estação:", error);
       alert(`Erro ao salvar estação: ${error.message}`);
@@ -248,12 +241,8 @@ const Estacao: React.FC = () => {
       alert("Sessão expirada. Faça login para editar estações.");
       return;
     }
-
     try {
-      // 1. Crie um DTO de "diferenças" (o que mudou)
       const changedData: any = {};
-
-      // 2. Compara cada campo do formulário com a estação original
       if (data.name !== editingStation.name) {
         changedData.name = data.name;
       }
@@ -266,52 +255,36 @@ const Estacao: React.FC = () => {
       if (data.status !== editingStation.status) {
         changedData.status = data.status;
       }
-
-      // Converte os dados do formulário (string) para número antes de comparar
       const formLat = parseFloat(data.latitude || '0');
       const formLng = parseFloat(data.longitude || '0');
-
       if (formLat !== editingStation.latitude) {
         changedData.latitude = formLat;
       }
       if (formLng !== editingStation.longitude) {
         changedData.longitude = formLng;
       }
-
-      // A VERIFICAÇÃO MAIS IMPORTANTE:
-      // Só adiciona 'macAddress' se ele realmente mudou
       if (data.macAddress !== (editingStation.macAddress || '')) {
         changedData.macAddress = data.macAddress;
       }
-
-      // 3. Verifique se algo realmente mudou
       if (Object.keys(changedData).length === 0) {
         alert("Nenhuma alteração foi feita.");
-        setEditingStation(null); // Fechar o modal
+        setEditingStation(null);
         return;
       }
-
-      // Se algo mudou (e o macAddress não), o objeto 'changedData'
-      // será enviado SEM o campo 'macAddress', evitando o bug de validação!
-
       const response = await fetch(`${API_URL}/${editingStation.id}`, {
-        method: 'PUT', // Ainda usando PUT, como você pediu
+        method: 'PUT',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(changedData), // 4. Envia APENAS os dados alterados
+        body: JSON.stringify(changedData),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || `Erro ao editar: ${response.status}`);
       }
-
-      setEditingStation(null); // Fecha o modal
-
-      // Atualiza a lista na tela
+      setEditingStation(null);
       const updatedStation: StationDto = await response.json();
       setListaDeEstacoes(prevList =>
         prevList.map(station =>
@@ -320,17 +293,48 @@ const Estacao: React.FC = () => {
             : station
         )
       );
-
     } catch (error: any) {
       console.error("Erro ao editar estação:", error);
       alert(`Erro ao salvar alteração: ${error.message}`);
     }
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!deletingStation) return;
+    if (!token) {
+      alert("Sessão expirada. Faça login para excluir estações.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/${deletingStation.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Falha ao excluir a estação');
+      }
+
+      setListaDeEstacoes(prevList =>
+        prevList.filter(station => station.id !== deletingStation.id)
+      );
+
+      setDeletingStation(null);
+
+    } catch (error: any) {
+      console.error("Erro ao excluir estação:", error);
+      alert(`Erro ao excluir estação: ${error.message}`);
+      setDeletingStation(null);
+    }
+  };
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
-
 
   if (loading) {
     return (
@@ -339,7 +343,6 @@ const Estacao: React.FC = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -347,7 +350,6 @@ const Estacao: React.FC = () => {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-white p-4 md:px-4">
@@ -368,19 +370,18 @@ const Estacao: React.FC = () => {
         Gerencie e monitore todas as estações de medição
       </p>
 
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {listaDeEstacoes.map((station) => (
           <EstacaoCard
             key={station.id}
             station={station}
-
             onConfigurarClick={() => setEditingStation(station)}
             onVerHistoricoClick={() => alert(`Abrir histórico da ${station.name}`)}
+            onDeleteClick={() => setDeletingStation(station)}
+            isUserLoggedIn={!!token}
           />
         ))}
       </div>
-
 
       {paginationData && (
         <Pagination
@@ -402,6 +403,16 @@ const Estacao: React.FC = () => {
           onClose={() => setEditingStation(null)}
           onSubmit={handleEditStationSubmit}
           stationToEdit={editingStation}
+        />
+      )}
+
+      {deletingStation && (
+        <ModalExcluirEstacao
+          isOpen={!!deletingStation}
+          onClose={() => setDeletingStation(null)}
+          onConfirm={handleDeleteConfirm}
+          title="Confirmar Exclusão"
+          message={`Tem certeza que deseja excluir a estação "${deletingStation.name}"? Esta ação não pode ser desfeita.`}
         />
       )}
     </div>

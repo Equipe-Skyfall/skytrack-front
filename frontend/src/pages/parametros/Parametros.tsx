@@ -6,3 +6,5 @@ const Parametros: React.FC = () => {
 };
 
 export default Parametros;
+
+//test

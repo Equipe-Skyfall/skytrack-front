@@ -1,10 +1,10 @@
 import React from 'react';
-import Perfil from '../../components/conteudoPaginas/perfil/Perfil';
+import PerfilComponent from '../../components/conteudoPaginas/perfil/Perfil';
 
-const Estacoes: React.FC = () => {
+const Perfil: React.FC = () => {
   return (
-    <Perfil />
+    <PerfilComponent />
   );
 };
 
-export default Estacoes;
+export default Perfil;

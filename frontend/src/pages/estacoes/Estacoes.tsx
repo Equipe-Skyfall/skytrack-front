@@ -2,12 +2,18 @@ import React from 'react';
 
 const Estacoes: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Estações</h1>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <p>Conteúdo de estações aqui...</p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Header da página */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Estações Pluviométricas</h1>
+        <p className="text-gray-600 mt-2">Gerencie e monitore todas as estações de medição</p>
       </div>
-    </div>
+
+      {/* Grid de estações */}
+      
+
+      {/* Estatísticas resumidas */}
+      </div>
   );
 };
 

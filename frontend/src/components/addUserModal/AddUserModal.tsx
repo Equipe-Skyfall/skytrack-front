@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { email: string; username: string; password: string; confirmPassword: string; role: string }) => void;
+  onSubmit: (data: { email: string; username: string; password: string; confirmPassword: string }) => void;
 }
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSubmit }) => {
@@ -11,7 +11,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSubmit }
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('USER');
+  // role removido, sempre ADMIN
   const [error, setError] = useState<string | null>(null);
 
 
@@ -31,7 +31,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSubmit }
       setError('As senhas não coincidem.');
       return;
     }
-    onSubmit({ email, username, password, confirmPassword, role });
+  onSubmit({ email, username, password, confirmPassword });
   };
 
   return (
@@ -62,13 +62,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSubmit }
             <label className="block font-semibold mb-1">Confirmar Senha</label>
             <input type="password" className="w-full border rounded px-3 py-2" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
           </div>
-          <div>
-            <label className="block font-semibold mb-1">Tipo</label>
-            <select className="w-full border rounded px-3 py-2" value={role} onChange={e => setRole(e.target.value)}>
-              <option value="USER">Usuário</option>
-              <option value="ADMIN">Administrador</option>
-            </select>
-          </div>
+          {/* Campo Tipo removido, sempre ADMIN */}
           {error && <div className="text-red-500 text-sm">{error}</div>}
           <div className="flex justify-between mt-4">
             <button type="button" className="px-6 py-2 rounded border border-black hover:bg-red-500 hover:text-white transition-colors" onClick={onClose}>Cancelar</button>

@@ -1,12 +1,10 @@
 import React from 'react';
+import ConteudoEducacao from '../../components/conteudoPaginas/educacao/ConteudoEducacao';
 
 const Educacao: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Educação</h1>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <p>Conteúdo de educação aqui...</p>
-      </div>
+    <div className="Educacao">
+      <ConteudoEducacao />
     </div>
   );
 };

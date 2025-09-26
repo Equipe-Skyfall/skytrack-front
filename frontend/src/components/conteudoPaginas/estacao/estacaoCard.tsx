@@ -46,6 +46,7 @@ interface StationFormData {
 interface EstacaoCardProps {
   station: Station;
   onConfigurarClick: () => void;
+  onVerHistoricoClick: () => void;
   onDeleteClick: () => void;
   isUserLoggedIn: boolean;
 }
@@ -53,6 +54,7 @@ interface EstacaoCardProps {
 const EstacaoCard: React.FC<EstacaoCardProps> = ({
   station,
   onConfigurarClick,
+  onVerHistoricoClick,
   onDeleteClick,
   isUserLoggedIn,
 }) => {
@@ -81,20 +83,31 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
           <span>{station.address || 'Endereço não informado'}</span>
         </div>
       </div>
-      <div className="flex items-center gap-2 text-sm text-zinc-600">
-        <Wifi className="h-4 w-4" />
-        <span className="font-mono">MAC: {station.macAddress || 'Não configurado'}</span>
-      </div>
-      <div className="flex items-center gap-2 text-sm text-zinc-600">
-        <Activity className="h-4 w-4" />
-        <span className="font-mono">Coords: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}</span>
-      </div>
-      <p className="text-sm text-zinc-600">
-        <strong>Descrição:</strong> {station.description || 'Sem descrição'}
-      </p>
-      <div className="text-xs text-zinc-500">
-        Criado: {new Date(station.createdAt).toLocaleDateString("pt-BR")} | 
-        Atualizado: {new Date(station.updatedAt).toLocaleDateString("pt-BR")}
+
+
+      <div className="flex justify-end items-center gap-2 mt-4 pt-4 border-t border-gray-200">
+        {isUserLoggedIn && (
+          <>
+            <button
+              onClick={onDeleteClick}
+              className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1 px-3 rounded"
+            >
+              Excluir
+            </button>
+            <button
+              onClick={onConfigurarClick}
+              className="bg-slate-800 hover:bg-slate-600 text-white text-xs font-bold py-1 px-3 rounded"
+            >
+              Configurar
+            </button>
+          </>
+        )}
+        <button
+          onClick={onVerHistoricoClick}
+          className="bg-slate-800 hover:bg-slate-600 text-white text-xs font-bold py-1 px-3 rounded"
+        >
+          Ver Histórico
+        </button>
       </div>
       {isUserLoggedIn && (
         <div className="flex justify-center gap-4 pt-4 border-t border-zinc-200">
@@ -323,47 +336,42 @@ const Estacao: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen font-poppins">
-      <main className="p-4 md:p-6 lg:p-8 space-y-8 max-w-full mx-auto">
-        <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-zinc-800 tracking-tight">Estações Pluviométricas</h1>
-            <p className="text-base md:text-lg text-zinc-600">Gerencie e monitore todas as estações de medição</p>
-          </div>
-          {token && (
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-slate-900 text-white rounded-lg py-2.5 px-6 flex items-center gap-2 text-sm font-semibold hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
-            >
-              <Plus className="h-5 w-5" />
-              Cadastrar Estação
-            </button>
-          )}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {listaDeEstacoes.map((station) => (
-            <EstacaoCard
-              key={station.id}
-              station={station}
-              onConfigurarClick={() => setEditingStation(station)}
-              onDeleteClick={() => setDeletingStation(station)}
-              isUserLoggedIn={!!token}
-            />
-          ))}
-        </div>
+    <div className="min-h-screen bg-white p-4 md:px-4">
 
-        {paginationData && (
-          <Pagination
-            currentPage={paginationData.page}
-            totalPages={paginationData.totalPages}
-            onPageChange={handlePageChange}
-          />
+      <div className="flex justify-between items-center mb-1">
+        <h1 className="text-3xl font-bold">Estações Pluviométricas</h1>
+        {token && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-slate-900 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Cadastrar Estação
+          </button>
         )}
+      </div>
 
-        <ModalCadastroEstacao
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleAddStation}
+      <p className="text-gray-600 mb-6">
+        Gerencie e monitore todas as estações de medição
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {listaDeEstacoes.map((station) => (
+          <EstacaoCard
+            key={station.id}
+            station={station}
+            onConfigurarClick={() => setEditingStation(station)}
+            onVerHistoricoClick={() => alert(`Abrir histórico da ${station.name}`)}
+            onDeleteClick={() => setDeletingStation(station)}
+            isUserLoggedIn={!!token}
+          />
+        ))}
+      </div>
+
+      {paginationData && (
+        <Pagination
+          currentPage={paginationData.page}
+          totalPages={paginationData.totalPages}
+          onPageChange={handlePageChange}
         />
 
         {editingStation && (
@@ -375,16 +383,25 @@ const Estacao: React.FC = () => {
           />
         )}
 
-        {deletingStation && (
-          <ModalExcluirEstacao
-            isOpen={!!deletingStation}
-            onClose={() => setDeletingStation(null)}
-            onConfirm={handleDeleteConfirm}
-            title="Confirmar Exclusão"
-            message={`Tem certeza que deseja excluir a estação "${deletingStation.name}"? Esta ação não pode ser desfeita.`}
-          />
-        )}
-      </main>
+
+      {editingStation && (
+        <ModalEdicaoEstacao
+          isOpen={!!editingStation}
+          onClose={() => setEditingStation(null)}
+          onSubmit={handleEditStationSubmit}
+          stationToEdit={editingStation}
+        />
+      )}
+
+      {deletingStation && (
+        <ModalExcluirEstacao
+          isOpen={!!deletingStation}
+          onClose={() => setDeletingStation(null)}
+          onConfirm={handleDeleteConfirm}
+          title="Confirmar Exclusão"
+          message={`Tem certeza que deseja excluir a estação "${deletingStation.name}"? Esta ação não pode ser desfeita.`}
+        />
+      )}
     </div>
   );
 };

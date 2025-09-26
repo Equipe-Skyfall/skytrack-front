@@ -1,10 +1,13 @@
 import React from 'react';
-import Login from '../../components/conteudoPaginas/login/Login';
+import ConteudoLogin from '../../components/conteudoPaginas/login/Login';
 
-const Estacoes: React.FC = () => {
+
+const Login: React.FC = () => {
   return (
-    <Login />
+    <div className="Login">
+      <ConteudoLogin />
+    </div>
   );
 };
 
-export default Estacoes;
+export default Login;

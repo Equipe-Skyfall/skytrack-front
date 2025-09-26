@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import AddUserModal from '../../addUserModal/AddUserModal';
-import { User } from 'lucide-react';
+import EditUserModal from '../../editUserModal/EditUserModal';
+import { User, Pencil, Settings } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
 type Usuario = {
@@ -30,12 +31,16 @@ interface ApiResponse {
 const Perfil: React.FC = () => {
   const { user, token, logout } = useAuth();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editUserInitialData, setEditUserInitialData] = useState<{ email: string; username: string }>({ email: '', username: '' });
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [editUserId, setEditUserId] = useState<string | null>(null);
 
   // Função para adicionar usuário
-  const handleAddUser = async (data: { email: string; username: string; password: string; role: string }) => {
+  const handleAddUser = async (data: { email: string; username: string; password: string; confirmPassword: string }) => {
     try {
       const response = await fetch('https://authservice-brown.vercel.app/users', {
         method: 'POST',
@@ -47,7 +52,7 @@ const Perfil: React.FC = () => {
           email: data.email,
           username: data.username,
           password: data.password,
-          role: data.role,
+          role: 'ADMIN',
         }),
       });
       if (!response.ok) {
@@ -55,9 +60,46 @@ const Perfil: React.FC = () => {
         throw new Error(err.message || 'Erro ao adicionar usuário');
       }
       setIsAddModalOpen(false);
-      window.location.reload();
+      setSuccessMessage('Usuário criado com sucesso!');
+      setTimeout(() => {
+        setSuccessMessage(null);
+        window.location.reload();
+      }, 2000);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Erro ao adicionar usuário');
+    }
+  };
+
+  // Função para editar usuário (atual ou outro)
+  const handleEditUser = async (data: { email: string; username: string; password: string }) => {
+    try {
+      if (!editUserId) throw new Error('Usuário para edição não selecionado');
+      const response = await fetch(`https://authservice-brown.vercel.app/users/${editUserId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          email: data.email,
+          username: data.username,
+          ...(data.password ? { password: data.password } : {}),
+          role: 'ADMIN',
+        }),
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Erro ao editar usuário');
+      }
+      setIsEditModalOpen(false);
+      setEditUserId(null);
+      setSuccessMessage('Usuário editado com sucesso!');
+      setTimeout(() => {
+        setSuccessMessage(null);
+        window.location.reload();
+      }, 2000);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao editar usuário');
     }
   };
 
@@ -157,6 +199,11 @@ const Perfil: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-white font-['Poppins'] p-8 relative">
+      {successMessage && (
+        <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-green-900/90 text-white px-6 py-2 rounded shadow-lg z-50 text-sm font-medium animate-fade-in">
+          {successMessage}
+        </div>
+      )}
       <h1 className="text-3xl font-bold mb-1 text-black">Perfil</h1>
       <span className="text-base text-black mb-6">Gerencie todos os perfis do site</span>
 
@@ -179,23 +226,66 @@ const Perfil: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <button className="w-44 h-10 bg-white rounded-md border border-black text-black text-xs font-bold flex items-center justify-center hover:bg-gray-100 transition">
-                Editar
+              <button
+                className="w-44 h-10 bg-white rounded-md border border-black text-black text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors"
+                onClick={() => {
+                  setEditUserInitialData({
+                    email: usuarioPrincipal.email,
+                    username: usuarioPrincipal.nome,
+                  });
+                  setEditUserId(usuarioPrincipal.id);
+                  setIsEditModalOpen(true);
+                }}
+                type="button"
+              >
+                <Pencil size={18} className="mr-1" /> Editar
               </button>
+      {/* Modal de editar usuário (atual ou outro) */}
+      <EditUserModal
+        isOpen={isEditModalOpen}
+        onClose={() => { setIsEditModalOpen(false); setEditUserId(null); }}
+        onSubmit={handleEditUser}
+        onDelete={async () => {
+          if (!editUserId) return;
+          try {
+            const response = await fetch(`https://authservice-brown.vercel.app/users/${editUserId}`, {
+              method: 'DELETE',
+              headers: {
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                'Content-Type': 'application/json',
+              },
+            });
+            if (!response.ok) {
+              const err = await response.json();
+              throw new Error(err.message || 'Erro ao deletar usuário');
+            }
+            setIsEditModalOpen(false);
+            setEditUserId(null);
+            setSuccessMessage('Usuário deletado com sucesso!');
+            setTimeout(() => {
+              setSuccessMessage(null);
+              window.location.reload();
+            }, 2000);
+          } catch (err) {
+            alert(err instanceof Error ? err.message : 'Erro ao deletar usuário');
+          }
+        }}
+        initialData={editUserInitialData}
+      />
             </div>
             <div className="flex flex-row gap-16 mt-2 text-zinc-100 text-sm">
               <div className="w-72 h-24 flex flex-col justify-start">
-                <div className="leading-8">Nome: {usuarioPrincipal.nome}</div>
-                <div className="leading-8">Email: {usuarioPrincipal.email}</div>
-                <div className="leading-8">ID: {usuarioPrincipal.id}</div>
-                <div className="leading-8">Role: {usuarioPrincipal.role}</div>
+                <div className="leading-7">ID: {usuarioPrincipal.id}</div>
+                <div className="leading-7">Nome: {usuarioPrincipal.nome}</div>
+                <div className="leading-7">Email: {usuarioPrincipal.email}</div>
+                <div className="leading-7">Role: {usuarioPrincipal.role}</div>
               </div>
               <div className="w-72 h-24 flex flex-col justify-start">
                 {usuarioPrincipal.createdAt && (
-                  <div className="leading-8">Membro desde: {new Date(usuarioPrincipal.createdAt).toLocaleDateString()}</div>
+                  <div className="leading-7">Membro desde: {new Date(usuarioPrincipal.createdAt).toLocaleDateString()}</div>
                 )}
                 {usuarioPrincipal.updatedAt && (
-                  <div className="leading-8">Última atualização: {new Date(usuarioPrincipal.updatedAt).toLocaleDateString()}</div>
+                  <div className="leading-7">Última atualização: {new Date(usuarioPrincipal.updatedAt).toLocaleDateString()}</div>
                 )}
               </div>
             </div>
@@ -218,7 +308,7 @@ const Perfil: React.FC = () => {
       <AddUserModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSubmit={({ email, username, password, role }) => handleAddUser({ email, username, password, role })}
+        onSubmit={({ email, username, password, confirmPassword }) => handleAddUser({ email, username, password, confirmPassword })}
       />
         </div>
         <div className="flex flex-col gap-6">
@@ -236,8 +326,19 @@ const Perfil: React.FC = () => {
                       {u.status}
                     </span>
                   </div>
-                  <button className="w-32 h-10 bg-white/60 rounded-md border border-black text-black text-sm font-normal flex items-center justify-center hover:bg-gray-100 transition ml-6">
-                    <span className="material-icons text-gray-600 mr-2">settings</span>Configurar
+                  <button
+                    className="w-36 h-10 bg-slate-900 rounded-lg border border-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-blue-900 transition-colors ml-6 shadow-sm"
+                    onClick={() => {
+                      setEditUserInitialData({
+                        email: u.email,
+                        username: u.nome,
+                      });
+                      setEditUserId(u.id);
+                      setIsEditModalOpen(true);
+                    }}
+                    type="button"
+                  >
+                    <Settings size={18} className="mr-1" /> Configurar
                   </button>
                 </div>
               </div>

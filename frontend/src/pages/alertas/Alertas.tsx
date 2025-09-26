@@ -3,6 +3,7 @@ import { getAlerts, createAlert, updateAlert, deleteAlert } from '../../services
 import AlertForm from '../../components/alertas/AlertForm';
 import ConfirmDelete from '../../components/alertas/ConfirmDelete';
 import TipoAlertaModal from '../../components/tipo-alerta/TipoAlertaModal';
+import { useAuth } from '../../context/AuthContext';
 
 type Alert = {
   id: string;
@@ -18,6 +19,7 @@ type FormData = Partial<Alert>;
 
 const emptyForm: FormData = { stationId: '', parameterId: '', tipoAlertaId: '', data: new Date() };
 const Alertas: React.FC = () => {
+  const { user } = useAuth();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +91,7 @@ const Alertas: React.FC = () => {
           <p className="text-sm text-gray-600 mt-1">Monitoramento de condições adversas e notificações</p>
         </div>
         <div>
-          <button onClick={() => setShowTipoAlertaModal(true)} className="px-4 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50">Gerenciar Tipos</button>
+          {user && <button onClick={() => setShowTipoAlertaModal(true)} className="px-4 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50">Gerenciar Tipos</button>}
         </div>
       </div>
 
@@ -114,8 +116,12 @@ const Alertas: React.FC = () => {
                   <div className="text-xs text-gray-400 mt-3">{a.createdAt.toLocaleString()}</div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <button onClick={() => onEdit(a)} className="px-3 py-1 border rounded hover:bg-gray-50">Detalhes</button>
-                  <button onClick={() => onDelete(a.id)} className="px-3 py-1 border rounded bg-white text-red-600">Resolver</button>
+                  {user && (
+                    <>
+                      <button onClick={() => onEdit(a)} className="px-3 py-1 border rounded hover:bg-gray-50">Detalhes</button>
+                      <button onClick={() => onDelete(a.id)} className="px-3 py-1 border rounded bg-white text-red-600">Resolver</button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -139,7 +145,7 @@ const Alertas: React.FC = () => {
                 <div className="text-sm text-gray-500">{h.stationId} • {h.createdAt.toLocaleString()}</div>
               </div>
               <div>
-                <button className="px-3 py-1 border rounded">Ver Detalhes</button>
+                {user && <button className="px-3 py-1 border rounded">Ver Detalhes</button>}
               </div>
             </div>
           ))

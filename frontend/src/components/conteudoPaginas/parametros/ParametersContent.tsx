@@ -74,6 +74,7 @@ const ParametersContent: React.FC = () => {
   const [editParamId, setEditParamId] = useState<string | null>(null);
   const [deleteParamId, setDeleteParamId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -407,6 +408,7 @@ const ParametersContent: React.FC = () => {
             <h1 className="text-3xl md:text-4xl font-extrabold text-zinc-800 tracking-tight">Parâmetros</h1>
             <p className="text-base md:text-lg text-zinc-600">Gerencie e monitore todos os parâmetros utilizados</p>
           </div>
+
           {token && (
             <button
               onClick={handleAddParameter}
@@ -425,6 +427,7 @@ const ParametersContent: React.FC = () => {
             >
               <div className="flex items-center gap-4">
                 <div className="bg-zinc-100 rounded-lg p-2">
+
                   {getIconForMetrica(param.metrica) === 'Droplet' && <Droplet className="h-6 w-6 text-zinc-700" />}
                   {getIconForMetrica(param.metrica) === 'Gauge' && <Gauge className="h-6 w-6 text-zinc-700" />}
                   {getIconForMetrica(param.metrica) === 'Droplets' && <Droplets className="h-6 w-6 text-zinc-700" />}
@@ -494,6 +497,7 @@ const ParametersContent: React.FC = () => {
                 </button>
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
+              
               <form onSubmit={handleParameterSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700">JSON ID</label>
@@ -636,6 +640,7 @@ const ParametersContent: React.FC = () => {
             </div>
           </div>
         )}
+        
         {isAssociateModalOpen && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-md space-y-4">

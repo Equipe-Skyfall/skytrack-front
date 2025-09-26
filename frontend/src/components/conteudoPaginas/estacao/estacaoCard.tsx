@@ -4,6 +4,7 @@ import ModalEdicaoEstacao from "../../modalEdicaoEstacao/modalEdicaoEstacao";
 import ModalExcluirEstacao from "../../modalExcluirEstacao/modalExcluirEstacao";
 import { useAuth } from "../../../context/AuthContext";
 import Pagination from "../../pagination/pagination";
+import { MapPin, Wifi, Activity, Plus, Settings, Trash2 } from 'lucide-react';
 
 const API_URL = 'https://sky-track-backend.vercel.app/api/stations';
 
@@ -62,62 +63,27 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
     INACTIVE: "Inativo",
   };
   return (
-    <div className="bg-white rounded-xl shadow border p-6 flex flex-col justify-between">
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" stroke="#aaa" strokeWidth="2" />
-                <circle cx="12" cy="12" r="4" stroke="#aaa" strokeWidth="2" />
-              </svg>
-            </span>
-            <span className="font-semibold text-lg">{station.name}</span>
+    <div className="bg-white rounded-xl border border-zinc-300 p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-zinc-100 rounded-lg p-2">
+            <MapPin className="h-5 w-5 text-zinc-700" />
           </div>
-          <span
-            className={`text-xs px-3 py-1 rounded-full text-white font-semibold ${station.statusColor}`}
-          >
-            {displayStatus[station.status] || station.status}
-          </span>
+          <h3 className="text-lg font-bold text-zinc-800">{station.name}</h3>
         </div>
-        <div className="flex items-center gap-2 text-gray-500 mb-2">
-          <span>
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-              <path
-                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
-                stroke="#aaa"
-                strokeWidth="2"
-              />
-            </svg>
-          </span>
-          <span>{station.address}</span>
-        </div>
-        <div className="flex items-center gap-2 text-gray-500 mb-4 text-sm">
-          <span>
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2a4 4 0 00-4-4H3m18 0h-2a4 4 0 00-4 4v2m-4-11v2a4 4 0 004 4h2M3 7h2a4 4 0 004-4V3" />
-            </svg>
-          </span>
-          <span>
-            MAC: <span className="font-mono">{station.macAddress}</span>
-          </span>
-        </div>
-        <div className="text-sm text-gray-700 mb-1">
-          Coords:{" "}
-          <span className="font-mono">
-            {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}
-          </span>
-        </div>
-        <div className="text-sm text-gray-700 mb-1">
-          Descrição: {station.description}
-        </div>
-        <div className="text-sm text-gray-700 mb-1">
-          Criado em: {new Date(station.createdAt).toLocaleDateString("pt-BR")}
-        </div>
-        <div className="text-sm text-gray-700 mb-4">
-          Atualizado em: {new Date(station.updatedAt).toLocaleDateString("pt-BR")}
+        <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+          station.status === 'ACTIVE' ? 'bg-lime-500 text-white' : 'bg-red-500 text-white'
+        }`}>
+          {displayStatus[station.status] || station.status}
         </div>
       </div>
+      <div className="bg-zinc-100 rounded-lg p-3">
+        <div className="flex items-center gap-2 text-sm text-zinc-600">
+          <MapPin className="h-4 w-4" />
+          <span>{station.address || 'Endereço não informado'}</span>
+        </div>
+      </div>
+
 
       <div className="flex justify-end items-center gap-2 mt-4 pt-4 border-t border-gray-200">
         {isUserLoggedIn && (
@@ -143,13 +109,31 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
           Ver Histórico
         </button>
       </div>
+      {isUserLoggedIn && (
+        <div className="flex justify-center gap-4 pt-4 border-t border-zinc-200">
+          <button
+            onClick={onConfigurarClick}
+            className="bg-white border border-zinc-400 rounded-lg py-2 px-10 flex items-center justify-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
+          >
+            <Settings className="h-5 w-5" />
+            Configurar
+          </button>
+          <button
+            onClick={onDeleteClick}
+            className="bg-red-500 text-white rounded-lg py-2 px-10 flex items-center justify-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
+          >
+            <Trash2 className="h-5 w-5" />
+            Excluir
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 function getStatusColor(status: "ACTIVE" | "INACTIVE"): string {
-  if (status === "ACTIVE") return "bg-lime-400";
-  return "bg-red-500";
+  if (status === "ACTIVE") return "bg-lime-500 text-white";
+  return "bg-red-500 text-white";
 }
 
 const Estacao: React.FC = () => {
@@ -338,14 +322,14 @@ const Estacao: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Carregando estações...</div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-zinc-50 to-white">
+        <div className="text-lg text-zinc-600">Carregando estações...</div>
       </div>
     );
   }
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-zinc-50 to-white">
         <div className="text-red-500 text-lg">Erro: {error}</div>
       </div>
     );
@@ -389,13 +373,16 @@ const Estacao: React.FC = () => {
           totalPages={paginationData.totalPages}
           onPageChange={handlePageChange}
         />
-      )}
 
-      <ModalCadastroEstacao
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddStation}
-      />
+        {editingStation && (
+          <ModalEdicaoEstacao
+            isOpen={!!editingStation}
+            onClose={() => setEditingStation(null)}
+            onSubmit={handleEditStationSubmit}
+            stationToEdit={editingStation}
+          />
+        )}
+
 
       {editingStation && (
         <ModalEdicaoEstacao

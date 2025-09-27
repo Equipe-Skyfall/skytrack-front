@@ -21,6 +21,6 @@ const ConfirmDelete: React.FC<Props> = ({ open, onCancel, onConfirm, message }) 
       </div>
     </div>
   );
-};
 
 export default ConfirmDelete;
+

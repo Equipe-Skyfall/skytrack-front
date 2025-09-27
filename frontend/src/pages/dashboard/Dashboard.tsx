@@ -3,16 +3,18 @@ import { StatusEstacoes, AlertasRecentes, estacoesStatus, alertasRecentes } from
 
 const Dashboard: React.FC = () => {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Status das Estações - Lado Esquerdo */}
-        <StatusEstacoes estacoes={estacoesStatus} />
-        
-        {/* Alertas Recentes - Lado Direito */}
-        <AlertasRecentes alertas={alertasRecentes} />
-      </div>
+
+    <div className="min-h-screen bg-white font-poppins flex">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 w-full">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-800 tracking-tight">
+          Dashboard
+        </h1>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <StatusEstacoes estacoes={estacoesStatus} />
+          <AlertasRecentes alertas={alertasRecentes} />
+        </div>
+      </main>
+
     </div>
   );
 };

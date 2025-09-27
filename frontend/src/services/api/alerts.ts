@@ -54,4 +54,6 @@ export async function deleteAlert(id: string) {
   return await request(`/api/alerts/${id}`, { method: 'DELETE' });
 }
 
+
 export default { getAlerts, getAlert, createAlert, updateAlert, deleteAlert };
+

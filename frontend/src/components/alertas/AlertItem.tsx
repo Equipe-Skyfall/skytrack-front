@@ -41,3 +41,4 @@ const AlertItem: React.FC<Props> = ({ alert, onEdit, onDelete }) => {
 };
 
 export default AlertItem;
+

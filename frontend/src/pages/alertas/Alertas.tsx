@@ -1,9 +1,22 @@
-  import React, { useEffect, useState } from 'react';
-import { getAlerts, createAlert, updateAlert, deleteAlert } from '../../services/api/alerts';
-import AlertForm from '../../components/alertas/AlertForm';
-import ConfirmDelete from '../../components/alertas/ConfirmDelete';
-import TipoAlertaModal from '../../components/tipo-alerta/TipoAlertaModal';
-import { useAuth } from '../../context/AuthContext';
+
+import React, { useEffect, useState } from 'react';
+import { AlertTriangle, Plus, Settings, Trash2 } from 'lucide-react';
+
+
+type Alert = {
+  id: string;
+  data: Date;
+  stationId: string;
+  parameterId: string;
+  tipoAlertaId: string;
+  medidasId?: string;
+  createdAt: Date;
+};
+
+type FormData = Partial<Alert>;
+
+const emptyForm: FormData = { stationId: '', parameterId: '', tipoAlertaId: '', data: new Date() };
+
 
 type Alert = {
   id: string;
@@ -79,115 +92,177 @@ const Alertas: React.FC = () => {
     }
   };
 
-  // Split active vs history using a resolved flag when available
+
+
   const active = alerts.filter(a => !(a as any).resolved);
   const history = alerts.filter(a => (a as any).resolved);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Alertas Meteorológicos</h1>
-          <p className="text-sm text-gray-600 mt-1">Monitoramento de condições adversas e notificações</p>
+    <div className="min-h-screen bg-white font-poppins flex">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-800 tracking-tight">
+              Alertas Meteorológicos
+            </h1>
+            <p className="text-base sm:text-lg text-zinc-600">
+              Monitore condições adversas e gerencie notificações
+            </p>
+          </div>
+          {user && (
+            <button
+              onClick={() => setShowTipoAlertaModal(true)}
+              className="bg-slate-900 text-white rounded-lg py-3 px-8 flex items-center gap-2 text-base font-semibold hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
+            >
+              <Settings className="h-5 w-5" />
+              Gerenciar Tipos
+            </button>
+          )}
         </div>
-        <div>
-          {user && <button onClick={() => setShowTipoAlertaModal(true)} className="px-4 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50">Gerenciar Tipos</button>}
-        </div>
-      </div>
 
-      {/* Active alerts section - large cards */}
-      <h2 className="text-lg font-semibold mb-3">Alertas Ativos</h2>
-      <div className="space-y-4 mb-8">
-        {loading ? (
-          <p>Carregando...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : active.length === 0 ? (
-          <p>Nenhum alerta ativo.</p>
-        ) : (
-          active.map(a => (
-            <div key={a.id} className="border rounded-lg overflow-hidden bg-white shadow-sm">
-              <div className="border-l-4 border-blue-500 p-6 flex items-start justify-between">
-                <div className="flex-1 min-w-0 pr-6">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-lg break-words">Alerta {a.parameterId}</h3>
-                    <span className="text-sm text-gray-500">{a.stationId}</span>
+        {/* Active Alerts Section */}
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold text-zinc-800 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-zinc-700" />
+            Alertas Ativos
+          </h2>
+          {loading ? (
+            <div className="text-lg text-zinc-600">Carregando...</div>
+          ) : error ? (
+            <p className="text-red-500 text-sm">{error}</p>
+          ) : active.length === 0 ? (
+            <p className="text-sm text-zinc-600">Nenhum alerta ativo.</p>
+          ) : (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              {active.map(a => (
+                <div
+                  key={a.id}
+                  className="bg-white rounded-xl border border-zinc-300 p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300 w-full"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="bg-zinc-100 rounded-lg p-2">
+                      <AlertTriangle className="h-6 w-6 text-zinc-700" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-zinc-800 truncate">
+                        Alerta {a.parameterId}
+                      </h3>
+                      <p className="text-sm text-zinc-600 truncate">{a.stationId}</p>
+                    </div>
+                    <div className="bg-blue-500 text-white rounded-full px-3 py-1 text-xs font-semibold">
+                      Ativo
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-400 mt-3">{a.createdAt.toLocaleString()}</div>
-                </div>
-                <div className="flex flex-col items-end gap-2">
+                  <p className="text-sm text-zinc-600">
+                    <strong>Data:</strong> {a.createdAt.toLocaleString()}
+                  </p>
                   {user && (
-                    <>
-                      <button onClick={() => onEdit(a)} className="px-3 py-1 border rounded hover:bg-gray-50">Detalhes</button>
-                      <button onClick={() => onDelete(a.id)} className="px-3 py-1 border rounded bg-white text-red-600">Resolver</button>
-                    </>
+                    <div className="flex justify-center gap-4">
+                      <button
+                        onClick={() => onEdit(a)}
+                        className="bg-white border border-zinc-400 rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
+                      >
+                        <Settings className="h-5 w-5" />
+                        Detalhes
+                      </button>
+                      <button
+                        onClick={() => onDelete(a.id)}
+                        className="bg-red-500 text-white rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                        Deletar
+                      </button>
+                    </div>
                   )}
                 </div>
-              </div>
+              ))}
             </div>
-          ))
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* History section - compact list */}
-      <h2 className="text-lg font-semibold mb-3">Histórico de Alertas</h2>
-      <div className="space-y-3">
-        {history.length === 0 ? (
-          <p className="text-sm text-gray-600">Sem histórico de alertas.</p>
-        ) : (
-          history.map(h => (
-            <div key={h.id} className="flex items-center justify-between border rounded-lg p-4 bg-white">
-              <div className="min-w-0">
-                <div className="flex items-center gap-3">
-                  <h4 className="font-medium break-words">Alerta {h.parameterId}</h4>
-                  <span className="text-xs px-2 py-1 bg-gray-100 rounded">Resolvido</span>
+        {/* History Section */}
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold text-zinc-800 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-zinc-700" />
+            Histórico de Alertas
+          </h2>
+          {history.length === 0 ? (
+            <p className="text-sm text-zinc-600">Sem histórico de alertas.</p>
+          ) : (
+            <div className="space-y-4">
+              {history.map(h => (
+                <div
+                  key={h.id}
+                  className="bg-white rounded-xl border border-zinc-300 p-4 flex items-center justify-between shadow-md hover:shadow-lg transition-shadow duration-300 w-full"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="bg-zinc-100 rounded-lg p-2">
+                      <AlertTriangle className="h-5 w-5 text-zinc-700" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3">
+                        <h4 className="text-base font-semibold text-zinc-800 truncate">
+                          Alerta {h.parameterId}
+                        </h4>
+                        <span className="bg-zinc-200 text-zinc-800 rounded-full px-2 py-1 text-xs font-semibold">
+                          Resolvido
+                        </span>
+                      </div>
+                      <p className="text-sm text-zinc-600 truncate">
+                        {h.stationId} • {h.createdAt.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  {user && (
+                    <button
+                      className="bg-white border border-zinc-400 rounded-lg py-2 px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 cursor-pointer"
+                    >
+                      Ver Detalhes
+                    </button>
+                  )}
                 </div>
-                <div className="text-sm text-gray-500">{h.stationId} • {h.createdAt.toLocaleString()}</div>
-              </div>
-              <div>
-                {user && <button className="px-3 py-1 border rounded">Ver Detalhes</button>}
-              </div>
+              ))}
             </div>
-          ))
+          )}
+        </div>
+
+        {showForm && (
+          <AlertForm
+            value={form}
+            onChange={(v) => setForm({ ...form, ...v })}
+            onCancel={() => { setShowForm(false); setEditing(null); }}
+            onSubmit={onSubmit}
+            submitting={submitting}
+            title={editing ? 'Editar Alerta' : 'Novo Alerta'}
+          />
         )}
-      </div>
 
-      {showForm && (
-        <AlertForm
-          value={form}
-          onChange={(v) => setForm({ ...form, ...v })}
-          onCancel={() => { setShowForm(false); setEditing(null); }}
-          onSubmit={onSubmit}
-          submitting={submitting}
-          title={editing ? 'Editar Alerta' : 'Novo Alerta'}
+        <ConfirmDelete
+          open={!!deletingId}
+          onCancel={() => setDeletingId(null)}
+          onConfirm={async () => {
+            if (!deletingId) return;
+            try {
+              await deleteAlert(deletingId);
+              setAlerts(prev => prev.filter(x => x.id !== deletingId));
+            } catch (err: any) {
+              alert(err.message || 'Erro ao excluir');
+            } finally {
+              setDeletingId(null);
+            }
+          }}
+          message="Deseja realmente excluir este alerta?"
         />
-      )}
 
-      <ConfirmDelete
-        open={!!deletingId}
-        onCancel={() => setDeletingId(null)}
-        onConfirm={async () => {
-          if (!deletingId) return;
-          try {
-            await deleteAlert(deletingId);
-            setAlerts(prev => prev.filter(x => x.id !== deletingId));
-          } catch (err: any) {
-            alert(err.message || 'Erro ao excluir');
-          } finally {
-            setDeletingId(null);
-          }
-        }}
-        message="Deseja realmente excluir este alerta?"
-      />
+        <TipoAlertaModal
+          open={showTipoAlertaModal}
+          onClose={() => setShowTipoAlertaModal(false)}
+          onSave={() => {
+            load();
+          }}
+        />
+      </main>
 
-      <TipoAlertaModal
-        open={showTipoAlertaModal}
-        onClose={() => setShowTipoAlertaModal(false)}
-        onSave={() => {
-          // Optionally reload alerts if needed
-          load();
-        }}
-      />
     </div>
   );
 };

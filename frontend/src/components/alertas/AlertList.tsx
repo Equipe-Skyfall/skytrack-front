@@ -32,4 +32,5 @@ const AlertList: React.FC<Props> = ({ alerts, onEdit, onDelete }) => {
   );
 };
 
+
 export default AlertList;

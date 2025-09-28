@@ -54,7 +54,19 @@ const ParametersContent: React.FC = () => {
           },
         });
         if (!stationResponse.ok) throw new Error(`Erro ao buscar estações: ${stationResponse.status}`);
-        const stationData = await stationResponse.json();
+        
+        let stationData;
+        try {
+          const text = await stationResponse.text();
+          if (text) {
+            stationData = JSON.parse(text);
+          } else {
+            throw new Error('Resposta vazia do servidor para estações');
+          }
+        } catch (e) {
+          throw new Error('Erro ao processar dados das estações');
+        }
+        
         const stations = stationData.data || [];
         setStations(stations);
       } catch (err) {
@@ -106,14 +118,20 @@ const ParametersContent: React.FC = () => {
   const confirmDelete = async () => {
     if (!deleteParamId || !token) {
       alert('Sessão expirada. Faça login para excluir parâmetros.');
+      handleModalClose();
       return;
     }
+    
     try {
       await deleteParameter(deleteParamId, token);
       setParameters((prev) => prev.filter((param) => param.id !== deleteParamId));
       handleModalClose();
     } catch (error: any) {
       setError(error.message || 'Erro ao excluir parâmetro');
+      // Close modal even on error after showing the error
+      setTimeout(() => {
+        handleModalClose();
+      }, 3000); // Close modal after 3 seconds to show error message
     }
   };
 
@@ -462,6 +480,7 @@ const ParametersContent: React.FC = () => {
                   <X className="h-6 w-6" />
                 </button>
               </div>
+              {error && <p className="text-red-500 text-sm">{error}</p>}
               <p className="text-sm text-zinc-600">
                 Tem certeza que deseja deletar o parâmetro{' '}
                 <span className="font-semibold">

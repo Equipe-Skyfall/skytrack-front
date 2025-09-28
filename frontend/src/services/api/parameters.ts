@@ -54,12 +54,38 @@ async function request<T>(
   const response = await fetch(url, config);
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+    let errorData: any = {};
+    try {
+      const text = await response.text();
+      if (text) {
+        errorData = JSON.parse(text);
+      }
+    } catch (e) {
+      // Ignore JSON parse errors for error responses
+    }
     throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
   }
 
-  const data = await response.json();
-  return data;
+  // Handle empty responses (like DELETE operations)
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    // If it's not JSON, return undefined for void operations
+    return undefined as T;
+  }
+
+  const text = await response.text();
+  if (!text) {
+    // Empty response body
+    return undefined as T;
+  }
+
+  try {
+    const data = JSON.parse(text);
+    return data;
+  } catch (e) {
+    // If JSON parsing fails, return undefined for void operations
+    return undefined as T;
+  }
 }
 
 export async function getParameters(

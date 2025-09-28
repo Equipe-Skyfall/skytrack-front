@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 // Função para decodificar JWT (usada como fallback)
@@ -49,24 +49,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Verifica a autenticação
   useEffect(() => {
     const checkAuth = async () => {
-      // Não verifica autenticação em rotas públicas
-      if (publicRoutes.includes(location.pathname)) {
-        setIsCheckingAuth(false);
-        return;
-      }
-
-      // Se há usuário, pula verificação
-      if (user) {
-        // Verifica se é admin nas rotas de admin
-        if (adminRoutes.includes(location.pathname) && user.role !== 'ADMIN') {
-          navigate('/login', { replace: true });
-        }
-        setIsCheckingAuth(false);
-        return;
-      }
-
       try {
         setIsCheckingAuth(true);
+
+        // First, restore user and token from localStorage if available
+        const storedUser = localStorage.getItem('skytrack_user');
+        const storedToken = localStorage.getItem('skytrack_token');
+        let currentUser = user;
+        
+        if (storedUser && !user) {
+          try {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            currentUser = userData; // Update local reference
+          } catch (parseError) {
+            console.error('Error parsing stored user data:', parseError);
+            localStorage.removeItem('skytrack_user');
+          }
+        }
+
+        if (storedToken && !token) {
+          setToken(storedToken);
+        }
+
+        // Não verifica autenticação em rotas públicas
+        if (publicRoutes.includes(location.pathname)) {
+          setIsCheckingAuth(false);
+          return;
+        }
+
+        // Se há usuário, verifica permissões de admin e pula verificação do servidor
+        if (currentUser) {
+          if (adminRoutes.includes(location.pathname) && currentUser.role !== 'ADMIN') {
+            navigate('/login', { replace: true });
+          }
+          setIsCheckingAuth(false);
+          return;
+        }
+
+        // Then verify with the server
         const response = await fetch('https://authservice-brown.vercel.app/auth/profile', {
           method: 'GET',
           headers: {
@@ -77,10 +98,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
 
         if (!response.ok) {
-          throw new Error(`Erro ${response.status}`);
+          // Only clear user data on explicit auth failure (401/403)
+          if (response.status === 401 || response.status === 403) {
+            throw new Error(`Erro ${response.status}`);
+          }
+          // For other errors (network, server), keep stored user data
+          return;
         }
 
-        const data = await response.json();
+        let data;
+        try {
+          const text = await response.text();
+          if (text) {
+            data = JSON.parse(text);
+          } else {
+            throw new Error('Resposta vazia do servidor');
+          }
+        } catch (e) {
+          throw new Error('Erro ao processar resposta do servidor');
+        }
+
         if (!data.success) {
           throw new Error(data.message || 'Falha ao verificar autenticação');
         }
@@ -93,9 +130,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
         setUser(newUser);
+        // Store updated user data in localStorage
+        localStorage.setItem('skytrack_user', JSON.stringify(newUser));
       } catch (error) {
         setUser(null);
         setToken(null);
+        localStorage.removeItem('skytrack_user');
+        localStorage.removeItem('skytrack_token');
         if (adminRoutes.includes(location.pathname)) {
           navigate('/login', { replace: true });
         }
@@ -119,7 +160,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        const text = await response.text();
+        if (text) {
+          data = JSON.parse(text);
+        } else {
+          throw new Error(`Erro ${response.status}: Resposta vazia do servidor`);
+        }
+      } catch (e) {
+        if (e instanceof Error && e.message.includes('Erro')) {
+          throw e;
+        }
+        throw new Error(`Erro ${response.status}: Falha ao processar resposta`);
+      }
+
       if (!response.ok || !data.success) {
         throw new Error(data.message || `Erro ${response.status}: Falha no login`);
       }
@@ -143,6 +198,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         role: decodedToken.role || 'USER',
       };
       setUser(newUser);
+      // Store user data and token in localStorage
+      localStorage.setItem('skytrack_user', JSON.stringify(newUser));
+      localStorage.setItem('skytrack_token', newToken);
 
       navigate('/dashboard', { replace: true });
     } catch (error) {
@@ -170,6 +228,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setUser(null);
     setToken(null);
+    // Clear localStorage on logout
+    localStorage.removeItem('skytrack_user');
+    localStorage.removeItem('skytrack_token');
     navigate('/login', { replace: true });
   };
 

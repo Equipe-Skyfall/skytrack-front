@@ -27,12 +27,12 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
   const [tipoParametros, setTipoParametros] = useState<Array<{ id: string; nome: string }>>([]);
   const [tipoAlertas, setTipoAlertas] = useState<Array<{ id: string; tipo: string }>>([]);
   const [loadingParams, setLoadingParams] = useState(false);
-  const [stations, setStations] = useState<Array<{ mac: string; name?: string; region?: string }>>([]);
+  const [stations, setStations] = useState<Array<{ id: string; mac: string; name?: string; region?: string }>>([]);
   const [loadingStations, setLoadingStations] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-    const base = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3000';
+    const base = (import.meta.env.VITE_API_URL as string) || 'https://sky-track-backend.vercel.app/';
 
     async function loadStations() {
       setLoadingStations(true);
@@ -41,7 +41,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
         if (!res.ok) throw new Error('Failed to load stations');
         const json = await res.json();
         const list = Array.isArray(json) ? json : (json.data || []);
-        if (mounted) setStations(list.map((s: any) => ({ mac: s.macAddress ?? s.mac ?? s.id, name: s.name, region: s.address })));
+        if (mounted) setStations(list.map((s: any) => ({ id: s.id, mac: s.macAddress ?? s.mac ?? s.id, name: s.name, region: s.address })));
       } catch (e) {
         // ignore
       } finally {
@@ -158,7 +158,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
             >
               <option value="" disabled>Selecione uma estação</option>
               {stations.map(s => (
-                <option key={s.mac} value={s.mac}>
+                <option key={s.id} value={s.id}>
                   {s.name ? `${s.name} (${s.mac})` : s.mac}
                 </option>
               ))}

@@ -33,6 +33,10 @@ export interface CreateParameterDto {
   tipoAlertaId?: string;
 }
 
+export interface UpdateParameterDto {
+  tipoAlertaId?: string;
+}
+
 export interface StationDto {
   id: string;
   name: string;

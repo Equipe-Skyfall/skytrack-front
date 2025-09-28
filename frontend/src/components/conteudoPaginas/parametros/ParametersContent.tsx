@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Gauge, Plus, Settings, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import TipoParametroModal from '../../tipo-parametro/TipoParametroModal';
-import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, StationDto, ParameterFormData } from './types';
+import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, UpdateParameterDto, StationDto, ParameterFormData } from './types';
 import { getParameters, createParameter, updateParameter, deleteParameter } from '../../../services/api/parameters';
 import { getTipoParametros } from '../../../services/api/tipo-parametro';
 import { getTipoAlertas } from '../../../services/api/tipo-alerta';
@@ -111,8 +111,7 @@ const ParametersContent: React.FC = () => {
     try {
       await deleteParameter(deleteParamId, token);
       setParameters((prev) => prev.filter((param) => param.id !== deleteParamId));
-      setIsDeleteModalOpen(false);
-      setDeleteParamId(null);
+      handleModalClose();
     } catch (error: any) {
       setError(error.message || 'Erro ao excluir parâmetro');
     }
@@ -154,39 +153,46 @@ const ParametersContent: React.FC = () => {
       alert('Sessão expirada. Faça login para salvar parâmetro.');
       return;
     }
-    if (!formData.stationId || !formData.tipoParametroId) {
-      setError('Estação e Tipo de Parâmetro são obrigatórios');
-      return;
+    if (isAddModalOpen) {
+      // Para criação, todos os campos obrigatórios devem estar presentes
+      if (!formData.stationId || !formData.tipoParametroId) {
+        setError('Estação e Tipo de Parâmetro são obrigatórios');
+        return;
+      }
+
+      // Validate UUIDs for creation
+      if (!isValidUUID(formData.stationId)) {
+        setError(`ID da estação inválido (não é UUID): ${formData.stationId}`);
+        return;
+      }
+      
+      if (!isValidUUID(formData.tipoParametroId)) {
+        setError(`ID do tipo de parâmetro inválido (não é UUID): ${formData.tipoParametroId}`);
+        return;
+      }
     }
 
-    // Validate UUIDs
-    if (!isValidUUID(formData.stationId)) {
-      setError(`ID da estação inválido (não é UUID): ${formData.stationId}`);
-      return;
-    }
-    
-    if (!isValidUUID(formData.tipoParametroId)) {
-      setError(`ID do tipo de parâmetro inválido (não é UUID): ${formData.tipoParametroId}`);
-      return;
-    }
-
+    // Validate tipoAlertaId if provided (for both create and update)
     if (formData.tipoAlertaId && formData.tipoAlertaId !== '' && !isValidUUID(formData.tipoAlertaId)) {
       setError(`ID do tipo de alerta inválido (não é UUID): ${formData.tipoAlertaId}`);
       return;
     }
 
-    const createDto: CreateParameterDto = {
-      stationId: formData.stationId,
-      tipoParametroId: formData.tipoParametroId,
-      tipoAlertaId: formData.tipoAlertaId || undefined,
-    };
-
     try {
       if (isAddModalOpen) {
+        const createDto: CreateParameterDto = {
+          stationId: formData.stationId,
+          tipoParametroId: formData.tipoParametroId,
+          tipoAlertaId: formData.tipoAlertaId || undefined,
+        };
         const newParam = await createParameter(createDto, token);
         setParameters((prev) => [...prev, newParam]);
       } else if (isEditModalOpen && editParamId) {
-        const updatedParam = await updateParameter(editParamId, createDto, token);
+        // Para edição, só podemos atualizar o tipoAlertaId
+        const updateDto: UpdateParameterDto = {
+          tipoAlertaId: formData.tipoAlertaId || undefined,
+        };
+        const updatedParam = await updateParameter(editParamId, updateDto, token);
         setParameters((prev) =>
           prev.map((param) => (param.id === editParamId ? updatedParam : param))
         );
@@ -351,8 +357,13 @@ const ParametersContent: React.FC = () => {
                     name="stationId"
                     value={formData.stationId}
                     onChange={handleInputChange}
-                    className="mt-1 w-full rounded-md border border-zinc-300 p-2 text-sm"
-                    required
+                    className={`mt-1 w-full rounded-md border p-2 text-sm ${
+                      isEditModalOpen 
+                        ? 'bg-zinc-100 border-zinc-200 text-zinc-500 cursor-not-allowed' 
+                        : 'border-zinc-300'
+                    }`}
+                    required={isAddModalOpen}
+                    disabled={isEditModalOpen}
                   >
                     <option value="" disabled>Selecione uma estação</option>
                     {stations.map((station) => (
@@ -361,6 +372,11 @@ const ParametersContent: React.FC = () => {
                       </option>
                     ))}
                   </select>
+                  {isEditModalOpen && (
+                    <p className="mt-1 text-xs text-zinc-500">
+                      A estação não pode ser alterada após a criação
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700">Tipo de Parâmetro</label>
@@ -368,8 +384,13 @@ const ParametersContent: React.FC = () => {
                     name="tipoParametroId"
                     value={formData.tipoParametroId}
                     onChange={handleInputChange}
-                    className="mt-1 w-full rounded-md border border-zinc-300 p-2 text-sm"
-                    required
+                    className={`mt-1 w-full rounded-md border p-2 text-sm ${
+                      isEditModalOpen 
+                        ? 'bg-zinc-100 border-zinc-200 text-zinc-500 cursor-not-allowed' 
+                        : 'border-zinc-300'
+                    }`}
+                    required={isAddModalOpen}
+                    disabled={isEditModalOpen}
                   >
                     <option value="" disabled>Selecione um tipo de parâmetro</option>
                     {tipoParametros.map((tipoParametro) => (
@@ -378,14 +399,24 @@ const ParametersContent: React.FC = () => {
                       </option>
                     ))}
                   </select>
+                  {isEditModalOpen && (
+                    <p className="mt-1 text-xs text-zinc-500">
+                      O tipo de parâmetro não pode ser alterado após a criação
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700">Tipo de Alerta (opcional)</label>
+                  <label className="block text-sm font-medium text-zinc-700">
+                    Tipo de Alerta (opcional)
+                    {isEditModalOpen && (
+                      <span className="text-blue-600 font-normal"> - Campo editável</span>
+                    )}
+                  </label>
                   <select
                     name="tipoAlertaId"
                     value={formData.tipoAlertaId}
                     onChange={handleInputChange}
-                    className="mt-1 w-full rounded-md border border-zinc-300 p-2 text-sm"
+                    className="mt-1 w-full rounded-md border border-zinc-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Nenhum</option>
                     {tipoAlertas.map((tipoAlerta) => (
@@ -394,6 +425,11 @@ const ParametersContent: React.FC = () => {
                       </option>
                     ))}
                   </select>
+                  {isEditModalOpen && (
+                    <p className="mt-1 text-xs text-blue-600">
+                      Apenas o tipo de alerta pode ser modificado durante a edição
+                    </p>
+                  )}
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
@@ -431,7 +467,6 @@ const ParametersContent: React.FC = () => {
                 <span className="font-semibold">
                   {(() => {
                     const param = parameters.find((p) => p.id === deleteParamId);
-                    window.location.reload();
                     if (param) {
                       const { tipoParametro, station } = getParameterDetails(param);
                       return `${tipoParametro?.nome || 'Tipo não encontrado'} (${station?.name || 'Estação não encontrada'})`;
@@ -475,6 +510,6 @@ const ParametersContent: React.FC = () => {
         />
       </div>
     );
-  };
-  
-  export default ParametersContent;
+};
+
+export default ParametersContent;

@@ -12,6 +12,10 @@ export interface CreateParameterDto {
   tipoAlertaId?: string;
 }
 
+export interface UpdateParameterDto {
+  tipoAlertaId?: string;
+}
+
 export interface ParametersListResponse {
   data: ParameterDto[];
   pagination: {
@@ -113,7 +117,7 @@ export async function createParameter(
 
 export async function updateParameter(
   id: string,
-  data: Partial<CreateParameterDto>,
+  data: UpdateParameterDto,
   token: string
 ): Promise<ParameterDto> {
   return request<ParameterDto>(`/api/parameters/${id}`, {

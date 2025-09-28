@@ -139,36 +139,37 @@ const Estacao: React.FC = () => {
 
   const STATIONS_PER_PAGE = 6;
 
-  useEffect(() => {
-    const fetchStations = async (page: number) => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await fetch(`${API_URL}?limit=${STATIONS_PER_PAGE}&page=${page}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!response.ok) {
-          throw new Error(`Erro ao buscar estações: ${response.status}`);
-        }
-        const responseData: StationsListResponse = await response.json();
-        if (!responseData.data) {
-          throw new Error('Formato de resposta inesperado da API');
-        }
-        const stationsFromApi = responseData.data;
-        const displayStations: Station[] = stationsFromApi.map((station) => ({
-          ...station,
-          statusColor: getStatusColor(station.status),
-        }));
-        setListaDeEstacoes(displayStations);
-        setPaginationData(responseData.pagination);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
-        console.error('Erro:', err);
-      } finally {
-        setLoading(false);
+  const fetchStations = async (page: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(`${API_URL}?limit=${STATIONS_PER_PAGE}&page=${page}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar estações: ${response.status}`);
       }
-    };
+      const responseData: StationsListResponse = await response.json();
+      if (!responseData.data) {
+        throw new Error('Formato de resposta inesperado da API');
+      }
+      const stationsFromApi = responseData.data;
+      const displayStations: Station[] = stationsFromApi.map((station) => ({
+        ...station,
+        statusColor: getStatusColor(station.status),
+      }));
+      setListaDeEstacoes(displayStations);
+      setPaginationData(responseData.pagination);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
+      console.error('Erro:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStations(currentPage);
   }, [currentPage]);
 
@@ -196,10 +197,8 @@ const Estacao: React.FC = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || `Erro ao salvar: ${response.status}`);
       }
-      setIsModalOpen(false);
-      const fetchPage = currentPage;
-      setCurrentPage(0);
-      setCurrentPage(fetchPage);
+  setIsModalOpen(false);
+  await fetchStations(currentPage);
     } catch (error: any) {
       console.error("Erro ao criar estação:", error);
       alert(`Erro ao salvar estação: ${error.message}`);
@@ -255,15 +254,8 @@ const Estacao: React.FC = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || `Erro ao editar: ${response.status}`);
       }
-      setEditingStation(null);
-      const updatedStation: StationDto = await response.json();
-      setListaDeEstacoes(prevList =>
-        prevList.map(station =>
-          station.id === updatedStation.id
-            ? { ...updatedStation, statusColor: getStatusColor(updatedStation.status) }
-            : station
-        )
-      );
+  setEditingStation(null);
+  await fetchStations(currentPage);
     } catch (error: any) {
       console.error("Erro ao editar estação:", error);
       alert(`Erro ao salvar alteração: ${error.message}`);

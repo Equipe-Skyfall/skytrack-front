@@ -141,17 +141,23 @@ const Alertas: React.FC = () => {
                     </div>
                   </div>
                   <p className="text-sm text-zinc-600">
-                    <strong>Data:</strong> {a.createdAt.toLocaleString()}
+                    <strong>Data:</strong> {new Date(a.createdAt).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </p>
                   {user && (
                     <div className="flex justify-center gap-4">
-                      <button
+                      {/**<button
                         onClick={() => onEdit(a)}
                         className="bg-white border border-zinc-400 rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
                       >
                         <Settings className="h-5 w-5" />
                         Detalhes
-                      </button>
+                      </button>**/}
                       <button
                         onClick={() => onDelete(a.id)}
                         className="bg-red-500 text-white rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
@@ -196,7 +202,13 @@ const Alertas: React.FC = () => {
                         </span>
                       </div>
                       <p className="text-sm text-zinc-600 truncate">
-                        {h.stationId} • {h.createdAt.toLocaleString()}
+                        {h.stationId} • {new Date(h.createdAt).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </p>
                     </div>
                   </div>

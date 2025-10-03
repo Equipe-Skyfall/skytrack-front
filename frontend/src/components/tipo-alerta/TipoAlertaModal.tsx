@@ -155,7 +155,7 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700">Valor</label>
+                    <label className="block text-sm font-medium text-zinc-700">Parâmetro</label>
                     <input
                       type="text"
                       value={form.valor || ''}

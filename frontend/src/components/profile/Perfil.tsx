@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import AddUserModal from '../../addUserModal/AddUserModal';
-import EditUserModal from '../../editUserModal/EditUserModal';
+import AddUserModal from '../modals/AddUserModal';
+import EditUserModal from '../modals/EditUserModal';
 import { User, Pencil, Settings } from 'lucide-react';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 type Usuario = {
   id: string;

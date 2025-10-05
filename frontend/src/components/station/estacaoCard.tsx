@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import ModalCadastroEstacao from "../../modalCadastroEstacao/cadastroEstacaoModal";
-import ModalEdicaoEstacao from "../../modalEdicaoEstacao/modalEdicaoEstacao";
-import ModalExcluirEstacao from "../../modalExcluirEstacao/modalExcluirEstacao";
-import { useAuth } from "../../../context/AuthContext";
-import Pagination from "../../pagination/pagination";
 import { MapPin, Wifi, Activity, Plus, Settings, Trash2 } from 'lucide-react';
+import ModalCadastroEstacao from "../modals/cadastroEstacaoModal";
+import ModalEdicaoEstacao from "../modals/modalEdicaoEstacao";
+import ModalExcluirEstacao from "../modals/modalExcluirEstacao";
+import { useAuth } from "../../context/AuthContext";
+import Pagination from "../pagination/pagination";
 
 const API_URL = 'https://sky-track-backend.vercel.app/api/stations';
 

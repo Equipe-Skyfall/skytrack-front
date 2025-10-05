@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, Plus, Settings, Trash2 } from 'lucide-react';
 import { getAlerts, createAlert, updateAlert, deleteAlert } from '../../services/api/alerts';
-import AlertForm from '../../components/alertas/AlertForm';
-import ConfirmDelete from '../../components/alertas/ConfirmDelete';
-import TipoAlertaModal from '../../components/tipo-alerta/TipoAlertaModal';
+import AlertForm from '../../components/alerts/AlertForm';
+import ConfirmDelete from '../../components/alerts/ConfirmDelete';
+import TipoAlertaModal from '../../components/modals/TipoAlertaModal';
 import { useAuth } from '../../context/AuthContext';
 
 type Alert = {

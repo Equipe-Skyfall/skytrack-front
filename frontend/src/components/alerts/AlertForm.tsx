@@ -32,7 +32,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
 
   useEffect(() => {
     let mounted = true;
-    const base = (import.meta.env.VITE_API_URL as string) || 'https://sky-track-backend.vercel.app/';
+    const base = (import.meta.env.VITE_API_URL as string) || 'https://api.skytrack.space/';
 
     async function loadStations() {
       setLoadingStations(true);
@@ -101,7 +101,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
 
   useEffect(() => {
     let mounted = true;
-    const base = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3000';
+  const base = (import.meta.env.VITE_API_URL as string) || import.meta.env.VITE_API_URL || 'https://api.skytrack.space';
     async function loadParametersForStation(stationId?: string) {
       setLoadingParams(true);
       try {

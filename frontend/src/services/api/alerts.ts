@@ -1,4 +1,4 @@
-const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3000';
+import { API_BASE } from './config';
 
 async function request(path: string, opts: RequestInit = {}) {
   const url = `${API_BASE}${path}`;
@@ -9,8 +9,16 @@ async function request(path: string, opts: RequestInit = {}) {
     body: opts.body ? JSON.parse(opts.body as string) : undefined
   });
   
+  // attach token from localStorage if available
+  const token = typeof window !== 'undefined' ? localStorage.getItem('skytrack_token') : null;
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) } as Record<string, string>;
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const credentials = (opts && (opts as RequestInit).credentials) || 'include';
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
+    // default to include credentials for cookie-based auth; allow override via opts
+    credentials,
     ...opts,
   });
   
@@ -46,28 +54,30 @@ export async function getAlert(id: string) {
   return await request(`/api/alerts/${id}`);
 }
 
-export async function createAlert(payload: any) {
+export async function createAlert(payload: Record<string, unknown>) {
   const body = sanitizeAlertPayload(payload);
   return await request('/api/alerts', { method: 'POST', body: JSON.stringify(body) });
 }
 
-export async function updateAlert(id: string, payload: any) {
+export async function updateAlert(id: string, payload: Record<string, unknown>) {
   const body = sanitizeAlertPayload(payload);
   return await request(`/api/alerts/${id}`, { method: 'PUT', body: JSON.stringify(body) });
 }
 
-function sanitizeAlertPayload(payload: any) {
+function sanitizeAlertPayload(payload: Record<string, unknown>) {
   // Allowed by backend CreateAlertDto: data, stationId, parameterId, tipoAlertaId, medidasId
-  const out: any = {};
+  const out: Record<string, unknown> = {};
   if (payload == null) return out;
-  if (payload.data) {
+  const data = payload.data as unknown;
+  if (data) {
     // accept Date or ISO string
-    out.data = payload.data instanceof Date ? payload.data.toISOString() : payload.data;
+    if (data instanceof Date) out.data = data.toISOString();
+    else if (typeof data === 'string') out.data = data;
   }
-  if (payload.stationId) out.stationId = payload.stationId;
-  if (payload.parameterId) out.parameterId = payload.parameterId;
-  if (payload.tipoAlertaId) out.tipoAlertaId = payload.tipoAlertaId;
-  if (payload.medidasId) out.medidasId = payload.medidasId;
+  if (typeof payload.stationId !== 'undefined') out.stationId = payload.stationId;
+  if (typeof payload.parameterId !== 'undefined') out.parameterId = payload.parameterId;
+  if (typeof payload.tipoAlertaId !== 'undefined') out.tipoAlertaId = payload.tipoAlertaId;
+  if (typeof payload.medidasId !== 'undefined') out.medidasId = payload.medidasId;
   return out;
 }
 

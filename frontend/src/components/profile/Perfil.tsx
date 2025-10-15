@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
-import AddUserModal from '../modals/AddUserModal';
-import EditUserModal from '../modals/EditUserModal';
 import { User, Pencil, Settings } from 'lucide-react';
+import EditUserModal from '../modals/EditUserModal';
+import AddUserModal from '../modals/AddUserModal';
 import { useAuth } from '../../context/AuthContext';
 
 type Usuario = {
@@ -42,7 +41,7 @@ const Perfil: React.FC = () => {
   // Função para adicionar usuário
   const handleAddUser = async (data: { email: string; username: string; password: string; confirmPassword: string }) => {
     try {
-      const response = await fetch('https://authservice-brown.vercel.app/users', {
+      const response = await fetch('https://auth.skytrack.space/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +73,7 @@ const Perfil: React.FC = () => {
   const handleEditUser = async (data: { email: string; username: string; password: string }) => {
     try {
       if (!editUserId) throw new Error('Usuário para edição não selecionado');
-      const response = await fetch(`https://authservice-brown.vercel.app/users/${editUserId}`, {
+      const response = await fetch(`https://auth.skytrack.space/users/${editUserId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +108,7 @@ const Perfil: React.FC = () => {
         setLoading(true);
 
         // Buscar perfil do usuário atual
-        const profileResponse = await fetch('https://authservice-brown.vercel.app/auth/profile', {
+        const profileResponse = await fetch('https://auth.skytrack.space/auth/profile', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -128,7 +127,7 @@ const Perfil: React.FC = () => {
         }
 
         // Buscar todos os usuários
-        const usersResponse = await fetch('https://authservice-brown.vercel.app/users', {
+        const usersResponse = await fetch('https://auth.skytrack.space/users', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -140,7 +139,7 @@ const Perfil: React.FC = () => {
           throw new Error(`Erro ao buscar usuários: ${usersResponse.status}`);
         }
 
-        const usersData: ApiResponse = await usersResponse.json();
+        const usersData: ApiResponse = await usersResponse.json(); // Corrigido: usersResponse em vez de usersData
 
         if (!usersData.success || !usersData.data) {
           throw new Error(usersData.message || 'Erro ao carregar usuários');
@@ -153,8 +152,8 @@ const Perfil: React.FC = () => {
         // Marcar o usuário atual como principal
         const processedUsers = allUsers.map(user => ({
           ...user,
-          nome: user.username, // Usar username como nome
-          status: 'Ativo' as const, // Definir status padrão
+          nome: user.username,
+          status: 'Ativo' as const,
           principal: user.id === currentUser.id,
         }));
 
@@ -248,7 +247,7 @@ const Perfil: React.FC = () => {
         onDelete={async () => {
           if (!editUserId) return;
           try {
-            const response = await fetch(`https://authservice-brown.vercel.app/users/${editUserId}`, {
+            const response = await fetch(`https://auth.skytrack.space/users/${editUserId}`, {
               method: 'DELETE',
               headers: {
                 ...(token ? { 'Authorization': `Bearer ${token}` } : {}),

@@ -1,70 +1,83 @@
-import type { 
-  StationDto, 
-  Station, 
-  StationFormData, 
-  StationsListResponse 
-} from '../../interfaces/stations';
+import { API_BASE } from './config';
 
-const STATIONS_API_URL = 'https://sky-track-backend.vercel.app/api/stations';
-
-export async function getStations(page = 1, limit = 10): Promise<StationsListResponse> {
-  const response = await fetch(`${STATIONS_API_URL}?limit=${limit}&page=${page}`, {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Erro ${response.status}: Falha ao carregar estações`);
-  }
-  
-  return response.json();
+export interface StationDto {
+  id: string;
+  macAddress: string;
+  name?: string;
+  address?: string;
 }
 
-export async function createStation(stationData: StationFormData): Promise<StationDto> {
-  const response = await fetch(STATIONS_API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(stationData),
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || `Erro ${response.status}: Falha ao criar estação`);
-  }
-  
-  return response.json();
-}
+async function request(path: string, opts: RequestInit = {}, token?: string) {
+  const url = `${API_BASE}${path}`;
 
-export async function updateStation(id: string, stationData: Partial<StationFormData>): Promise<StationDto> {
-  const response = await fetch(`${STATIONS_API_URL}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(stationData),
+  console.log('🏭 Stations API Request:', {
+    method: opts.method || 'GET',
+    url,
+    body: opts.body ? JSON.parse(opts.body as string) : undefined,
   });
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || `Erro ${response.status}: Falha ao atualizar estação`);
-  }
-  
-  return response.json();
-}
 
-export async function deleteStation(id: string): Promise<void> {
-  const response = await fetch(`${STATIONS_API_URL}/${id}`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || `Erro ${response.status}: Falha ao excluir estação`);
-  }
-}
-
-// Função para processar dados da estação com statusColor
-export function processStationData(station: StationDto): Station {
-  return {
-    ...station,
-    statusColor: station.status === 'ACTIVE' ? 'lime-500' : 'red-500'
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
   };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const credentials = opts.credentials || 'include';
+  const res = await fetch(url, {
+    headers,
+    credentials,
+    ...opts,
+  });
+
+  console.log('📡 Stations API Response:', {
+    status: res.status,
+    statusText: res.statusText,
+    url: res.url,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('❌ Stations API Error:', text);
+    try {
+      const json = JSON.parse(text);
+      throw new Error(json.message || text);
+    } catch {
+      throw new Error(text || res.statusText);
+    }
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    const data = await res.json();
+    console.log('✅ Stations API Success Data:', data);
+    return data;
+  }
+  return null;
 }
+
+export async function getStations(token?: string) {
+  console.log('🏭 getStations called');
+  const res = await request('/api/stations?limit=100&page=1', {}, token);
+  return (res?.data || res || []) as StationDto[];
+}
+
+export async function getStation(id: string, token?: string) {
+  return (await request(`/api/stations/${id}`, {}, token)) as StationDto;
+}
+
+export async function createStation(payload: Record<string, unknown>, token: string) {
+  return (await request('/api/stations', { method: 'POST', body: JSON.stringify(payload) }, token)) as StationDto;
+}
+
+export async function updateStation(id: string, payload: Record<string, unknown>, token: string) {
+  return (await request(`/api/stations/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token)) as StationDto;
+}
+
+export async function deleteStation(id: string, token: string) {
+  await request(`/api/stations/${id}`, { method: 'DELETE' }, token);
+}
+
+export default { getStations, getStation, createStation, updateStation, deleteStation };

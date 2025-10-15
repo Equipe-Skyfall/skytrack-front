@@ -1,12 +1,17 @@
+// src/components/ParametersContent.tsx
 import React, { useState, useEffect } from 'react';
 import { Gauge, Plus, Settings, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import TipoParametroModal from '../modals/TipoParametroModal';
+
 import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, UpdateParameterDto, ParameterFormData } from '../../interfaces/parameters';
 import type { StationDto } from '../../interfaces/stations';
 import { getParameters, createParameter, updateParameter, deleteParameter } from '../../services/api/parameters';
+
 import { getTipoParametros } from '../../services/api/tipo-parametro';
 import { getTipoAlertas } from '../../services/api/tipo-alerta';
+import { getStations } from '../../services/api/stations';
+
 const ParametersContent: React.FC = () => {
   const { token } = useAuth();
   const [parameters, setParameters] = useState<ParameterDto[]>([]);
@@ -34,56 +39,38 @@ const ParametersContent: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Buscar associações de parâmetros
-        const paramResponse = await getParameters(1, 100);
+        if (!token) {
+          throw new Error('Sessão expirada. Faça login para continuar.');
+        }
+
+        // Fetch stations
+        const stationsData = await getStations(token);
+        setStations(stationsData);
+
+        // Fetch parameters
+        const paramResponse = await getParameters(1, 100, undefined, token);
         setParameters(paramResponse.data);
 
-        // Buscar tipos de parâmetros para referência
-        const tipoParamResponse = await getTipoParametros();
+        // Fetch tipoParametros
+        const tipoParamResponse = await getTipoParametros(token);
         setTipoParametros(tipoParamResponse);
 
-        // Buscar tipos de alertas para referência
-        const tipoAlertasResponse = await getTipoAlertas();
+        // Fetch tipoAlertas
+        const tipoAlertasResponse = await getTipoAlertas(token);
         setTipoAlertas(tipoAlertasResponse);
-
-        // Buscar estações para referência
-        const API_BASE_URL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3000';
-        const stationResponse = await fetch(`${API_BASE_URL}/api/stations?limit=100&page=1`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        });
-        if (!stationResponse.ok) throw new Error(`Erro ao buscar estações: ${stationResponse.status}`);
-        
-        let stationData;
-        try {
-          const text = await stationResponse.text();
-          if (text) {
-            stationData = JSON.parse(text);
-          } else {
-            throw new Error('Resposta vazia do servidor para estações');
-          }
-        } catch (e) {
-          throw new Error('Erro ao processar dados das estações');
-        }
-        
-        const stations = stationData.data || [];
-        setStations(stations);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
+        setError(err instanceof Error ? err.message : 'Erro ao carregar dados. Verifique sua conexão ou faça login novamente.');
+        console.error('Erro ao carregar dados:', err);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, []);
-
-
+  }, [token]);
 
   const getParameterDetails = (param: ParameterDto) => {
-    const tipoParametro = tipoParametros.find(tp => tp.id === param.tipoParametroId);
-    const station = stations.find(s => s.id === param.stationId);
+    const tipoParametro = tipoParametros.find((tp) => tp.id === param.tipoParametroId);
+    const station = stations.find((s) => s.id === param.stationId);
     return { tipoParametro, station };
   };
 
@@ -118,21 +105,18 @@ const ParametersContent: React.FC = () => {
 
   const confirmDelete = async () => {
     if (!deleteParamId || !token) {
-      alert('Sessão expirada. Faça login para excluir parâmetros.');
-      handleModalClose();
+      setError('Sessão expirada. Faça login para excluir parâmetros.');
+      setTimeout(() => handleModalClose(), 3000);
       return;
     }
-    
+
     try {
       await deleteParameter(deleteParamId, token);
       setParameters((prev) => prev.filter((param) => param.id !== deleteParamId));
       handleModalClose();
     } catch (error: any) {
       setError(error.message || 'Erro ao excluir parâmetro');
-      // Close modal even on error after showing the error
-      setTimeout(() => {
-        handleModalClose();
-      }, 3000); // Close modal after 3 seconds to show error message
+      setTimeout(() => handleModalClose(), 3000);
     }
   };
 
@@ -157,8 +141,6 @@ const ParametersContent: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-
-
   // UUID validation helper function
   const isValidUUID = (uuid: string) => {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -167,31 +149,29 @@ const ParametersContent: React.FC = () => {
 
   const handleParameterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!token) {
-      alert('Sessão expirada. Faça login para salvar parâmetro.');
+      setError('Sessão expirada. Faça login para salvar parâmetro.');
       return;
     }
+
     if (isAddModalOpen) {
-      // Para criação, todos os campos obrigatórios devem estar presentes
       if (!formData.stationId || !formData.tipoParametroId) {
         setError('Estação e Tipo de Parâmetro são obrigatórios');
         return;
       }
 
-      // Validate UUIDs for creation
       if (!isValidUUID(formData.stationId)) {
         setError(`ID da estação inválido (não é UUID): ${formData.stationId}`);
         return;
       }
-      
+
       if (!isValidUUID(formData.tipoParametroId)) {
         setError(`ID do tipo de parâmetro inválido (não é UUID): ${formData.tipoParametroId}`);
         return;
       }
     }
 
-    // Validate tipoAlertaId if provided (for both create and update)
     if (formData.tipoAlertaId && formData.tipoAlertaId !== '' && !isValidUUID(formData.tipoAlertaId)) {
       setError(`ID do tipo de alerta inválido (não é UUID): ${formData.tipoAlertaId}`);
       return;
@@ -207,7 +187,6 @@ const ParametersContent: React.FC = () => {
         const newParam = await createParameter(createDto, token);
         setParameters((prev) => [...prev, newParam]);
       } else if (isEditModalOpen && editParamId) {
-        // Para edição, só podemos atualizar o tipoAlertaId
         const updateDto: UpdateParameterDto = {
           tipoAlertaId: formData.tipoAlertaId || undefined,
         };
@@ -233,7 +212,7 @@ const ParametersContent: React.FC = () => {
   if (error && !parameters.length) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-zinc-50 to-white">
-        <div className="text-red-500 text-lg">Erro: {error}</div>
+        <div className="text-red-500 text-lg">{error}</div>
       </div>
     );
   }
@@ -266,7 +245,6 @@ const ParametersContent: React.FC = () => {
           )}
         </div>
 
-        {/* Tabs */}
         <div className="border-b border-zinc-200">
           
         </div>
@@ -297,7 +275,7 @@ const ParametersContent: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-sm text-zinc-600">
-                      <strong>Estação:</strong> {station?.name || 'Estação não encontrada'}<br />
+                      <strong>Estação:</strong> {station?.name || station?.macAddress || 'Estação não encontrada'}<br />
                       <strong>Tipo de Parâmetro:</strong> {tipoParametro?.nome || 'N/A'}<br />
                       <strong>JSON ID:</strong> {tipoParametro?.jsonId || 'N/A'}<br />
                       <strong>Métrica:</strong> {tipoParametro?.metrica || 'N/A'}<br />
@@ -366,7 +344,7 @@ const ParametersContent: React.FC = () => {
                     <option value="" disabled>Selecione uma estação</option>
                     {stations.map((station) => (
                       <option key={station.id} value={station.id}>
-                        {station.name}
+                        {station.name || station.macAddress || station.id}
                       </option>
                     ))}
                   </select>
@@ -468,7 +446,7 @@ const ParametersContent: React.FC = () => {
                     const param = parameters.find((p) => p.id === deleteParamId);
                     if (param) {
                       const { tipoParametro, station } = getParameterDetails(param);
-                      return `${tipoParametro?.nome || 'Tipo não encontrado'} (${station?.name || 'Estação não encontrada'})`;
+                      return `${tipoParametro?.nome || 'Tipo não encontrado'} (${station?.name || station?.macAddress || 'Estação não encontrada'})`;
                     }
                     return 'Parâmetro não encontrado';
                   })()}
@@ -479,36 +457,34 @@ const ParametersContent: React.FC = () => {
                 <button
                   onClick={handleModalClose}
                   className="bg-zinc-200 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-zinc-300 transition-colors duration-300 cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={confirmDelete}
-                    className="bg-red-500 text-white rounded-lg py-3 px-8 text-base font-semibold hover:bg-red-600 transition-colors duration-300 cursor-pointer"
-                  >
-                    Deletar
-                  </button>
-                </div>
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="bg-red-500 text-white rounded-lg py-3 px-8 text-base font-semibold hover:bg-red-600 transition-colors duration-300 cursor-pointer"
+                >
+                  Deletar
+                </button>
               </div>
             </div>
-          )}
-        </main>
-
+          </div>
+        )}
         <TipoParametroModal
           open={showTipoParametroModal}
           onClose={() => setShowTipoParametroModal(false)}
           onSave={async () => {
-            // Reload tipo parametros when tipo parametro is saved
             try {
-              const tipoParamResponse = await getTipoParametros();
+              const tipoParamResponse = await getTipoParametros(token);
               setTipoParametros(tipoParamResponse);
             } catch (err) {
               console.error('Erro ao recarregar tipos de parâmetro:', err);
             }
           }}
         />
-      </div>
-    );
+      </main>
+    </div>
+  );
 };
 
 export default ParametersContent;

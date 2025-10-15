@@ -1,32 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Settings, Trash2, Loader2 } from 'lucide-react';
 import { getTipoAlertas, createTipoAlerta, updateTipoAlerta, deleteTipoAlerta } from '../../services/api/tipo-alerta';
-
-type TipoAlerta = {
-  id: string;
-  tipo: string;
-  publica: boolean;
-  condicao: string;
-  valor: string;
-  limite: number;
-  nivel: string;
-  duracaoMin?: number;
-  criadoEm: Date;
-};
-
-type FormData = Partial<Omit<TipoAlerta, 'id' | 'criadoEm'>>;
-
-interface TipoAlertaModalProps {
-  open: boolean;
-  onClose: () => void;
-  onSave: () => void;
-}
+import type { TipoAlerta, TipoAlertaFormData, TipoAlertaModalProps } from '../../interfaces/alerts';
 
 const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave }) => {
   const [tipoAlertas, setTipoAlertas] = useState<TipoAlerta[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<TipoAlerta | null>(null);
-  const [form, setForm] = useState<FormData>({});
+  const [form, setForm] = useState<TipoAlertaFormData>({});
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -210,7 +191,7 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
-                    onClick={() => { setShowForm(false); setEditing(null); setForm({}); }}
+                    onClick={() => { setShowForm(false); setEditing(null); setForm({} as TipoAlertaFormData); }}
                     className="bg-zinc-200 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-zinc-300 transition-colors duration-300 cursor-pointer"
                   >
                     Cancelar

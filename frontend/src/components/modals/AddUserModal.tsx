@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-
-interface AddUserModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: { email: string; username: string; password: string; confirmPassword: string }) => void;
-}
+import type { AddUserModalProps } from '../../interfaces/components';
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const [email, setEmail] = useState('');

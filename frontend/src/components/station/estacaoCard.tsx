@@ -5,50 +5,15 @@ import ModalEdicaoEstacao from "../modals/modalEdicaoEstacao";
 import ModalExcluirEstacao from "../modals/modalExcluirEstacao";
 import { useAuth } from "../../context/AuthContext";
 import Pagination from "../pagination/pagination";
+import type { 
+  PaginationData, 
+  StationsListResponse, 
+  Station, 
+  StationFormData, 
+  EstacaoCardProps 
+} from '../../interfaces/stations';
 
 const API_URL = 'https://sky-track-backend.vercel.app/api/stations';
-
-interface PaginationData {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-interface StationsListResponse {
-  data: StationDto[];
-  pagination: PaginationData;
-}
-interface StationDto {
-  id: string;
-  name: string;
-  macAddress: string | null;
-  latitude: number;
-  longitude: number;
-  address: string | null;
-  description: string | null;
-  status: "ACTIVE" | "INACTIVE";
-  createdAt: string;
-  updatedAt: string;
-}
-interface Station extends StationDto {
-  statusColor: string;
-}
-interface StationFormData {
-  name: string;
-  address: string;
-  macAddress: string;
-  latitude: string;
-  longitude: string;
-  description: string;
-  status: "ACTIVE" | "INACTIVE";
-}
-
-interface EstacaoCardProps {
-  station: Station;
-  onConfigurarClick: () => void;
-  onDeleteClick: () => void;
-  isUserLoggedIn: boolean;
-}
 
 const EstacaoCard: React.FC<EstacaoCardProps> = ({
   station,

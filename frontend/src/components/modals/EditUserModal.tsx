@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -13,6 +13,13 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, onSubmit
   const [username, setUsername] = useState(initialData.username);
   const [password, setPassword] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    // Sync state with initialData when it changes (e.g., for different users)
+  useEffect(() => {
+    setEmail(initialData.email);
+    setUsername(initialData.username);
+    setPassword('');  // Reset password to empty on new user (optional, since it's optional)
+  }, [initialData]);
 
   if (!isOpen) return null;
 

@@ -1,8 +1,45 @@
-import AlertasContent from "../../pageContent/alertas/alertasContent";
+import React from 'react';
+import { AlertTriangle, Settings, Trash2 } from 'lucide-react';
+import AlertForm from '../../components/alerts/AlertForm';
+import ConfirmDelete from '../../components/alerts/ConfirmDelete';
+import TipoAlertaModal from '../../components/modals/TipoAlertaModal';
+import { useAuth } from '../../context/AuthContext';
+import { useAlertasPage } from '../../hooks/pages/useAlertasPage';
+import type { Alert } from '../../interfaces/alerts';
 
-export default function Alertas() {
+export default function AlertasContent() {
+  const { user } = useAuth();
+  const {
+    // Data
+    activeAlerts,
+    historyAlerts,
+    loading,
+    error,
+    
+    // Form state
+    editing,
+    form,
+    showForm,
+    submitting,
+    
+    // Modal state
+    showTipoAlertaModal,
+    deletingId,
+    
+    // Actions
+    handleEdit,
+    handleDelete,
+    handleSubmit,
+    handleConfirmDelete,
+    openCreateForm,
+    closeForm,
+    openTipoAlertaModal,
+    closeTipoAlertaModal,
+    setForm,
+    setDeletingId
+  } = useAlertasPage();
+
   return (
-<<<<<<< HEAD
     <div className="min-h-screen bg-white font-poppins flex">
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -16,7 +53,7 @@ export default function Alertas() {
           </div>
           {user && (
             <button
-              onClick={() => setShowTipoAlertaModal(true)}
+              onClick={openTipoAlertaModal}
               className="bg-slate-900 text-white rounded-lg py-3 px-8 flex items-center gap-2 text-base font-semibold hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
             >
               <Settings className="h-5 w-5" />
@@ -35,11 +72,11 @@ export default function Alertas() {
             <div className="text-lg text-zinc-600">Carregando...</div>
           ) : error ? (
             <p className="text-red-500 text-sm">{error}</p>
-          ) : active.length === 0 ? (
+          ) : activeAlerts.length === 0 ? (
             <p className="text-sm text-zinc-600">Nenhum alerta ativo.</p>
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {active.map(a => (
+              {activeAlerts.map(a => (
                 <div
                   key={a.id}
                   className="bg-white rounded-xl border border-zinc-300 p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300 w-full"
@@ -59,25 +96,19 @@ export default function Alertas() {
                     </div>
                   </div>
                   <p className="text-sm text-zinc-600">
-                    <strong>Data:</strong> {new Date(a.createdAt).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit', 
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    <strong>Data:</strong> {a.createdAt.toLocaleString()}
                   </p>
                   {user && (
                     <div className="flex justify-center gap-4">
-                      {/**<button
-                        onClick={() => onEdit(a)}
+                      <button
+                        onClick={() => handleEdit(a)}
                         className="bg-white border border-zinc-400 rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
                       >
                         <Settings className="h-5 w-5" />
                         Detalhes
-                      </button>**/}
+                      </button>
                       <button
-                        onClick={() => onDelete(a.id)}
+                        onClick={() => handleDelete(a.id)}
                         className="bg-red-500 text-white rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
                       >
                         <Trash2 className="h-5 w-5" />
@@ -97,11 +128,11 @@ export default function Alertas() {
             <AlertTriangle className="h-5 w-5 text-zinc-700" />
             Histórico de Alertas
           </h2>
-          {history.length === 0 ? (
+          {historyAlerts.length === 0 ? (
             <p className="text-sm text-zinc-600">Sem histórico de alertas.</p>
           ) : (
             <div className="space-y-4">
-              {history.map(h => (
+              {historyAlerts.map(h => (
                 <div
                   key={h.id}
                   className="bg-white rounded-xl border border-zinc-300 p-4 flex items-center justify-between shadow-md hover:shadow-lg transition-shadow duration-300 w-full"
@@ -120,13 +151,7 @@ export default function Alertas() {
                         </span>
                       </div>
                       <p className="text-sm text-zinc-600 truncate">
-                        {h.stationId} • {new Date(h.createdAt).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {h.stationId} • {h.createdAt.toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -147,8 +172,8 @@ export default function Alertas() {
           <AlertForm
             value={form}
             onChange={(v) => setForm({ ...form, ...v })}
-            onCancel={() => { setShowForm(false); setEditing(null); }}
-            onSubmit={onSubmit}
+            onCancel={closeForm}
+            onSubmit={handleSubmit}
             submitting={submitting}
             title={editing ? 'Editar Alerta' : 'Novo Alerta'}
           />
@@ -157,33 +182,18 @@ export default function Alertas() {
         <ConfirmDelete
           open={!!deletingId}
           onCancel={() => setDeletingId(null)}
-          onConfirm={async () => {
-            if (!deletingId) return;
-            try {
-              await deleteAlert(deletingId);
-              setAlerts(prev => prev.filter(x => x.id !== deletingId));
-            } catch (err: any) {
-              alert(err.message || 'Erro ao excluir');
-            } finally {
-              setDeletingId(null);
-            }
-          }}
+          onConfirm={handleConfirmDelete}
           message="Deseja realmente excluir este alerta?"
         />
 
         <TipoAlertaModal
           open={showTipoAlertaModal}
-          onClose={() => setShowTipoAlertaModal(false)}
+          onClose={closeTipoAlertaModal}
           onSave={() => {
-            load();
+            // Hook will automatically reload
           }}
         />
       </main>
     </div>
-=======
-    <>
-      <AlertasContent />
-    </>
->>>>>>> dev
   );
-}
+};

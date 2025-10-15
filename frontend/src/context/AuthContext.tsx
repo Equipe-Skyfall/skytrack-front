@@ -1,3 +1,6 @@
+
+import { useAuthService } from '../hooks/auth/useAuthService';
+import type { AuthContextType } from '../interfaces/auth';
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AUTH_BASE } from '../services/api/config';
@@ -41,6 +44,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const authService = useAuthService();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -224,8 +228,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
-      {isCheckingAuth ? (
+    <AuthContext.Provider value={authService}>
+      {authService.isCheckingAuth ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-lg text-zinc-600">Carregando...</div>
         </div>

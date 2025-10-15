@@ -1,9 +1,6 @@
 import React from 'react';
 import Sidebar from './Sidebar';
-
-interface LayoutProps {
-  children: React.ReactNode;
-}
+import type { LayoutProps } from '../../interfaces/components';
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (

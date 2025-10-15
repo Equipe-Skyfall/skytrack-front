@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, X } from 'lucide-react';
-
-type Alert = {
-  id: string;
-  data: Date;
-  stationId: string;
-  parameterId: string;
-  tipoAlertaId: string;
-  medidasId?: string;
-  createdAt: Date;
-};
-
-type AlertFormData = Partial<Alert>;
+import type { Alert, AlertFormData } from '../../interfaces/alerts';
 
 type Props = {
   value: AlertFormData;

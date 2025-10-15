@@ -1,5 +1,5 @@
 import React from 'react';
-import Estacao from '../../components/conteudoPaginas/estacao/estacaoCard';
+import Estacao from '../../components/station/estacaoCard';
 
 const Estacoes: React.FC = () => {
   return (

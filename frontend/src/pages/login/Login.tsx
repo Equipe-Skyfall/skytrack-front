@@ -1,5 +1,5 @@
 import React from 'react';
-import ConteudoLogin from '../../components/conteudoPaginas/login/Login';
+import ConteudoLogin from '../../components/login/Login';
 
 
 const Login: React.FC = () => {

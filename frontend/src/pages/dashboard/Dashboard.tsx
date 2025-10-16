@@ -2,6 +2,7 @@ import React from 'react';
 import StatusEstacoes from '../../components/dashboard/StatusEstacoes';
 import AlertasRecentes from '../../components/dashboard/AlertasRecentes';
 import { alertasRecentes, estacoesStatus } from '../../components/dashboard/mockData';
+import Charts from '../../components/dashboard/Charts';
 
 const Dashboard: React.FC = () => {
   return (

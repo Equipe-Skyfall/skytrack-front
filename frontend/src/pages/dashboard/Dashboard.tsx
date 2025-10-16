@@ -1,5 +1,8 @@
 import React from 'react';
-import { StatusEstacoes, AlertasRecentes, estacoesStatus, alertasRecentes } from '../../components/dashboard';
+import StatusEstacoes from '../../components/dashboard/StatusEstacoes';
+import AlertasRecentes from '../../components/dashboard/AlertasRecentes';
+import { alertasRecentes, estacoesStatus } from '../../components/dashboard/mockData';
+import Charts from '../../components/dashboards/Charts';
 
 const Dashboard: React.FC = () => {
   return (
@@ -11,6 +14,9 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <StatusEstacoes estacoes={estacoesStatus} />
           <AlertasRecentes alertas={alertasRecentes} />
+        </div>
+        <div className="mt-6">
+          <Charts />
         </div>
       </main>
     </div>

@@ -1,55 +1,34 @@
-import React, { useEffect, useState } from 'react';
+// pages/alertas/Alertas.tsx
+import React, { useState } from 'react';
 import { AlertTriangle, Plus, Settings, Trash2 } from 'lucide-react';
-import { getAlerts, createAlert, updateAlert, deleteAlert } from '../../services/api/alerts';
 import AlertForm from '../../components/alerts/AlertForm';
 import ConfirmDelete from '../../components/alerts/ConfirmDelete';
 import TipoAlertaModal from '../../components/modals/TipoAlertaModal';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../context/NotificationContext';
+import { createAlert, updateAlert, deleteAlert } from '../../services/api/alerts';
 
-type Alert = {
-  id: string;
-  data: Date;
+type FormData = {
   stationId: string;
   parameterId: string;
   tipoAlertaId: string;
+  data: Date;
   medidasId?: string;
-  createdAt: Date;
 };
-
-type FormData = Partial<Alert>;
 
 const emptyForm: FormData = { stationId: '', parameterId: '', tipoAlertaId: '', data: new Date() };
 
 const Alertas: React.FC = () => {
   const { user } = useAuth();
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<Alert | null>(null);
+  const { alerts } = useNotifications(); // Usa o contexto
+  const [editing, setEditing] = useState<FormData | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showTipoAlertaModal, setShowTipoAlertaModal] = useState(false);
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getAlerts();
-      setAlerts(res || []);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar alertas');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  const onEdit = (a: Alert) => {
+  const onEdit = (a: FormData) => {
     setEditing(a);
     setForm(a);
     setShowForm(true);
@@ -65,11 +44,9 @@ const Alertas: React.FC = () => {
     setSubmitting(true);
     try {
       if (editing && editing.id) {
-        const updated = await updateAlert(editing.id, form as any);
-        setAlerts(prev => prev.map(a => (a.id === editing.id ? updated : a)));
+        await updateAlert(editing.id, form as any);
       } else {
-        const created = await createAlert(form as any);
-        setAlerts(prev => [created, ...prev]);
+        await createAlert(form as any);
       }
       setShowForm(false);
       setEditing(null);
@@ -113,11 +90,7 @@ const Alertas: React.FC = () => {
             <AlertTriangle className="h-5 w-5 text-zinc-700" />
             Alertas Ativos
           </h2>
-          {loading ? (
-            <div className="text-lg text-zinc-600">Carregando...</div>
-          ) : error ? (
-            <p className="text-red-500 text-sm">{error}</p>
-          ) : active.length === 0 ? (
+          {active.length === 0 ? (
             <p className="text-sm text-zinc-600">Nenhum alerta ativo.</p>
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -132,7 +105,7 @@ const Alertas: React.FC = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-bold text-zinc-800 truncate">
-                        Alerta {a.parameterId}
+                        {a.description || `Alerta ${a.parameterId}`}
                       </h3>
                       <p className="text-sm text-zinc-600 truncate">{a.stationId}</p>
                     </div>
@@ -141,7 +114,7 @@ const Alertas: React.FC = () => {
                     </div>
                   </div>
                   <p className="text-sm text-zinc-600">
-                    <strong>Data:</strong> {a.createdAt.toLocaleString()}
+                    <strong>Data:</strong> {new Date(a.createdAt).toLocaleString()}
                   </p>
                   {user && (
                     <div className="flex justify-center gap-4">
@@ -189,14 +162,14 @@ const Alertas: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3">
                         <h4 className="text-base font-semibold text-zinc-800 truncate">
-                          Alerta {h.parameterId}
+                          {h.description || `Alerta ${h.parameterId}`}
                         </h4>
                         <span className="bg-zinc-200 text-zinc-800 rounded-full px-2 py-1 text-xs font-semibold">
                           Resolvido
                         </span>
                       </div>
                       <p className="text-sm text-zinc-600 truncate">
-                        {h.stationId} • {h.createdAt.toLocaleString()}
+                        {h.stationId} • {new Date(h.createdAt).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -231,7 +204,7 @@ const Alertas: React.FC = () => {
             if (!deletingId) return;
             try {
               await deleteAlert(deletingId);
-              setAlerts(prev => prev.filter(x => x.id !== deletingId));
+              // Atualizar contexto se necessário
             } catch (err: any) {
               alert(err.message || 'Erro ao excluir');
             } finally {
@@ -245,7 +218,7 @@ const Alertas: React.FC = () => {
           open={showTipoAlertaModal}
           onClose={() => setShowTipoAlertaModal(false)}
           onSave={() => {
-            load();
+            // Atualizar contexto se necessário
           }}
         />
       </main>

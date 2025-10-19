@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+  c import { useState, useEffect, useCallback } from 'react';
 import { 
   getAlerts, 
   createAlert, 
@@ -11,6 +11,7 @@ import {
   updateTipoAlerta, 
   deleteTipoAlerta 
 } from '../../services/api/tipo-alerta';
+import { RefreshManager, ENTITY_TYPES } from '../../services/api/refreshManager';
 import type { Alert, AlertFormData, TipoAlerta, TipoAlertaFormData } from '../../interfaces/alerts';
 
 export const useAlerts = () => {
@@ -122,7 +123,15 @@ export const useTipoAlertas = () => {
   const handleDeleteTipoAlerta = async (id: string): Promise<void> => {
     try {
       await deleteTipoAlerta(id);
-      await loadTipoAlertas(); // Reload tipos
+      
+      // Opção 1: Reload local (mais rápido)
+      await loadTipoAlertas();
+      
+      // Notifica outros componentes que a lista foi atualizada
+      RefreshManager.notify(ENTITY_TYPES.TIPO_ALERTA);
+      
+      // Opção 2: Reload da página (garante estado limpo) - descomente se necessário
+      // RefreshManager.forceReload();
     } catch (error) {
       throw error;
     }

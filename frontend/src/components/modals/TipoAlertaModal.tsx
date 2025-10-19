@@ -42,7 +42,6 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
       tipo: ta.tipo,
       publica: ta.publica,
       condicao: ta.condicao,
-      valor: ta.valor,
       limite: ta.limite,
       nivel: ta.nivel,
       duracaoMin: ta.duracaoMin,
@@ -81,6 +80,8 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
       await deleteTipoAlerta(deletingId);
       await loadTipoAlertas();
       onSave();
+      // Recarregar a página para atualizar todos os dados
+      window.location.reload();
     } catch (err: any) {
       alert(err.message || 'Erro ao excluir tipo de alerta');
     } finally {
@@ -134,16 +135,6 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
                       <option value="EQUALS">Igual a</option>
                       <option value="NOT_EQUALS">Diferente de</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-700">Parâmetro</label>
-                    <input
-                      type="text"
-                      value={form.valor || ''}
-                      onChange={e => setForm({ ...form, valor: e.target.value })}
-                      className="mt-1 w-full rounded-md border border-zinc-300 p-2 text-sm focus:ring-slate-500 focus:border-slate-500"
-                      required
-                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-zinc-700">Limite</label>
@@ -246,7 +237,7 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
                       UUID: {ta.id}
                     </p>
                     <p className="text-sm text-zinc-600">
-                      {ta.condicao} {ta.valor} • Nível: {ta.nivel} • {ta.publica ? 'Público' : 'Privado'}
+                      {ta.condicao} • Nível: {ta.nivel} • {ta.publica ? 'Público' : 'Privado'}
                     </p>
                   </div>
                   <div className="flex gap-4">

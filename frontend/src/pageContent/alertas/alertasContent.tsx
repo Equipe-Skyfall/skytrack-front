@@ -1,11 +1,9 @@
-import React from 'react';
 import { AlertTriangle, Settings, Trash2 } from 'lucide-react';
 import AlertForm from '../../components/alerts/AlertForm';
 import ConfirmDelete from '../../components/alerts/ConfirmDelete';
 import TipoAlertaModal from '../../components/modals/TipoAlertaModal';
 import { useAuth } from '../../context/AuthContext';
 import { useAlertasPage } from '../../hooks/pages/useAlertasPage';
-import type { Alert } from '../../interfaces/alerts';
 
 export default function AlertasContent() {
   const { user } = useAuth();
@@ -27,16 +25,15 @@ export default function AlertasContent() {
     deletingId,
     
     // Actions
-    handleEdit,
-    handleDelete,
-    handleSubmit,
-    handleConfirmDelete,
-    openCreateForm,
-    closeForm,
-    openTipoAlertaModal,
-    closeTipoAlertaModal,
-    setForm,
-    setDeletingId
+    onEdit,
+    onDelete,
+    onSubmit,
+    onConfirmDelete,
+    onCancelForm,
+    onCancelDelete,
+    onFormChange,
+    onOpenTipoAlertaModal,
+    onCloseTipoAlertaModal
   } = useAlertasPage();
 
   return (
@@ -53,7 +50,7 @@ export default function AlertasContent() {
           </div>
           {user && (
             <button
-              onClick={openTipoAlertaModal}
+              onClick={onOpenTipoAlertaModal}
               className="bg-slate-900 text-white rounded-lg py-3 px-8 flex items-center gap-2 text-base font-semibold hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
             >
               <Settings className="h-5 w-5" />
@@ -101,14 +98,14 @@ export default function AlertasContent() {
                   {user && (
                     <div className="flex justify-center gap-4">
                       <button
-                        onClick={() => handleEdit(a)}
+                        onClick={() => onEdit(a)}
                         className="bg-white border border-zinc-400 rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
                       >
                         <Settings className="h-5 w-5" />
                         Detalhes
                       </button>
                       <button
-                        onClick={() => handleDelete(a.id)}
+                        onClick={() => onDelete(a.id)}
                         className="bg-red-500 text-white rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
                       >
                         <Trash2 className="h-5 w-5" />
@@ -171,9 +168,9 @@ export default function AlertasContent() {
         {showForm && (
           <AlertForm
             value={form}
-            onChange={(v) => setForm({ ...form, ...v })}
-            onCancel={closeForm}
-            onSubmit={handleSubmit}
+            onChange={onFormChange}
+            onCancel={onCancelForm}
+            onSubmit={onSubmit}
             submitting={submitting}
             title={editing ? 'Editar Alerta' : 'Novo Alerta'}
           />
@@ -181,14 +178,14 @@ export default function AlertasContent() {
 
         <ConfirmDelete
           open={!!deletingId}
-          onCancel={() => setDeletingId(null)}
-          onConfirm={handleConfirmDelete}
+          onCancel={onCancelDelete}
+          onConfirm={onConfirmDelete}
           message="Deseja realmente excluir este alerta?"
         />
 
         <TipoAlertaModal
           open={showTipoAlertaModal}
-          onClose={closeTipoAlertaModal}
+          onClose={onCloseTipoAlertaModal}
           onSave={() => {
             // Hook will automatically reload
           }}

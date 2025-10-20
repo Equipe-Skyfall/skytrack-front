@@ -6,7 +6,7 @@ import TipoParametroModal from '../modals/TipoParametroModal';
 
 import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, UpdateParameterDto, ParameterFormData } from '../../interfaces/parameters';
 import type { StationDto } from '../../interfaces/stations';
-import { getParameters, createParameter, updateParameter, deleteParameter } from '../../services/api/parameters';
+import { getParameters, createParameter, updateParameter } from '../../services/api/parameters';
 
 import { getTipoParametros } from '../../services/api/tipo-parametro';
 import { getTipoAlertas } from '../../services/api/tipo-alerta';

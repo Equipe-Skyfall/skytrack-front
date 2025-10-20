@@ -4,9 +4,13 @@ import { API_BASE } from './config';
 async function request(path: string, opts: RequestInit = {}, token?: string) {
   const url = `${API_BASE}${path}`;
 
+  // Auto-fetch token from localStorage if not provided
+  const finalToken = token || (typeof window !== 'undefined' ? localStorage.getItem('skytrack_token') : null);
+
   console.log('🚨 TipoAlerta API Request:', {
     method: opts.method || 'GET',
     url,
+    hasToken: !!finalToken,
     body: opts.body ? JSON.parse(opts.body as string) : undefined,
   });
 
@@ -15,8 +19,10 @@ async function request(path: string, opts: RequestInit = {}, token?: string) {
     'Accept': 'application/json',
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (finalToken) {
+    headers['Authorization'] = `Bearer ${finalToken}`;
+  } else {
+    console.warn('⚠️ No token found for tipo-alerta request');
   }
 
   const credentials = opts.credentials || 'include';
@@ -38,8 +44,11 @@ async function request(path: string, opts: RequestInit = {}, token?: string) {
     try {
       const json = JSON.parse(text);
       throw new Error(json.message || text);
-    } catch {
-      throw new Error(text || res.statusText);
+    } catch (e) {
+      if (e instanceof Error && e.message.includes('json')) {
+        throw new Error(text || res.statusText);
+      }
+      throw e;
     }
   }
 
@@ -52,25 +61,25 @@ async function request(path: string, opts: RequestInit = {}, token?: string) {
   return null;
 }
 
-export async function getTipoAlertas(token?: string) {
+export async function getTipoAlertas(token?: string | null) {
   console.log('🚨 getTipoAlertas called');
-  return (await request('/api/tipo-alerta', {}, token)) || [];
+  return (await request('/api/tipo-alerta', {}, token || undefined)) || [];
 }
 
-export async function getTipoAlerta(id: string, token?: string) {
-  return await request(`/api/tipo-alerta/${id}`, {}, token);
+export async function getTipoAlerta(id: string, token?: string | null) {
+  return await request(`/api/tipo-alerta/${id}`, {}, token || undefined);
 }
 
-export async function createTipoAlerta(payload: Record<string, unknown>, token: string) {
-  return await request('/api/tipo-alerta', { method: 'POST', body: JSON.stringify(payload) }, token);
+export async function createTipoAlerta(payload: Record<string, unknown>, token?: string | null) {
+  return await request('/api/tipo-alerta', { method: 'POST', body: JSON.stringify(payload) }, token || undefined);
 }
 
-export async function updateTipoAlerta(id: string, payload: Record<string, unknown>, token: string) {
-  return await request(`/api/tipo-alerta/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token);
+export async function updateTipoAlerta(id: string, payload: Record<string, unknown>, token?: string | null) {
+  return await request(`/api/tipo-alerta/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token || undefined);
 }
 
-export async function deleteTipoAlerta(id: string, token: string) {
-  return await request(`/api/tipo-alerta/${id}`, { method: 'DELETE' }, token);
+export async function deleteTipoAlerta(id: string, token?: string | null) {
+  return await request(`/api/tipo-alerta/${id}`, { method: 'DELETE' }, token || undefined);
 }
 
 export default { getTipoAlertas, getTipoAlerta, createTipoAlerta, updateTipoAlerta, deleteTipoAlerta };

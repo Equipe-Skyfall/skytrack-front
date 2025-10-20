@@ -4,9 +4,13 @@ import { API_BASE } from './config';
 async function request(path: string, opts: RequestInit = {}, token?: string) {
   const url = `${API_BASE}${path}`;
 
+  // Auto-fetch token from localStorage if not provided
+  const finalToken = token || (typeof window !== 'undefined' ? localStorage.getItem('skytrack_token') : null);
+
   console.log('🔧 TipoParametro API Request:', {
     method: opts.method || 'GET',
     url,
+    hasToken: !!finalToken,
     body: opts.body ? JSON.parse(opts.body as string) : undefined,
   });
 
@@ -15,8 +19,10 @@ async function request(path: string, opts: RequestInit = {}, token?: string) {
     'Accept': 'application/json',
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (finalToken) {
+    headers['Authorization'] = `Bearer ${finalToken}`;
+  } else {
+    console.warn('⚠️ No token found for tipo-parametro request');
   }
 
   const credentials = opts.credentials || 'include';
@@ -52,26 +58,26 @@ async function request(path: string, opts: RequestInit = {}, token?: string) {
   return null;
 }
 
-export async function getTipoParametros(token?: string) {
+export async function getTipoParametros(token?: string | null) {
   console.log('📝 getTipoParametros called');
-  return (await request('/api/tipo-parametro', {}, token)) || [];
+  return (await request('/api/tipo-parametro', {}, token || undefined)) || [];
 }
 
-export async function getTipoParametro(id: string, token?: string) {
-  return await request(`/api/tipo-parametro/${id}`, {}, token);
+export async function getTipoParametro(id: string, token?: string | null) {
+  return await request(`/api/tipo-parametro/${id}`, {}, token || undefined);
 }
 
-export async function createTipoParametro(payload: any, token: string) {
+export async function createTipoParametro(payload: any, token?: string | null) {
   console.log('➕ createTipoParametro called with:', payload);
-  return await request('/api/tipo-parametro', { method: 'POST', body: JSON.stringify(payload) }, token);
+  return await request('/api/tipo-parametro', { method: 'POST', body: JSON.stringify(payload) }, token || undefined);
 }
 
-export async function updateTipoParametro(id: string, payload: any, token: string) {
-  return await request(`/api/tipo-parametro/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token);
+export async function updateTipoParametro(id: string, payload: any, token?: string | null) {
+  return await request(`/api/tipo-parametro/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token || undefined);
 }
 
-export async function deleteTipoParametro(id: string, token: string) {
-  return await request(`/api/tipo-parametro/${id}`, { method: 'DELETE' }, token);
+export async function deleteTipoParametro(id: string, token?: string | null) {
+  return await request(`/api/tipo-parametro/${id}`, { method: 'DELETE' }, token || undefined);
 }
 
 export default { getTipoParametros, getTipoParametro, createTipoParametro, updateTipoParametro, deleteTipoParametro };

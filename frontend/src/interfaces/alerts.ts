@@ -17,7 +17,6 @@ export interface TipoAlerta {
   tipo: string;
   publica: boolean;
   condicao: string;
-  valor: string;
   limite: number;
   nivel: string;
   duracaoMin?: number;

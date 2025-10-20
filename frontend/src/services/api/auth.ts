@@ -1,4 +1,5 @@
 import type { User } from '../../interfaces/auth';
+import { AUTH_BASE } from './config';
 
 // Função para decodificar JWT
 const decodeJWT = (token: string) => {
@@ -18,7 +19,7 @@ const decodeJWT = (token: string) => {
 };
 
 export async function loginUser(email: string, password: string): Promise<{ user: User; token: string }> {
-  const response = await fetch('https://authservice-brown.vercel.app/auth/login', {
+  const response = await fetch(`${AUTH_BASE}/auth/login`, {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
@@ -68,7 +69,7 @@ export async function loginUser(email: string, password: string): Promise<{ user
 }
 
 export async function logoutUser(): Promise<void> {
-  const response = await fetch('https://authservice-brown.vercel.app/auth/logout', {
+  const response = await fetch(`${AUTH_BASE}/auth/logout`, {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
@@ -83,7 +84,7 @@ export async function logoutUser(): Promise<void> {
 }
 
 export async function getUserProfile(): Promise<User> {
-  const response = await fetch('https://authservice-brown.vercel.app/auth/profile', {
+  const response = await fetch(`${AUTH_BASE}/auth/profile`, {
     method: 'GET',
     headers: {
       'Accept': 'application/json',

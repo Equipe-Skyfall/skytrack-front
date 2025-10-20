@@ -10,9 +10,13 @@ export interface StationDto {
 async function request(path: string, opts: RequestInit = {}, token?: string) {
   const url = `${API_BASE}${path}`;
 
+  // Auto-fetch token from localStorage if not provided
+  const finalToken = token || (typeof window !== 'undefined' ? localStorage.getItem('skytrack_token') : null);
+
   console.log('🏭 Stations API Request:', {
     method: opts.method || 'GET',
     url,
+    hasToken: !!finalToken,
     body: opts.body ? JSON.parse(opts.body as string) : undefined,
   });
 
@@ -21,8 +25,10 @@ async function request(path: string, opts: RequestInit = {}, token?: string) {
     'Accept': 'application/json',
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (finalToken) {
+    headers['Authorization'] = `Bearer ${finalToken}`;
+  } else {
+    console.warn('⚠️ No token found for stations request');
   }
 
   const credentials = opts.credentials || 'include';
@@ -58,26 +64,26 @@ async function request(path: string, opts: RequestInit = {}, token?: string) {
   return null;
 }
 
-export async function getStations(token?: string) {
+export async function getStations(token?: string | null) {
   console.log('🏭 getStations called');
-  const res = await request('/api/stations?limit=100&page=1', {}, token);
+  const res = await request('/api/stations?limit=100&page=1', {}, token || undefined);
   return (res?.data || res || []) as StationDto[];
 }
 
-export async function getStation(id: string, token?: string) {
-  return (await request(`/api/stations/${id}`, {}, token)) as StationDto;
+export async function getStation(id: string, token?: string | null) {
+  return (await request(`/api/stations/${id}`, {}, token || undefined)) as StationDto;
 }
 
-export async function createStation(payload: Record<string, unknown>, token: string) {
-  return (await request('/api/stations', { method: 'POST', body: JSON.stringify(payload) }, token)) as StationDto;
+export async function createStation(payload: Record<string, unknown>, token?: string | null) {
+  return (await request('/api/stations', { method: 'POST', body: JSON.stringify(payload) }, token || undefined)) as StationDto;
 }
 
-export async function updateStation(id: string, payload: Record<string, unknown>, token: string) {
-  return (await request(`/api/stations/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token)) as StationDto;
+export async function updateStation(id: string, payload: Record<string, unknown>, token?: string | null) {
+  return (await request(`/api/stations/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token || undefined)) as StationDto;
 }
 
-export async function deleteStation(id: string, token: string) {
-  await request(`/api/stations/${id}`, { method: 'DELETE' }, token);
+export async function deleteStation(id: string, token?: string | null) {
+  await request(`/api/stations/${id}`, { method: 'DELETE' }, token || undefined);
 }
 
 export default { getStations, getStation, createStation, updateStation, deleteStation };

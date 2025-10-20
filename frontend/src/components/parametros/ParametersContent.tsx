@@ -3,8 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Gauge, Plus, Settings, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import TipoParametroModal from '../modals/TipoParametroModal';
-import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, UpdateParameterDto, StationDto, ParameterFormData } from './types';
-import { getParameters } from '../../services/api/parameters';
+
+import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, UpdateParameterDto, ParameterFormData } from '../../interfaces/parameters';
+import type { StationDto } from '../../interfaces/stations';
+import { getParameters, createParameter, updateParameter } from '../../services/api/parameters';
+
 import { getTipoParametros } from '../../services/api/tipo-parametro';
 import { getTipoAlertas } from '../../services/api/tipo-alerta';
 import { getStations } from '../../services/api/stations';
@@ -200,7 +203,7 @@ const ParametersContent: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-zinc-50 to-white">
+      <div className="flex items-center justify-center min-h-screen ">
         <div className="text-lg text-zinc-600">Carregando parâmetros...</div>
       </div>
     );
@@ -215,7 +218,7 @@ const ParametersContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-white font-poppins flex">
+    <div className="min-h-screen  font-poppins flex">
       <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-8 max-w-full mx-auto">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
@@ -243,28 +246,7 @@ const ParametersContent: React.FC = () => {
         </div>
 
         <div className="border-b border-zinc-200">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab('parametros')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'parametros'
-                  ? 'border-slate-900 text-slate-900'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300'
-              }`}
-            >
-              Parâmetros
-            </button>
-            <button
-              onClick={() => setActiveTab('tipos')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'tipos'
-                  ? 'border-slate-900 text-slate-900'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300'
-              }`}
-            >
-              Tipos de Parâmetro
-            </button>
-          </nav>
+          
         </div>
 
         {activeTab === 'parametros' && (

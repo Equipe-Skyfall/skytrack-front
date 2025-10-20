@@ -1,32 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Settings, Trash2, Loader2 } from 'lucide-react';
 import { getTipoAlertas, createTipoAlerta, updateTipoAlerta, deleteTipoAlerta } from '../../services/api/tipo-alerta';
-
-type TipoAlerta = {
-  id: string;
-  tipo: string;
-  publica: boolean;
-  condicao: string;
-  valor: string;
-  limite: number;
-  nivel: string;
-  duracaoMin?: number;
-  criadoEm: Date;
-};
-
-type FormData = Partial<Omit<TipoAlerta, 'id' | 'criadoEm'>>;
-
-interface TipoAlertaModalProps {
-  open: boolean;
-  onClose: () => void;
-  onSave: () => void;
-}
+import type { TipoAlerta, TipoAlertaFormData, TipoAlertaModalProps } from '../../interfaces/alerts';
 
 const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave }) => {
   const [tipoAlertas, setTipoAlertas] = useState<TipoAlerta[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<TipoAlerta | null>(null);
-  const [form, setForm] = useState<FormData>({});
+  const [form, setForm] = useState<TipoAlertaFormData>({});
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -34,9 +15,12 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
   const loadTipoAlertas = async () => {
     setLoading(true);
     try {
+      console.log('📋 Loading tipos de alerta...');
       const res = await getTipoAlertas();
+      console.log('✅ Tipos de alerta loaded:', res);
       setTipoAlertas(res || []);
     } catch (err: any) {
+      console.error('❌ Error loading tipos de alerta:', err);
       alert(err.message || 'Erro ao carregar tipos de alerta');
     } finally {
       setLoading(false);
@@ -61,7 +45,6 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
       tipo: ta.tipo,
       publica: ta.publica,
       condicao: ta.condicao,
-      valor: ta.valor,
       limite: ta.limite,
       nivel: ta.nivel,
       duracaoMin: ta.duracaoMin,
@@ -77,17 +60,22 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
     e.preventDefault();
     setSubmitting(true);
     try {
+      console.log('💾 Saving tipo de alerta:', form);
       if (editing) {
+        console.log('🔄 Updating tipo de alerta:', editing.id);
         await updateTipoAlerta(editing.id, form);
       } else {
+        console.log('➕ Creating new tipo de alerta');
         await createTipoAlerta(form);
       }
+      console.log('✅ Tipo de alerta saved successfully');
       await loadTipoAlertas();
       setShowForm(false);
       setEditing(null);
       setForm({});
       onSave();
     } catch (err: any) {
+      console.error('❌ Error saving tipo de alerta:', err);
       alert(err.message || 'Erro ao salvar tipo de alerta');
     } finally {
       setSubmitting(false);
@@ -97,10 +85,13 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
   const confirmDelete = async () => {
     if (!deletingId) return;
     try {
+      console.log('🗑️ Deleting tipo de alerta:', deletingId);
       await deleteTipoAlerta(deletingId);
+      console.log('✅ Tipo de alerta deleted successfully');
       await loadTipoAlertas();
       onSave();
     } catch (err: any) {
+      console.error('❌ Error deleting tipo de alerta:', err);
       alert(err.message || 'Erro ao excluir tipo de alerta');
     } finally {
       setDeletingId(null);
@@ -155,16 +146,6 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700">Valor</label>
-                    <input
-                      type="text"
-                      value={form.valor || ''}
-                      onChange={e => setForm({ ...form, valor: e.target.value })}
-                      className="mt-1 w-full rounded-md border border-zinc-300 p-2 text-sm focus:ring-slate-500 focus:border-slate-500"
-                      required
-                    />
-                  </div>
-                  <div>
                     <label className="block text-sm font-medium text-zinc-700">Limite</label>
                     <input
                       type="number"
@@ -210,7 +191,7 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
-                    onClick={() => { setShowForm(false); setEditing(null); setForm({}); }}
+                    onClick={() => { setShowForm(false); setEditing(null); setForm({} as TipoAlertaFormData); }}
                     className="bg-zinc-200 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-zinc-300 transition-colors duration-300 cursor-pointer"
                   >
                     Cancelar
@@ -265,7 +246,7 @@ const TipoAlertaModal: React.FC<TipoAlertaModalProps> = ({ open, onClose, onSave
                       UUID: {ta.id}
                     </p>
                     <p className="text-sm text-zinc-600">
-                      {ta.condicao} {ta.valor} • Nível: {ta.nivel} • {ta.publica ? 'Público' : 'Privado'}
+                      {ta.condicao} {ta.limite} • Nível: {ta.nivel} • {ta.publica ? 'Público' : 'Privado'}
                     </p>
                   </div>
                   <div className="flex gap-4">

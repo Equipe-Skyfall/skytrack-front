@@ -1,12 +1,11 @@
 import React from 'react';
 import { ArrowLeft, BarChart2, Calculator, BookOpen } from 'lucide-react';
 import SecaoEducacao from './SecaoEducacao';
-import { useEducacao } from '../../hooks/educacao/useEducacao';
 import CardEducacao from './CardEducacao';
 
 
 const ConteudoEducacao: React.FC = () => {
-  const { voltarParaDashboard } = useEducacao();
+  // const { voltarParaDashboard } = useEducacao();
 
   const estatisticasDashboard = [
     {
@@ -105,7 +104,7 @@ const ConteudoEducacao: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b to-white font-poppins flex flex-col">
       <main className="flex-1 p-6 md:p-10 space-y-10 relative">
         <button
-          onClick={voltarParaDashboard}
+          onClick={() => window.history.back()}
           className="absolute top-6 left-6 text-black hover:text-zinc-600 font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md md:hidden bg-white border border-zinc-300"
           aria-label="Voltar para o Dashboard"
         >

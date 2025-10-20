@@ -1,11 +1,11 @@
 // components/navigation/Layout.tsx
 import React from 'react';
 import Sidebar from './Sidebar';
+import type { LayoutProps } from '../../interfaces/components';
+
 import Notification from '../notifications/Notification';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
+
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (

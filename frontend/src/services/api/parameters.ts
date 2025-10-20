@@ -30,7 +30,15 @@ export interface ParametersListResponse {
 
 async function request<T>(endpoint: string, options: RequestInit = {}, token?: string): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
-  console.log('🛠️ Parameters API Request:', { method: options.method || 'GET', url, token });
+
+  // Auto-fetch token from localStorage if not provided
+  const finalToken = token || (typeof window !== 'undefined' ? localStorage.getItem('skytrack_token') : null);
+
+  console.log('🛠️ Parameters API Request:', { 
+    method: options.method || 'GET', 
+    url, 
+    hasToken: !!finalToken 
+  });
 
   const headers: Record<string, string> = {
     'Accept': 'application/json',
@@ -40,10 +48,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}, token?: s
     headers['Content-Type'] = 'application/json';
   }
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (finalToken) {
+    headers['Authorization'] = `Bearer ${finalToken}`;
   } else {
-    console.warn('⚠️ No token provided for request:', url);
+    console.warn('⚠️ No token provided for parameters request:', url);
   }
 
   const config: RequestInit = {
@@ -90,7 +98,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}, token?: s
   return data;
 }
 
-export async function getParameters(page = 1, limit = 10, name?: string, token?: string): Promise<ParametersListResponse> {
+export async function getParameters(page = 1, limit = 10, name?: string, token?: string | null): Promise<ParametersListResponse> {
   const params = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
@@ -100,14 +108,14 @@ export async function getParameters(page = 1, limit = 10, name?: string, token?:
     params.append('name', name);
   }
 
-  return await request<ParametersListResponse>(`/api/parameters?${params}`, {}, token);
+  return await request<ParametersListResponse>(`/api/parameters?${params}`, {}, token || undefined);
 }
 
-export async function getParameterById(id: string, token?: string): Promise<ParameterDto> {
-  return await request<ParameterDto>(`/api/parameters/${id}`, {}, token);
+export async function getParameterById(id: string, token?: string | null): Promise<ParameterDto> {
+  return await request<ParameterDto>(`/api/parameters/${id}`, {}, token || undefined);
 }
 
-export async function getParametersByStationId(stationId: string, page = 1, limit = 10, name?: string, token?: string): Promise<ParametersListResponse> {
+export async function getParametersByStationId(stationId: string, page = 1, limit = 10, name?: string, token?: string | null): Promise<ParametersListResponse> {
   const params = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
@@ -117,27 +125,32 @@ export async function getParametersByStationId(stationId: string, page = 1, limi
     params.append('name', name);
   }
 
-  return await request<ParametersListResponse>(`/api/parameters/station/${stationId}?${params}`, {}, token);
+  return await request<ParametersListResponse>(`/api/parameters/station/${stationId}?${params}`, {}, token || undefined);
 }
 
-export async function createParameter(data: CreateParameterDto, token: string): Promise<ParameterDto> {
+export async function createParameter(data: CreateParameterDto, token?: string | null): Promise<ParameterDto> {
   return await request<ParameterDto>(
     '/api/parameters',
     {
       method: 'POST',
       body: JSON.stringify(data),
     },
-    token
+    token || undefined
   );
 }
 
-export async function updateParameter(id: string, data: UpdateParameterDto, token: string): Promise<ParameterDto> {
+export async function updateParameter(id: string, data: UpdateParameterDto, token?: string | null): Promise<ParameterDto> {
   return await request<ParameterDto>(
     `/api/parameters/${id}`,
     {
       method: 'PUT',
       body: JSON.stringify(data),
     },
-    token
+    token || undefined
   );
+}
+export async function deleteParameter(id: string, token?: string | null): Promise<void> {
+  return request<void>(`/api/parameters/${id}`, {
+    method: 'DELETE',
+  }, token || undefined);
 }

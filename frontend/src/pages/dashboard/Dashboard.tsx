@@ -1,5 +1,7 @@
 import React from 'react';
-import { StatusEstacoes, AlertasRecentes, estacoesStatus, alertasRecentes } from '../../components/dashboard';
+import StatusEstacoes from '../../components/dashboard/StatusEstacoes';
+import AlertasRecentes from '../../components/dashboard/AlertasRecentes';
+import { alertasRecentes, estacoesStatus } from '../../components/dashboard/mockData';
 
 const Dashboard: React.FC = () => {
   return (

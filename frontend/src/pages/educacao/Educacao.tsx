@@ -1,5 +1,5 @@
 import React from 'react';
-import ConteudoEducacao from '../../components/conteudoPaginas/educacao/ConteudoEducacao';
+import ConteudoEducacao from '../../components/education/ConteudoEducacao';
 
 const Educacao: React.FC = () => {
   return (

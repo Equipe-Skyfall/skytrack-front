@@ -1,18 +1,70 @@
-import React, { useState } from 'react';
-import SensorReadingsCards from '../../components/sensor-readings/SensorReadingsCards';
+import React, { useState, useEffect } from 'react';
+import SensorReadingsChart from '../../components/sensor-readings/SensorReadingsChart';
 import { TrendingUp, Activity, BarChart3 } from 'lucide-react';
+import type { Station } from '../../interfaces/stations';
 
 const SensorReadings: React.FC = () => {
   const [selectedStationId, setSelectedStationId] = useState<string>('');
+  const [stations, setStations] = useState<Station[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Station list - replace with real data from API if needed
-  const stations = [
-    { id: '', name: 'Todas as Estações' },
-    { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Estação Central' },
-    { id: '550e8400-e29b-41d4-a716-446655440001', name: 'Estação Norte' },
-    { id: '550e8400-e29b-41d4-a716-446655440002', name: 'Estação Sul' },
-    { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Estação Leste' },
-  ];
+  useEffect(() => {
+    const loadStations = async () => {
+      try {
+        setLoading(true);
+        
+        // TODO: Replace with real API call
+        // const response = await getStations();
+        // setStations([{ id: '', name: 'Todas as Estações' }, ...response.data]);
+        
+        // For now, provide basic empty state to avoid mock data
+        setStations([{ 
+          id: '', 
+          name: 'Todas as Estações', 
+          macAddress: '', 
+          latitude: 0, 
+          longitude: 0, 
+          address: null, 
+          description: null, 
+          status: 'INACTIVE' as const, 
+          createdAt: '', 
+          updatedAt: '',
+          statusColor: 'gray'
+        }]);
+      } catch (error) {
+        console.error('Erro ao carregar estações:', error);
+        setStations([{ 
+          id: '', 
+          name: 'Todas as Estações', 
+          macAddress: '', 
+          latitude: 0, 
+          longitude: 0, 
+          address: null, 
+          description: null, 
+          status: 'INACTIVE' as const, 
+          createdAt: '', 
+          updatedAt: '',
+          statusColor: 'gray'
+        }]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStations();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 font-poppins">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-96">
+            <div className="text-lg text-zinc-600">Carregando estações...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-poppins">
@@ -26,7 +78,7 @@ const SensorReadings: React.FC = () => {
             </h1>
           </div>
           <p className="text-gray-600 text-lg">
-            Visualize as leituras atuais dos sensores meteorológicos
+            Visualize e analise as leituras dos sensores meteorológicos em tempo real
           </p>
         </div>
 
@@ -51,48 +103,97 @@ const SensorReadings: React.FC = () => {
             <div className="flex items-center gap-2 ml-auto">
               <TrendingUp className="h-4 w-4 text-green-600" />
               <span className="text-sm text-gray-600">
-                {selectedStationId ? 'Dados específicos da estação' : 'Dados de todas as estações'}
+                {selectedStationId ? 'Dados específicos da estação' : 'Dados agregados de todas as estações'}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Sensor Readings Cards */}
-        <SensorReadingsCards 
-          stationId={selectedStationId || undefined}
-          autoRefresh={true}
-          refreshInterval={180} // 3 minutes
-        />
+        {/* Main Chart */}
+        <div className="mb-8">
+          <SensorReadingsChart 
+            stationId={selectedStationId || undefined}
+            height={500}
+            showControls={true}
+            chartType="line"
+            timeRange="24h"
+          />
+        </div>
+
+        {/* Quick Views Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Vista Rápida - 1 Hora</h2>
+            </div>
+            <SensorReadingsChart 
+              stationId={selectedStationId || undefined}
+              height={300}
+              showControls={false}
+              chartType="area"
+              timeRange="1h"
+            />
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-green-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Vista Rápida - 6 Horas</h2>
+            </div>
+            <SensorReadingsChart 
+              stationId={selectedStationId || undefined}
+              height={300}
+              showControls={false}
+              chartType="line"
+              timeRange="6h"
+            />
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-purple-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Vista Rápida - 7 Dias</h2>
+            </div>
+            <SensorReadingsChart 
+              stationId={selectedStationId || undefined}
+              height={300}
+              showControls={false}
+              chartType="bar"
+              timeRange="7d"
+            />
+          </div>
+        </div>
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <Activity className="h-6 w-6 text-blue-600" />
-              <h3 className="font-semibold text-blue-900">Dados Atuais</h3>
+              <h3 className="font-semibold text-blue-900">Dados em Tempo Real</h3>
             </div>
             <p className="text-blue-700 text-sm">
-              Os valores exibidos são as leituras mais recentes de cada sensor.
+              Os gráficos são atualizados automaticamente com as últimas leituras dos sensores.
             </p>
           </div>
 
           <div className="bg-green-50 border border-green-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <TrendingUp className="h-6 w-6 text-green-600" />
-              <h3 className="font-semibold text-green-900">Atualização Automática</h3>
+              <h3 className="font-semibold text-green-900">Múltiplos Sensores</h3>
             </div>
             <p className="text-green-700 text-sm">
-              Os dados são atualizados automaticamente a cada 3 minutos.
+              Visualize temperatura, umidade e pressão atmosférica em um único gráfico.
             </p>
           </div>
 
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <BarChart3 className="h-6 w-6 text-purple-600" />
-              <h3 className="font-semibold text-purple-900">Status das Estações</h3>
+              <h3 className="font-semibold text-purple-900">Controles Flexíveis</h3>
             </div>
             <p className="text-purple-700 text-sm">
-              Monitore o status online/offline de cada estação meteorológica.
+              Escolha o período, tipo de gráfico e quais sensores visualizar.
             </p>
           </div>
         </div>

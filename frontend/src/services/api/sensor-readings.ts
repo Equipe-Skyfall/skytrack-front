@@ -74,15 +74,6 @@ export async function getStationReadings(
   return getSensorReadings({ ...filters, stationId });
 }
 
-/**
- * Get sensor readings by MAC address
- */
-export async function getReadingsByMac(
-  macAddress: string, 
-  filters: Omit<ReadingsFilters, 'macEstacao'> = {}
-): Promise<SensorReadingsResponse> {
-  return getSensorReadings({ ...filters, macEstacao: macAddress });
-}
 
 /**
  * Get latest reading for a station - using main route and client-side filtering
@@ -166,9 +157,6 @@ export async function getAvailableSensorTypes(): Promise<SensorType[]> {
   }
 }
 
-/**
- * Generate a random color for sensors
- */
 function generateRandomColor(): string {
   const colors = [
     '#ef4444', // red
@@ -252,9 +240,7 @@ export function transformToChartData(
   };
 }
 
-/**
- * Transform readings to data points for custom charts
- */
+
 export function transformToDataPoints(readings: SensorReading[]): ChartDataPoint[] {
   return readings.map(reading => ({
     timestamp: reading.timestamp,
@@ -414,7 +400,6 @@ export async function searchReadings(searchParams: {
 export default {
   getSensorReadings,
   getStationReadings,
-  getReadingsByMac,
   getLatestReading,
   getAggregatedReadings,
   getAvailableSensorTypes,

@@ -4,7 +4,6 @@ import {
   getStationReadings,
   getLatestReading,
   getAvailableSensorTypes,
-  getDefaultSensorTypes,
   transformToChartData,
   aggregateReadingsByTimestamp,
   searchReadings,
@@ -52,7 +51,7 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
   // Data state
   const [readings, setReadings] = useState<SensorReading[]>([]);
   const [chartData, setChartData] = useState<SensorChart | null>(null);
-  const [sensorTypes, setSensorTypes] = useState<SensorType[]>(getDefaultSensorTypes());
+  const [sensorTypes, setSensorTypes] = useState<SensorType[]>([]);
   const [pagination, setPagination] = useState<SensorReadingsResponse['pagination'] | null>(null);
   const [latestReading, setLatestReading] = useState<SensorReading | null>(null);
   
@@ -108,8 +107,8 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
           sensorTypesCache: types
         }));
       } catch (err) {
-        console.warn('Using default sensor types');
-        setSensorTypes(getDefaultSensorTypes());
+        console.warn('Could not load sensor types from data');
+        setSensorTypes([]);
       }
     };
     

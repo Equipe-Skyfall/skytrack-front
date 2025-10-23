@@ -8,90 +8,26 @@ import type {
   SensorType
 } from '../../interfaces/sensor-readings';
 
-// Cache para evitar múltiplas requisições
-let cachedReadings: SensorReading[] | null = null;
-let cachedSensorTypes: SensorType[] | null = null;
-let lastFetchTime: number = 0;
-let ongoingRequest: Promise<SensorReading[]> | null = null; // Prevent multiple simultaneous requests
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
-
-/**
- * Clear cache manually
- */
-export function clearCache(): void {
-  cachedReadings = null;
-  cachedSensorTypes = null;
-  lastFetchTime = 0;
-  ongoingRequest = null;
-  console.log('🗑️ Cache cleared');
-}
-
-/**
- * Check if cache is still valid
- */
-function isCacheValid(): boolean {
-  return cachedReadings !== null && (Date.now() - lastFetchTime) < CACHE_DURATION;
-}
-
-/**
- * Fetch fresh data from API (internal function)
- */
-async function fetchFreshData(): Promise<SensorReading[]> {
-  if (ongoingRequest) {
-    console.log('⏳ Request already in progress, waiting...');
-    return ongoingRequest;
-  }
-
-  ongoingRequest = (async () => {
-    try {
-      console.log('🌐 Fetching fresh data from API');
-      const response = await apiClient.get('/api/sensor-readings');
-      const readings = response.data.data || response.data || [];
-      
-      // Update cache
-      cachedReadings = readings;
-      lastFetchTime = Date.now();
-      console.log(`💾 Cached ${readings.length} readings`);
-      
-      return readings;
-    } finally {
-      ongoingRequest = null;
-    }
-  })();
-
-  return ongoingRequest;
-}
-
-/**
- * Get sensor readings - using cache to avoid multiple requests
- */
 export async function getSensorReadings(filters: ReadingsFilters = {}): Promise<SensorReadingsResponse> {
-  console.log('📊 getSensorReadings called - checking cache first');
+
   
-  let readings: SensorReading[];
+  // Only use the available sensor-readings route without filters to avoid timeout
+  const response = await apiClient.get('/api/sensor-readings');
   
-  // Use cache if valid
-  if (isCacheValid()) {
-    console.log('💾 Using cached readings data');
-    readings = cachedReadings!;
-  } else {
-    readings = await fetchFreshData();
-  }
-  
-  let filteredReadings = [...readings]; // Create copy to avoid mutating cache
+  let readings: SensorReading[] = response.data.data || response.data || [];
   
   // Apply client-side filtering if needed
   if (filters.stationId) {
-    filteredReadings = filteredReadings.filter((reading: SensorReading) => reading.stationId === filters.stationId);
+    readings = readings.filter((reading: SensorReading) => reading.stationId === filters.stationId);
   }
   
   if (filters.macEstacao) {
-    filteredReadings = filteredReadings.filter((reading: SensorReading) => reading.macEstacao === filters.macEstacao);
+    readings = readings.filter((reading: SensorReading) => reading.macEstacao === filters.macEstacao);
   }
   
   // Apply date filtering on client side
   if (filters.startDate || filters.endDate) {
-    filteredReadings = filteredReadings.filter((reading: SensorReading) => {
+    readings = readings.filter((reading: SensorReading) => {
       const readingDate = new Date(reading.timestamp);
       
       if (filters.startDate && readingDate < new Date(filters.startDate)) {
@@ -107,8 +43,8 @@ export async function getSensorReadings(filters: ReadingsFilters = {}): Promise<
   }
   
   // Aggregate readings by timestamp to handle duplicate data
-  const aggregatedReadings = aggregateReadingsByTimestamp(filteredReadings);
-  console.log(`📊 Aggregated ${filteredReadings.length} readings into ${aggregatedReadings.length} unique timestamps`);
+  const aggregatedReadings = aggregateReadingsByTimestamp(readings);
+ 
   
   // Apply pagination on aggregated data
   const page = filters.page || 1;
@@ -190,27 +126,19 @@ export async function getAggregatedReadings(
   
   const response = await getSensorReadings(filters);
   
-  // The data is already aggregated by timestamp in getSensorReadings
-  // For time period aggregation, we would need more complex logic here
-  // For now, return the timestamp-aggregated data
+ 
   return response;
 }
 
 /**
- * Get available sensor types - using cache to avoid multiple requests
+ * Get available sensor types - dynamically from actual data
  */
 export async function getAvailableSensorTypes(): Promise<SensorType[]> {
   try {
-    // Use cached sensor types if available
-    if (cachedSensorTypes !== null) {
-      console.log('💾 Using cached sensor types');
-      return cachedSensorTypes;
-    }
+    console.log('📊 Getting available sensor types from actual data');
     
-    console.log('📊 Getting available sensor types from main readings');
-    
-    // Try to get sensor types from actual data
-    const response = await getSensorReadings({ limit: 10 });
+    // Get actual data to detect sensors
+    const response = await getSensorReadings({ limit: 50 });
     
     if (response.data && response.data.length > 0) {
       // Extract unique sensor keys from actual data
@@ -219,64 +147,69 @@ export async function getAvailableSensorTypes(): Promise<SensorType[]> {
         Object.keys(reading.valor).forEach(key => sensorKeys.add(key));
       });
       
-      // Map to sensor types with defaults
-      const detectedTypes: SensorType[] = Array.from(sensorKeys).map(key => {
-        const defaultType = getDefaultSensorTypes().find(t => t.key === key);
-        return defaultType || {
-          key,
-          label: key.charAt(0).toUpperCase() + key.slice(1),
-          unit: '',
-          color: '#6b7280',
-          enabled: true
-        };
-      });
+      // Generate sensor types dynamically with random colors
+      const detectedTypes: SensorType[] = Array.from(sensorKeys).map(key => 
+        generateSensorTypeFromKey(key)
+      );
       
-      console.log('📊 Detected sensor types from data:', detectedTypes.map(t => t.key));
-      
-      // Cache the sensor types
-      cachedSensorTypes = detectedTypes;
-      
+      console.log('📊 Detected sensor types from data:', detectedTypes.map(t => `${t.key} (${t.label})`));
       return detectedTypes;
     }
     
-    const defaultTypes = getDefaultSensorTypes();
-    cachedSensorTypes = defaultTypes;
-    return defaultTypes;
+    // If no data available, return empty array instead of mocked data
+    console.warn('No sensor data available, returning empty sensor types');
+    return [];
   } catch (error) {
-    console.warn('Could not fetch sensor types from data, using defaults');
-    const defaultTypes = getDefaultSensorTypes();
-    cachedSensorTypes = defaultTypes;
-    return defaultTypes;
+    console.error('Error fetching sensor types from data:', error);
+    // Return empty array instead of fallback to mocked data
+    return [];
   }
 }
 
 /**
- * Default sensor types configuration
+ * Generate a random color for sensors
  */
-export function getDefaultSensorTypes(): SensorType[] {
-  return [
-    {
-      key: 'temperatura',
-      label: 'Temperatura',
-      unit: '°C',
-      color: '#ef4444', // red
-      enabled: true,
-    },
-    {
-      key: 'umidade',
-      label: 'Umidade',
-      unit: '%',
-      color: '#3b82f6', // blue
-      enabled: true,
-    },
-    {
-      key: 'chuva',
-      label: 'Chuva',
-      unit: 'mm',
-      color: '#10b981', // green
-      enabled: true,
-    },
+function generateRandomColor(): string {
+  const colors = [
+    '#ef4444', // red
+    '#3b82f6', // blue
+    '#10b981', // green
+    '#f59e0b', // yellow
+    '#8b5cf6', // purple
+    '#06b6d4', // cyan
+    '#f97316', // orange
+    '#84cc16', // lime
+    '#ec4899', // pink
+    '#6366f1', // indigo
+    '#14b8a6', // teal
+    '#f43f5e', // rose
+    '#a855f7', // violet
+    '#22c55e', // emerald
+    '#eab308', // amber
+    '#64748b', // slate
   ];
+  
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+/**
+ * Generate sensor type configuration from sensor key
+ */
+function generateSensorTypeFromKey(key: string): SensorType {
+  // NO MOCKED DATA - completely dynamic
+  // Just capitalize the first letter of the key as label
+  const label = key.charAt(0).toUpperCase() + key.slice(1);
+  
+  // No predefined units - leave empty for user to see raw sensor names
+  const unit = '';
+
+  return {
+    key,
+    label,
+    unit,
+    color: generateRandomColor(),
+    enabled: true,
+  };
 }
 
 /**
@@ -485,11 +418,9 @@ export default {
   getLatestReading,
   getAggregatedReadings,
   getAvailableSensorTypes,
-  getDefaultSensorTypes,
   transformToChartData,
   transformToDataPoints,
   aggregateReadingsByTimestamp,
   getReadingsByDateRange,
   searchReadings,
-  clearCache,
 };

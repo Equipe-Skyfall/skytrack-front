@@ -11,10 +11,12 @@ const Dashboard: React.FC = () => {
         <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-800 tracking-tight">
           Dashboard
         </h1>
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <StatusEstacoes estacoes={estacoesStatus} />
           <AlertasRecentes alertas={alertasRecentes} />
         </div>
+        
         <div className="mt-6">
           <Charts />
         </div>

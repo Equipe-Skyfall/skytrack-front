@@ -1,24 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { loginUser, logoutUser, getUserProfile } from '../services/api/auth';
+import { loginUser, logoutUser, getUserProfile } from '../../services/api/auth';
+import type { User } from '../../interfaces/auth';
 
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: 'ADMIN' | 'USER';
-}
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const useAuthService = () => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -45,7 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           try {
             const userData = JSON.parse(storedUser);
             setUser(userData);
-            currentUser = userData; // Update local reference
+            currentUser = userData;
           } catch (parseError) {
             console.error('Error parsing stored user data:', parseError);
             localStorage.removeItem('skytrack_user');
@@ -77,12 +62,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUser(userData);
           localStorage.setItem('skytrack_user', JSON.stringify(userData));
         } catch (error) {
-          // Only clear user data on explicit auth failure
-          if (error instanceof Error && error.message.includes('401')) {
-            throw error;
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem('skytrack_user');
+          localStorage.removeItem('skytrack_token');
+          if (adminRoutes.includes(location.pathname)) {
+            navigate('/login', { replace: true });
           }
-          // For other errors (network, server), keep stored user data
-          return;
         }
       } catch (error) {
         setUser(null);
@@ -106,8 +92,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       setUser(newUser);
       setToken(newToken);
-      
-      // Store user data and token in localStorage
       localStorage.setItem('skytrack_user', JSON.stringify(newUser));
       localStorage.setItem('skytrack_token', newToken);
 
@@ -122,33 +106,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await logoutUser();
     } catch (error) {
       // Mesmo com erro, limpa o estado local
+      console.warn('Erro no logout:', error);
     }
 
     setUser(null);
     setToken(null);
-    // Clear localStorage on logout
     localStorage.removeItem('skytrack_user');
     localStorage.removeItem('skytrack_token');
     navigate('/login', { replace: true });
   };
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
-      {isCheckingAuth ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg text-zinc-600">Carregando...</div>
-        </div>
-      ) : (
-        children
-      )}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
-  }
-  return context;
+  return {
+    user,
+    token,
+    login,
+    logout,
+    isCheckingAuth,
+  };
 };

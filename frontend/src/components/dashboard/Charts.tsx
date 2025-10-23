@@ -15,10 +15,12 @@ import {
 } from 'recharts';
 import { TrendingUp, Thermometer, Droplets, CloudRain } from 'lucide-react';
 import useSensorReadings from '../../hooks/sensor-readings/useSensorReadings';
+import { useStations } from '../../hooks/stations/useStations';
 
 const Charts: React.FC = () => {
   const [activeChart, setActiveChart] = useState<'line' | 'area' | 'bar'>('line');
   const [selectedSensors, setSelectedSensors] = useState<Set<string>>(new Set());
+  const [selectedStationId, setSelectedStationId] = useState<string>('');
 
   const {
     readings,
@@ -27,7 +29,12 @@ const Charts: React.FC = () => {
     error,
     hasData,
     loadReadings,
+    loadStationReadings,
   } = useSensorReadings();
+
+
+  // Stations hook for dropdown
+  const { stations, loading: stationsLoading } = useStations();
 
   // Initialize selected sensors based on available sensor types
   useEffect(() => {
@@ -36,6 +43,23 @@ const Charts: React.FC = () => {
       setSelectedSensors(defaultSelected);
     }
   }, [sensorTypes]);
+
+  // When the selected station changes, reload readings for that station
+  useEffect(() => {
+    // If no station selected, load global readings
+    const load = async () => {
+      if (!selectedStationId) {
+        await loadReadings();
+      } else {
+        // loadStationReadings is provided by the hook
+        if (typeof loadStationReadings === 'function') {
+          await loadStationReadings(selectedStationId);
+        }
+      }
+    };
+
+    load();
+  }, [selectedStationId]);
 
   // Transform readings to chart data
   const chartData = readings.map(reading => {
@@ -293,37 +317,54 @@ const Charts: React.FC = () => {
             {hasData ? `${readings.length} leituras` : 'Aguardando dados...'}
           </p>
         </div>
-        <div className="flex bg-gray-100 rounded-lg p-1">
-          <button
-            onClick={() => setActiveChart('line')}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              activeChart === 'line'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            }`}
-          >
-            Linha
-          </button>
-          <button
-            onClick={() => setActiveChart('area')}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              activeChart === 'area'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            }`}
-          >
-            Área
-          </button>
-          <button
-            onClick={() => setActiveChart('bar')}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              activeChart === 'bar'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            }`}
-          >
-            Barras
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setActiveChart('line')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                activeChart === 'line'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              Linha
+            </button>
+            <button
+              onClick={() => setActiveChart('area')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                activeChart === 'area'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              Área
+            </button>
+            <button
+              onClick={() => setActiveChart('bar')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                activeChart === 'bar'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              Barras
+            </button>
+          </div>
+
+          {/* Station selector */}
+          <div>
+            <label className="sr-only">Selecionar estação</label>
+            <select
+              value={selectedStationId}
+              onChange={(e) => setSelectedStationId(e.target.value)}
+              className="border border-gray-200 rounded-md bg-white text-sm p-2"
+            >
+              <option value="">{stationsLoading ? 'Carregando estações...' : 'Todas as estações'}</option>
+              {stations && stations.map(st => (
+                <option key={st.id} value={st.id}>{st.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

@@ -1,16 +1,18 @@
+// estacaoCard.tsx
 import React, { useState, useEffect } from "react";
-import { MapPin, Wifi, Activity, Plus, Settings, Trash2 } from 'lucide-react';
+import { MapPin, Wifi, Activity, Plus, Settings, Trash2, History } from 'lucide-react';
 import ModalCadastroEstacao from "../modals/cadastroEstacaoModal";
 import ModalEdicaoEstacao from "../modals/modalEdicaoEstacao";
 import ModalExcluirEstacao from "../modals/modalExcluirEstacao";
+import ModalHistoricoEstacao from "../modals/ModalHistoricoEstacao";
 import { useAuth } from "../../context/AuthContext";
 import Pagination from "../pagination/pagination";
-import type { 
-  PaginationData, 
-  StationsListResponse, 
-  Station, 
-  StationFormData, 
-  EstacaoCardProps 
+import type {
+  PaginationData,
+  StationsListResponse,
+  Station,
+  StationFormData,
+  EstacaoCardProps
 } from '../../interfaces/stations';
 
 const API_URL = 'https://sky-track-backend.vercel.app/api/stations';
@@ -21,65 +23,87 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
   onDeleteClick,
   isUserLoggedIn,
 }) => {
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+
   const displayStatus = {
     ACTIVE: "Ativo",
     INACTIVE: "Inativo",
   };
+
   return (
-    <div className="bg-white rounded-xl border border-zinc-300 p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-zinc-100 rounded-lg p-2">
-            <MapPin className="h-5 w-5 text-zinc-700" />
+    <>
+      <div className="bg-white rounded-xl border border-zinc-300 p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-zinc-100 rounded-lg p-2">
+              <MapPin className="h-5 w-5 text-zinc-700" />
+            </div>
+            <h3 className="text-lg font-bold text-zinc-800">{station.name}</h3>
           </div>
-          <h3 className="text-lg font-bold text-zinc-800">{station.name}</h3>
+          <div className={`px-3 py-1 rounded-full text-xs font-semibold ${station.status === 'ACTIVE' ? 'bg-lime-500 text-white' : 'bg-red-500 text-white'
+            }`}>
+            {displayStatus[station.status] || station.status}
+          </div>
         </div>
-        <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-          station.status === 'ACTIVE' ? 'bg-lime-500 text-white' : 'bg-red-500 text-white'
-        }`}>
-          {displayStatus[station.status] || station.status}
+        <div className="bg-zinc-100 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-sm text-zinc-600">
+            <MapPin className="h-4 w-4" />
+            <span>{station.address || 'Endereço não informado'}</span>
+          </div>
         </div>
-      </div>
-      <div className="bg-zinc-100 rounded-lg p-3">
         <div className="flex items-center gap-2 text-sm text-zinc-600">
-          <MapPin className="h-4 w-4" />
-          <span>{station.address || 'Endereço não informado'}</span>
+          <Wifi className="h-4 w-4" />
+          <span className="font-mono">MAC: {station.macAddress || 'Não configurado'}</span>
         </div>
-      </div>
-      <div className="flex items-center gap-2 text-sm text-zinc-600">
-        <Wifi className="h-4 w-4" />
-        <span className="font-mono">MAC: {station.macAddress || 'Não configurado'}</span>
-      </div>
-      <div className="flex items-center gap-2 text-sm text-zinc-600">
-        <Activity className="h-4 w-4" />
-        <span className="font-mono">Coords: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}</span>
-      </div>
-      <p className="text-sm text-zinc-600">
-        <strong>Descrição:</strong> {station.description || 'Sem descrição'}
-      </p>
-      <div className="text-xs text-zinc-500">
-        Criado: {new Date(station.createdAt).toLocaleDateString("pt-BR")} | 
-        Atualizado: {new Date(station.updatedAt).toLocaleDateString("pt-BR")}
-      </div>
-      {isUserLoggedIn && (
-        <div className="flex justify-center gap-4 pt-4 border-t border-zinc-200">
-          <button
-            onClick={onConfigurarClick}
-            className="bg-white border border-zinc-400 rounded-lg py-2 px-10 flex items-center justify-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
-          >
-            <Settings className="h-5 w-5" />
-            Configurar
-          </button>
-          <button
-            onClick={onDeleteClick}
-            className="bg-red-500 text-white rounded-lg py-2 px-10 flex items-center justify-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
-          >
-            <Trash2 className="h-5 w-5" />
-            Excluir
-          </button>
+        <div className="flex items-center gap-2 text-sm text-zinc-600">
+          <Activity className="h-4 w-4" />
+          <span className="font-mono">Coords: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}</span>
         </div>
-      )}
-    </div>
+        <p className="text-sm text-zinc-600">
+          <strong>Descrição:</strong> {station.description || 'Sem descrição'}
+        </p>
+        <div className="text-xs text-zinc-500">
+          Criado: {new Date(station.createdAt).toLocaleDateString("pt-BR")} |
+          Atualizado: {new Date(station.updatedAt).toLocaleDateString("pt-BR")}
+        </div>
+        {isUserLoggedIn && (
+          <div className="flex justify-center gap-4 pt-4 border-t border-zinc-200">
+            {/* Botão de Histórico - NOVO */}
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="bg-blue-500 text-white rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold hover:bg-blue-600 transition-colors duration-300 shadow-sm cursor-pointer"
+            >
+              <History className="h-5 w-5" />
+              Histórico
+            </button>
+
+            <button
+              onClick={onConfigurarClick}
+              className="bg-white border border-zinc-400 rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
+            >
+              <Settings className="h-5 w-5" />
+              Configurar
+            </button>
+            <button
+              onClick={onDeleteClick}
+              className="bg-red-500 text-white rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
+            >
+              <Trash2 className="h-5 w-5" />
+              Excluir
+            </button>
+          </div>
+        )}
+      </div>
+
+     
+      <ModalHistoricoEstacao
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        stationId={station.id}
+        stationName={station.name}
+        stationMac={station.macAddress || undefined} 
+      />
+    </>
   );
 };
 
@@ -162,8 +186,8 @@ const Estacao: React.FC = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || `Erro ao salvar: ${response.status}`);
       }
-  setIsModalOpen(false);
-  await fetchStations(currentPage);
+      setIsModalOpen(false);
+      await fetchStations(currentPage);
     } catch (error: any) {
       console.error("Erro ao criar estação:", error);
       alert(`Erro ao salvar estação: ${error.message}`);
@@ -219,8 +243,8 @@ const Estacao: React.FC = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || `Erro ao editar: ${response.status}`);
       }
-  setEditingStation(null);
-  await fetchStations(currentPage);
+      setEditingStation(null);
+      await fetchStations(currentPage);
     } catch (error: any) {
       console.error("Erro ao editar estação:", error);
       alert(`Erro ao salvar alteração: ${error.message}`);

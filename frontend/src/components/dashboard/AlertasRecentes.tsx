@@ -1,5 +1,5 @@
 import React from 'react';
-import type { AlertasRecentesProps, NivelAlerta } from './types';
+import type { AlertasRecentesProps, NivelAlerta } from '../../interfaces/dashboard';
 
 const AlertaBadge: React.FC<{ nivel: NivelAlerta }> = ({ nivel }) => {
   const getNivelConfig = (nivel: NivelAlerta) => {

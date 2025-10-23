@@ -86,4 +86,12 @@ export async function deleteStation(id: string, token?: string | null) {
   await request(`/api/stations/${id}`, { method: 'DELETE' }, token || undefined);
 }
 
-export default { getStations, getStation, createStation, updateStation, deleteStation };
+// Helper function to add UI-specific properties to station data
+export function processStationData(station: StationDto): Station {
+  return {
+    ...station,
+    statusColor: station.status === 'ACTIVE' ? 'bg-lime-500 text-white' : 'bg-red-500 text-white'
+  };
+}
+
+export default { getStations, getStation, createStation, updateStation, deleteStation, processStationData };

@@ -58,7 +58,6 @@ const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
         }
     }, [stationToEdit, isOpen]);
 
-
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
@@ -72,7 +71,6 @@ const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSubmit(formData);
-
     };
 
     const handleClose = () => {
@@ -105,7 +103,6 @@ const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
 
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                         <div className="mb-3 md:col-span-2">
                             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
                                 Nome da Estação

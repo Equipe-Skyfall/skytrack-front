@@ -1,135 +1,397 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
   BarChart,
   Bar,
   XAxis,
   YAxis,
-  Tooltip,
   CartesianGrid,
-  LineChart,
-  Line,
-  AreaChart,
-  Area
+  Tooltip,
+  Legend,
 } from 'recharts';
-
-import { chuvaPorDia, temperaturaMediaPorDia, ventoPorDia } from './mockChartData';
-import type { ChuvaDia, TemperaturaDia, VentoDia } from './mockChartData';
-import './charts-neon.css';
-
-const numberFormat = (value: number, suffix = '') => `${value.toFixed(1)}${suffix}`;
-
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0];
-    return (
-      <div className="bg-white p-2 rounded shadow text-sm border border-gray-200">
-        <div className="font-medium text-gray-700">{label}</div>
-        <div className="text-gray-600">{data.name || data.dataKey}: <span className="font-semibold text-gray-900">{data.value}</span></div>
-      </div>
-    );
-  }
-  return null;
-};
-
+import { TrendingUp, Thermometer, Droplets, CloudRain } from 'lucide-react';
+import useSensorReadings from '../../hooks/sensor-readings/useSensorReadings';
 
 const Charts: React.FC = () => {
-  const totalChuva = chuvaPorDia.reduce((s: number, c: ChuvaDia) => s + c.mm, 0);
-  const mediaTemp = temperaturaMediaPorDia.reduce((s: number, t: TemperaturaDia) => s + t.media, 0) / temperaturaMediaPorDia.length;
-  const mediaVento = ventoPorDia.reduce((s: number, v: VentoDia) => s + v.velocidadeMedia, 0) / ventoPorDia.length;
+  const [activeChart, setActiveChart] = useState<'line' | 'area' | 'bar'>('line');
+  const [selectedSensors, setSelectedSensors] = useState<Set<string>>(new Set());
+
+  const {
+    readings,
+    sensorTypes,
+    loading,
+    error,
+    hasData,
+    loadReadings,
+  } = useSensorReadings();
+
+  // Initialize selected sensors based on available sensor types
+  useEffect(() => {
+    if (sensorTypes.length > 0) {
+      const defaultSelected = new Set(sensorTypes.map(type => type.key));
+      setSelectedSensors(defaultSelected);
+    }
+  }, [sensorTypes]);
+
+  // Transform readings to chart data
+  const chartData = readings.map(reading => {
+    const timestamp = new Date(reading.timestamp);
+    const timeLabel = timestamp.toLocaleTimeString('pt-BR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+
+    const dataPoint: any = {
+      time: timeLabel,
+      timestamp: reading.timestamp,
+    };
+
+    // Add all sensor values dynamically
+    Object.keys(reading.valor).forEach(key => {
+      dataPoint[key] = reading.valor[key] || 0;
+    });
+
+    return dataPoint;
+  });
+
+  const toggleSensor = (sensor: string) => {
+    const newSelection = new Set(selectedSensors);
+    if (newSelection.has(sensor)) {
+      newSelection.delete(sensor);
+    } else {
+      newSelection.add(sensor);
+    }
+    setSelectedSensors(newSelection);
+  };
+
+  const getSensorConfig = (sensorKey: string) => {
+    const sensorType = sensorTypes.find(type => type.key === sensorKey);
+    
+    if (sensorType) {
+      return {
+        key: sensorType.key,
+        name: sensorType.label,
+        color: sensorType.color,
+        unit: sensorType.unit,
+        icon: getSensorIcon(sensorKey)
+      };
+    }
+
+    // Fallback for unknown sensors
+    return {
+      key: sensorKey,
+      name: sensorKey.charAt(0).toUpperCase() + sensorKey.slice(1),
+      color: '#6b7280',
+      unit: '',
+      icon: <TrendingUp className="h-4 w-4" />
+    };
+  };
+
+  const getSensorIcon = (sensorKey: string) => {
+    const iconMap: { [key: string]: React.ReactElement } = {
+      temperatura: <Thermometer className="h-4 w-4" />,
+      temperature: <Thermometer className="h-4 w-4" />,
+      umidade: <Droplets className="h-4 w-4" />,
+      humidity: <Droplets className="h-4 w-4" />,
+      chuva: <CloudRain className="h-4 w-4" />,
+      rain: <CloudRain className="h-4 w-4" />,
+    };
+    
+    return iconMap[sensorKey] || <TrendingUp className="h-4 w-4" />;
+  };
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200 min-w-40">
+          <div className="font-medium text-gray-700 mb-2">{label}</div>
+          {payload.map((entry: any, index: number) => {
+            const config = getSensorConfig(entry.dataKey);
+            return (
+              <div key={index} className="flex items-center justify-between text-sm mb-1">
+                <span className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: entry.color }}
+                  />
+                  {config?.name}:
+                </span>
+                <span className="font-semibold text-gray-900 ml-2">
+                  {entry.value.toFixed(1)}{config?.unit}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderChart = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="flex items-center justify-center h-96">
+          <div className="text-red-400 text-center">
+            <TrendingUp className="h-12 w-12 mx-auto mb-2" />
+            <p>Erro ao carregar dados: {error}</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Show loading spinner while data is being fetched
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-96">
+          <div className="text-gray-400 text-center">
+            <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin mx-auto mb-2"></div>
+            <p>Carregando dados...</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Only show "no data" message AFTER loading is complete
+    if (!loading && !hasData) {
+      return (
+        <div className="flex items-center justify-center h-96">
+          <div className="text-gray-400 text-center">
+            <TrendingUp className="h-12 w-12 mx-auto mb-2" />
+            <p>Nenhum dado disponível</p>
+          </div>
+        </div>
+      );
+    }
+
+    const commonProps = {
+      data: chartData,
+      margin: { top: 20, right: 30, left: 20, bottom: 5 },
+    };
+
+    const renderSensorLines = () => {
+      return Array.from(selectedSensors).map(sensor => {
+        const config = getSensorConfig(sensor);
+        if (!config) return null;
+
+        if (activeChart === 'area') {
+          return (
+            <Area
+              key={sensor}
+              type="monotone"
+              dataKey={config.key}
+              stroke={config.color}
+              fill={config.color}
+              fillOpacity={0.3}
+              strokeWidth={2}
+              name={config.name}
+              className="chart-line-glow"
+            />
+          );
+        } else if (activeChart === 'bar') {
+          return (
+            <Bar
+              key={sensor}
+              dataKey={config.key}
+              fill={config.color}
+              name={config.name}
+              className="chart-bar-glow"
+            />
+          );
+        } else {
+          return (
+            <Line
+              key={sensor}
+              type="monotone"
+              dataKey={config.key}
+              stroke={config.color}
+              strokeWidth={3}
+              dot={{ fill: config.color, strokeWidth: 2, r: 4 }}
+              name={config.name}
+              className="chart-line-glow"
+            />
+          );
+        }
+      });
+    };
+
+    const ChartComponent = activeChart === 'area' ? AreaChart : activeChart === 'bar' ? BarChart : LineChart;
+
+    return (
+      <ChartComponent {...commonProps}>
+        {activeChart === 'area' && (
+          <defs>
+            <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#ff6b6b" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#ff6b6b" stopOpacity={0.1}/>
+            </linearGradient>
+            <linearGradient id="colorHum" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#4ecdc4" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#4ecdc4" stopOpacity={0.1}/>
+            </linearGradient>
+            <linearGradient id="colorPres" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#45b7d1" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#45b7d1" stopOpacity={0.1}/>
+            </linearGradient>
+          </defs>
+        )}
+        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+        <XAxis dataKey="time" tick={{ fill: '#6b7280', fontSize: 12 }} />
+        <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} />
+        <Tooltip content={<CustomTooltip />} />
+        <Legend />
+        {renderSensorLines()}
+      </ChartComponent>
+    );
+  };
+
+  // Calculate statistics
+  const getStats = () => {
+    if (!hasData) return null;
+
+    const stats: { [key: string]: { current: number, avg: number } } = {};
+    
+    sensorTypes.forEach(sensorType => {
+      const sensorKey = sensorType.key;
+      const values = chartData.map(d => d[sensorKey] as number).filter(v => v > 0);
+      if (values.length > 0) {
+        stats[sensorKey] = {
+          current: values[values.length - 1] || 0,
+          avg: values.reduce((sum, val) => sum + val, 0) / values.length,
+        };
+      }
+    });
+
+    return stats;
+  };
+
+  const stats = getStats();
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="neon-card neon-sky bg-gradient-to-br from-white to-sky-50 p-6 rounded-lg shadow-lg border border-gray-100">
-        <div className="chart-overlay-line overlay-sky" />
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">Velocidade média do vento (km/h)</h3>
-            <p className="text-sm text-gray-500">Média últimos 7 dias</p>
+    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <div className="flex items-center mb-2">
+            <TrendingUp className="w-5 h-5 text-gray-600 mr-2" />
+            <h2 className="text-lg font-semibold text-gray-800">
+              Dados Meteorológicos - Tempo Real
+            </h2>
           </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-500">Média</div>
-            <div className="text-xl font-bold text-sky-600">{numberFormat(mediaVento, ' km/h')}</div>
-          </div>
+          <p className="text-sm text-gray-500">
+            {hasData ? `${readings.length} leituras` : 'Aguardando dados...'}
+          </p>
         </div>
-        <div style={{ width: '100%', height: 420 }}>
-          <ResponsiveContainer>
-            <AreaChart data={ventoPorDia} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorVento" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#bfdbfe" stopOpacity={0.9} />
-                  <stop offset="95%" stopColor="#60a5fa" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e8f1fb" />
-              <XAxis dataKey="dia" tick={{ fill: '#6b7280' }} />
-              <YAxis tickFormatter={(v) => numberFormat(v)} tick={{ fill: '#6b7280' }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="velocidadeMedia" stroke="#0ea5e9" fillOpacity={1} fill="url(#colorVento)" animationDuration={900} className="neon-glow-sky pulse wave" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-      <div className="neon-card neon-blue bg-gradient-to-br from-white to-slate-50 p-6 rounded-lg shadow-lg border border-gray-100">
-        <div className="chart-overlay-line overlay-blue" />
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">Chuva (mm) por dia</h3>
-            <p className="text-sm text-gray-500">Total últimos 7 dias</p>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-500">Total</div>
-            <div className="text-xl font-bold text-blue-600">{numberFormat(totalChuva, ' mm')}</div>
-          </div>
-        </div>
-        <div style={{ width: '100%', height: 420 }}>
-          <ResponsiveContainer>
-            <BarChart data={chuvaPorDia} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorChu" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.9} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.2} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e6edf6" />
-              <XAxis dataKey="dia" tick={{ fill: '#6b7280' }} />
-              <YAxis tickFormatter={(v) => numberFormat(v)} tick={{ fill: '#6b7280' }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="mm" fill="url(#colorChu)" radius={[6, 6, 0, 0]} animationDuration={800} className="neon-glow-blue pulse" />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="flex bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => setActiveChart('line')}
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              activeChart === 'line'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            Linha
+          </button>
+          <button
+            onClick={() => setActiveChart('area')}
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              activeChart === 'area'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            Área
+          </button>
+          <button
+            onClick={() => setActiveChart('bar')}
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              activeChart === 'bar'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            Barras
+          </button>
         </div>
       </div>
-      <div className="neon-card neon-red bg-gradient-to-br from-white to-rose-50 p-6 rounded-lg shadow-lg border border-gray-100">
-        <div className="chart-overlay-line overlay-red" />
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">Temperatura média (ºC)</h3>
-            <p className="text-sm text-gray-500">Média últimos 7 dias</p>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-500">Média</div>
-            <div className="text-xl font-bold text-red-500">{numberFormat(mediaTemp, ' ºC')}</div>
-          </div>
-        </div>
-        <div style={{ width: '100%', height: 420 }}>
-          <ResponsiveContainer>
-            <LineChart data={temperaturaMediaPorDia} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#fecaca" stopOpacity={0.9} />
-                  <stop offset="95%" stopColor="#fb7185" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#fbeaea" />
-              <XAxis dataKey="dia" tick={{ fill: '#6b7280' }} />
-              <YAxis tickFormatter={(v) => numberFormat(v)} tick={{ fill: '#6b7280' }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="media" stroke="url(#colorTemp)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} animationDuration={1000} className="neon-glow-red pulse-slow" />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+
+      {/* Sensor Selection */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {sensorTypes.map(sensorType => {
+          const config = getSensorConfig(sensorType.key);
+          const isSelected = selectedSensors.has(sensorType.key);
+          
+          return (
+            <button
+              key={sensorType.key}
+              onClick={() => toggleSensor(sensorType.key)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-all ${
+                isSelected
+                  ? 'bg-white border-gray-300 text-gray-900 shadow-sm'
+                  : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300'
+              }`}
+            >
+              {config?.icon}
+              {config?.name}
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: isSelected ? config?.color : '#d1d5db' }}
+              />
+            </button>
+          );
+        })}
       </div>
+      
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+        <ResponsiveContainer width="100%" height={420}>
+          {renderChart()}
+        </ResponsiveContainer>
+      </div>
+      
+      {/* Statistics Cards */}
+      {stats && (
+        <div className="grid grid-cols-3 gap-4 mt-6">
+          {sensorTypes.map(sensorType => {
+            const config = getSensorConfig(sensorType.key);
+            const sensorStats = stats[sensorType.key];
+            
+            if (!config || !sensorStats) return null;
+
+            return (
+              <div 
+                key={sensorType.key}
+                className="bg-gray-50 rounded-lg p-4 border border-gray-100"
+              >
+                <div className="flex items-center space-x-2 mb-2">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: config.color }}
+                  />
+                  <span className="text-gray-700 text-sm font-medium">{config.name}</span>
+                </div>
+                <div className="text-gray-900 text-2xl font-bold">
+                  {sensorStats.current.toFixed(1)}{config.unit}
+                </div>
+                <div className="text-gray-500 text-xs">
+                  Média: {sensorStats.avg.toFixed(1)}{config.unit}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

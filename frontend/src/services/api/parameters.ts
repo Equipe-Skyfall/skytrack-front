@@ -1,5 +1,7 @@
 import { API_BASE } from './config';
 
+import apiClient from './axios';
+
 export interface ParameterDto {
   id: string;
   stationId: string;

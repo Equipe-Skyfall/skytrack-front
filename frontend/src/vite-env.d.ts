@@ -3,10 +3,12 @@
 // Do not export runtime values from here.
 
 interface ImportMetaEnv {
-	readonly VITE_API_URL: string;
-	readonly VITE_AUTH_URL: string;
+    readonly VITE_SENSOR_API_URL: string;
+    readonly VITE_SENSOR_READINGS_URL: string;
+    readonly VITE_API_URL: string;
+    readonly VITE_AUTH_URL: string;
 }
 
 interface ImportMeta {
-	readonly env: ImportMetaEnv;
+    readonly env: ImportMetaEnv;
 }

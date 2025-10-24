@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlerts } from '../alerts/useAlerts';
 import type { Alert, AlertFormData } from '../../interfaces/alerts';
+import { getHistoryAlerts } from '../../services/api/historyAlerts';
+import type { HistoryQuery } from '../../services/api/historyAlerts';
 
 const emptyForm: AlertFormData = { 
   stationId: '', 
@@ -14,7 +16,6 @@ export const useAlertasPage = () => {
   const { user } = useAuth();
   const {
     activeAlerts,
-    historyAlerts,
     loading,
     error,
     createAlert,
@@ -22,15 +23,18 @@ export const useAlertasPage = () => {
     deleteAlert,
   } = useAlerts();
   
-  // Estado da página
   const [editing, setEditing] = useState<Alert | null>(null);
   const [form, setForm] = useState<AlertFormData>(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showTipoAlertaModal, setShowTipoAlertaModal] = useState(false);
+  const [historyData, setHistoryData] = useState<Alert[]>([]);
+  const [historyPagination, setHistoryPagination] = useState<any>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyQuery, setHistoryQuery] = useState<HistoryQuery>({ page: 1, limit: 10 });
 
-  // Handlers da página
   const onEdit = (alert: Alert) => {
     setEditing(alert);
     setForm(alert);
@@ -75,6 +79,7 @@ export const useAlertasPage = () => {
     if (!deletingId) return;
     try {
       await deleteAlert(deletingId);
+      await loadHistory();
     } catch (err: any) {
       alert(err.message || 'Erro ao excluir');
     } finally {
@@ -86,6 +91,29 @@ export const useAlertasPage = () => {
     setDeletingId(null);
   };
 
+  // Load history from backend using the new service
+  const loadHistory = async (query: HistoryQuery = historyQuery) => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const res = await getHistoryAlerts(query);
+      // expected { data: Alert[], pagination: {...} }
+      setHistoryData((res && res.data) || []);
+      setHistoryPagination((res && res.pagination) || null);
+      setHistoryQuery(query);
+    } catch (err: any) {
+      setHistoryError(err.message || 'Erro ao carregar histórico');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // load initial history on mount
+    loadHistory(historyQuery);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const onOpenTipoAlertaModal = () => {
     setShowTipoAlertaModal(true);
   };
@@ -95,12 +123,16 @@ export const useAlertasPage = () => {
   };
 
   return {
-    // Estado dos dados
-    user,
-    activeAlerts,
-    historyAlerts,
-    loading,
-    error,
+  // Estado dos dados
+  user,
+  activeAlerts,
+  loading,
+  error,
+  // Histórico integrado via service
+  historyAlerts: historyData,
+  historyPagination,
+  historyLoading,
+  historyError,
     
     // Estado da UI
     editing,
@@ -120,6 +152,8 @@ export const useAlertasPage = () => {
     onCancelDelete,
     onOpenTipoAlertaModal,
     onCloseTipoAlertaModal,
+  // history helpers
+  loadHistory,
     
     // Computed values
     formTitle: editing ? 'Editar Alerta' : 'Novo Alerta',

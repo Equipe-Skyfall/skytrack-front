@@ -1,7 +1,8 @@
+// App.tsx (atualizado)
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { NotificationProvider } from './context/NotificationContext'; // Novo contexto
+import { NotificationProvider } from './context/NotificationContext';
 import Layout from './components/navigation/Layout';
 import Dashboard from './pages/dashboard/Dashboard';
 import Estacoes from './pages/estacoes/Estacoes';
@@ -10,6 +11,7 @@ import Educacao from './pages/educacao/Educacao';
 import Parametros from './pages/parametros/Parametros';
 import Perfil from './pages/perfil/Perfil';
 import Usuarios from './pages/usuarios/Usuarios';
+import Relatorios from './pages/relatorios/Relatorios';
 import Login from './pages/login/Login';
 import NotFoundPage from './components/notFound/notFoundPage';
 
@@ -22,13 +24,19 @@ const App: React.FC = () => {
   return (
     <Router>
       <AuthProvider>
-        <NotificationProvider> {/* Envolve as rotas com o NotificationProvider */}
+        <NotificationProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
             <Route path="/estacoes" element={<Layout><Estacoes /></Layout>} />
             <Route path="/alertas" element={<Layout><Alertas /></Layout>} />
             <Route path="/educacao" element={<Layout><Educacao /></Layout>} />
+            {/* RELATÓRIOS APENAS PARA ADMIN */}
+            <Route path="/relatorios" element={
+              <AdminRoute>
+                <Layout><Relatorios /></Layout>
+              </AdminRoute>
+            } />
             <Route path="/perfil" element={<Layout><Perfil /></Layout>} />
             <Route path="/parametros" element={
               <AdminRoute>

@@ -13,7 +13,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { TrendingUp, Thermometer, Droplets, CloudRain } from 'lucide-react';
+import { TrendingUp, Thermometer, Droplets, CloudRain, MapPin } from 'lucide-react';
 import useSensorReadings from '../../hooks/sensor-readings/useSensorReadings';
 import { useStations } from '../../hooks/stations/useStations';
 
@@ -352,18 +352,23 @@ const Charts: React.FC = () => {
           </div>
 
           {/* Station selector */}
-          <div>
+          <div className="relative">
             <label className="sr-only">Selecionar estação</label>
+            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
             <select
               value={selectedStationId}
               onChange={(e) => setSelectedStationId(e.target.value)}
-              className="border border-gray-200 rounded-md bg-white text-sm p-2"
+              className="appearance-none pl-10 pr-8 py-2 border border-gray-200 rounded-md bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
             >
               <option value="">{stationsLoading ? 'Carregando estações...' : 'Todas as estações'}</option>
               {stations && stations.map(st => (
                 <option key={st.id} value={st.id}>{st.name}</option>
               ))}
             </select>
+            {/* Caret */}
+            <svg className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
         </div>
       </div>

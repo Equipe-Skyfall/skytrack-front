@@ -3,9 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useAlerts } from '../alerts/useAlerts';
 import type { Alert, AlertFormData } from '../../interfaces/alerts';
 import { getHistoryAlerts } from '../../services/api/historyAlerts';
-import { getStation } from '../../services/api/stations';
-import { getParameterById } from '../../services/api/parameters';
-import { getTipoAlerta } from '../../services/api/tipo-alerta';
+// removed detail-related remote fetches (stations/parameters/tipo-alerta) — not needed after details removal
 import type { HistoryQuery } from '../../services/api/historyAlerts';
 
 const emptyForm: AlertFormData = { 
@@ -37,8 +35,7 @@ export const useAlertasPage = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [historyQuery, setHistoryQuery] = useState<HistoryQuery>({ page: 1, limit: 10 });
-  const [detailAlert, setDetailAlert] = useState<Alert | null>(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  // detail modal removed
 
   const onEdit = (alert: Alert) => {
     setEditing(alert);
@@ -123,39 +120,7 @@ export const useAlertasPage = () => {
     setShowTipoAlertaModal(false);
   };
 
-  const onOpenDetails = (a: Alert) => {
-    (async () => {
-      try {
-        const [stationRes, parameterRes, tipoRes] = await Promise.allSettled([
-          getStation(a.stationId),
-          getParameterById(a.parameterId),
-          getTipoAlerta(a.tipoAlertaId),
-        ]);
-
-        const stationName = stationRes.status === 'fulfilled' ? (stationRes.value.name || stationRes.value.macAddress || a.stationId) : a.stationId;
-        const parameterName = parameterRes.status === 'fulfilled' ? (parameterRes.value.name || parameterRes.value.id || a.parameterId) : a.parameterId;
-        const tipoName = tipoRes.status === 'fulfilled' ? (tipoRes.value.tipo || a.tipoAlertaId) : a.tipoAlertaId;
-
-        const enriched: any = {
-          ...a,
-          stationName,
-          parameterName,
-          tipoAlertaName: tipoName,
-        };
-
-        setDetailAlert(enriched);
-      } catch (e) {
-        setDetailAlert(a);
-      } finally {
-        setShowDetailModal(true);
-      }
-    })();
-  };
-
-  const onCloseDetails = () => {
-    setDetailAlert(null);
-    setShowDetailModal(false);
-  };
+  // details handlers removed
 
   return {
   user,
@@ -174,8 +139,7 @@ export const useAlertasPage = () => {
     deletingId,
     submitting,
     showTipoAlertaModal,
-    detailAlert,
-    showDetailModal,
+  // detailAlert, showDetailModal removed
     
 
     onEdit,
@@ -187,8 +151,7 @@ export const useAlertasPage = () => {
     onCancelDelete,
     onOpenTipoAlertaModal,
     onCloseTipoAlertaModal,
-    onOpenDetails,
-    onCloseDetails,
+  // onOpenDetails, onCloseDetails removed
   loadHistory,
     
     formTitle: editing ? 'Editar Alerta' : 'Novo Alerta',

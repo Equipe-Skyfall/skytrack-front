@@ -2,7 +2,6 @@ import { AlertTriangle, Settings, Trash2, MapPin, Clock } from 'lucide-react';
 import AlertForm from '../../components/alerts/AlertForm';
 import ConfirmDelete from '../../components/alerts/ConfirmDelete';
 import TipoAlertaModal from '../../components/modals/TipoAlertaModal';
-import AlertDetailModal from '../../components/modals/AlertDetailModal';
 import { useAuth } from '../../context/AuthContext';
 import { useAlertasPage } from '../../hooks/pages/useAlertasPage';
 
@@ -24,12 +23,9 @@ export default function AlertasContent() {
     // Modal state
     showTipoAlertaModal,
     deletingId,
-  detailAlert,
-  showDetailModal,
     
-    // Actions
-    onEdit,
-    onDelete,
+  // Actions
+  onDelete,
     onSubmit,
     onConfirmDelete,
     onCancelForm,
@@ -37,8 +33,7 @@ export default function AlertasContent() {
     onFormChange,
     onOpenTipoAlertaModal,
     onCloseTipoAlertaModal
-    ,onOpenDetails, onCloseDetails
-  } = useAlertasPage();
+  } = useAlertasPage(); 
 
   return (
     <div className="min-h-screen bg-white font-poppins flex">
@@ -102,13 +97,6 @@ export default function AlertasContent() {
                   {user && (
                     <div className="flex justify-center gap-4">
                       <button
-                        onClick={() => onEdit(a)}
-                        className="bg-white border border-zinc-400 rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
-                      >
-                        <Settings className="h-5 w-5" />
-                        Detalhes
-                      </button>
-                      <button
                         onClick={() => onDelete(a.id)}
                         className="bg-red-500 text-white rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
                       >
@@ -146,9 +134,9 @@ export default function AlertasContent() {
                         <h4 className="text-base font-semibold text-zinc-800 truncate">
                           {`Alerta ${h.parameterId}`}
                         </h4>
-                        <span className="bg-zinc-100 text-zinc-700 rounded-full px-2 py-1 text-xs font-semibold">
+                        { /* <span className="bg-zinc-100 text-zinc-700 rounded-full px-2 py-1 text-xs font-semibold">
                           Resolvido
-                        </span>
+                        </span>   */}
                       </div>
                       <div className="flex items-center gap-3 mt-2 text-sm text-zinc-500">
                         <span className="flex items-center gap-1 min-w-0 truncate">
@@ -201,7 +189,7 @@ export default function AlertasContent() {
             // Hook will automatically reload
           }}
         />
-        <AlertDetailModal open={showDetailModal} alert={detailAlert} onClose={onCloseDetails} />
+  {/* AlertDetailModal removed per request */}
       </main>
     </div>
   );

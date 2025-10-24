@@ -43,7 +43,7 @@ const Notification: React.FC = () => {
           </div>
         </div>,
         {
-          position: 'top-right',
+          position: 'bottom-right',
           autoClose: 6000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -91,7 +91,7 @@ const Notification: React.FC = () => {
   return (
     <>
       {/* Ícone de notificação limpo */}
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={handleOpenModal}
           className="relative group bg-slate-900 rounded-xl p-3 hover:bg-slate-800 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg"

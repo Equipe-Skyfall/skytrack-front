@@ -34,6 +34,8 @@ export const useAlertasPage = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [historyQuery, setHistoryQuery] = useState<HistoryQuery>({ page: 1, limit: 10 });
+  const [detailAlert, setDetailAlert] = useState<Alert | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const onEdit = (alert: Alert) => {
     setEditing(alert);
@@ -122,27 +124,37 @@ export const useAlertasPage = () => {
     setShowTipoAlertaModal(false);
   };
 
+  const onOpenDetails = (a: Alert) => {
+    setDetailAlert(a);
+    setShowDetailModal(true);
+  };
+
+  const onCloseDetails = () => {
+    setDetailAlert(null);
+    setShowDetailModal(false);
+  };
+
   return {
-  // Estado dos dados
   user,
   activeAlerts,
   loading,
   error,
-  // Histórico integrado via service
+
   historyAlerts: historyData,
   historyPagination,
   historyLoading,
   historyError,
     
-    // Estado da UI
     editing,
     form,
     showForm,
     deletingId,
     submitting,
     showTipoAlertaModal,
+    detailAlert,
+    showDetailModal,
     
-    // Handlers
+
     onEdit,
     onDelete,
     onSubmit,
@@ -152,10 +164,10 @@ export const useAlertasPage = () => {
     onCancelDelete,
     onOpenTipoAlertaModal,
     onCloseTipoAlertaModal,
-  // history helpers
+    onOpenDetails,
+    onCloseDetails,
   loadHistory,
     
-    // Computed values
     formTitle: editing ? 'Editar Alerta' : 'Novo Alerta',
   };
 };

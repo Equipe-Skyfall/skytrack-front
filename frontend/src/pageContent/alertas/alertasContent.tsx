@@ -162,14 +162,14 @@ export default function AlertasContent() {
                       </div>
                     </div>
                   </div>
-                  {user && (
+                  {/* {user && (
                     <button
                       onClick={() => onOpenDetails(h)}
                       className="bg-white border border-zinc-300 rounded-lg py-2 px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-50 transition-colors duration-200"
                     >
                       Ver Detalhes
                     </button>
-                  )}
+                  )} */}
                 </div>
               ))}
             </div>

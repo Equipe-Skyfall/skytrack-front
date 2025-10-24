@@ -34,15 +34,15 @@ const AlertDetailModal: React.FC<Props> = ({ open, alert, onClose }) => {
             </div>
             <div>
               <div className="text-xs text-zinc-500">Estação</div>
-              <div className="text-sm text-zinc-800">{alert.stationId}</div>
+              <div className="text-sm text-zinc-800">{(alert as any).stationName || alert.stationId}</div>
             </div>
             <div>
               <div className="text-xs text-zinc-500">Parâmetro</div>
-              <div className="text-sm text-zinc-800">{alert.parameterId}</div>
+              <div className="text-sm text-zinc-800">{(alert as any).parameterName || alert.parameterId}</div>
             </div>
             <div>
               <div className="text-xs text-zinc-500">Tipo de Alerta</div>
-              <div className="text-sm text-zinc-800">{alert.tipoAlertaId || '-'}</div>
+              <div className="text-sm text-zinc-800">{(alert as any).tipoAlertaName || alert.tipoAlertaId || '-'}</div>
             </div>
             <div>
               <div className="text-xs text-zinc-500">Medidas</div>

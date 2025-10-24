@@ -3,6 +3,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useAlerts } from '../alerts/useAlerts';
 import type { Alert, AlertFormData } from '../../interfaces/alerts';
 import { getHistoryAlerts } from '../../services/api/historyAlerts';
+import { getStation } from '../../services/api/stations';
+import { getParameterById } from '../../services/api/parameters';
+import { getTipoAlerta } from '../../services/api/tipo-alerta';
 import type { HistoryQuery } from '../../services/api/historyAlerts';
 
 const emptyForm: AlertFormData = { 
@@ -93,13 +96,11 @@ export const useAlertasPage = () => {
     setDeletingId(null);
   };
 
-  // Load history from backend using the new service
   const loadHistory = async (query: HistoryQuery = historyQuery) => {
     setHistoryLoading(true);
     setHistoryError(null);
     try {
       const res = await getHistoryAlerts(query);
-      // expected { data: Alert[], pagination: {...} }
       setHistoryData((res && res.data) || []);
       setHistoryPagination((res && res.pagination) || null);
       setHistoryQuery(query);
@@ -111,9 +112,7 @@ export const useAlertasPage = () => {
   };
 
   useEffect(() => {
-    // load initial history on mount
     loadHistory(historyQuery);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onOpenTipoAlertaModal = () => {
@@ -125,8 +124,32 @@ export const useAlertasPage = () => {
   };
 
   const onOpenDetails = (a: Alert) => {
-    setDetailAlert(a);
-    setShowDetailModal(true);
+    (async () => {
+      try {
+        const [stationRes, parameterRes, tipoRes] = await Promise.allSettled([
+          getStation(a.stationId),
+          getParameterById(a.parameterId),
+          getTipoAlerta(a.tipoAlertaId),
+        ]);
+
+        const stationName = stationRes.status === 'fulfilled' ? (stationRes.value.name || stationRes.value.macAddress || a.stationId) : a.stationId;
+        const parameterName = parameterRes.status === 'fulfilled' ? (parameterRes.value.name || parameterRes.value.id || a.parameterId) : a.parameterId;
+        const tipoName = tipoRes.status === 'fulfilled' ? (tipoRes.value.tipo || a.tipoAlertaId) : a.tipoAlertaId;
+
+        const enriched: any = {
+          ...a,
+          stationName,
+          parameterName,
+          tipoAlertaName: tipoName,
+        };
+
+        setDetailAlert(enriched);
+      } catch (e) {
+        setDetailAlert(a);
+      } finally {
+        setShowDetailModal(true);
+      }
+    })();
   };
 
   const onCloseDetails = () => {

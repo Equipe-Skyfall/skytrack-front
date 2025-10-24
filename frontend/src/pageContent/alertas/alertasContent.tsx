@@ -2,6 +2,7 @@ import { AlertTriangle, Settings, Trash2, MapPin, Clock } from 'lucide-react';
 import AlertForm from '../../components/alerts/AlertForm';
 import ConfirmDelete from '../../components/alerts/ConfirmDelete';
 import TipoAlertaModal from '../../components/modals/TipoAlertaModal';
+import AlertDetailModal from '../../components/modals/AlertDetailModal';
 import { useAuth } from '../../context/AuthContext';
 import { useAlertasPage } from '../../hooks/pages/useAlertasPage';
 
@@ -23,6 +24,8 @@ export default function AlertasContent() {
     // Modal state
     showTipoAlertaModal,
     deletingId,
+  detailAlert,
+  showDetailModal,
     
     // Actions
     onEdit,
@@ -34,6 +37,7 @@ export default function AlertasContent() {
     onFormChange,
     onOpenTipoAlertaModal,
     onCloseTipoAlertaModal
+    ,onOpenDetails, onCloseDetails
   } = useAlertasPage();
 
   return (
@@ -160,6 +164,7 @@ export default function AlertasContent() {
                   </div>
                   {user && (
                     <button
+                      onClick={() => onOpenDetails(h)}
                       className="bg-white border border-zinc-300 rounded-lg py-2 px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-50 transition-colors duration-200"
                     >
                       Ver Detalhes
@@ -196,6 +201,7 @@ export default function AlertasContent() {
             // Hook will automatically reload
           }}
         />
+        <AlertDetailModal open={showDetailModal} alert={detailAlert} onClose={onCloseDetails} />
       </main>
     </div>
   );

@@ -1,4 +1,4 @@
-import { AlertTriangle, Settings, Trash2 } from 'lucide-react';
+import { AlertTriangle, Settings, Trash2, MapPin, Clock } from 'lucide-react';
 import AlertForm from '../../components/alerts/AlertForm';
 import ConfirmDelete from '../../components/alerts/ConfirmDelete';
 import TipoAlertaModal from '../../components/modals/TipoAlertaModal';
@@ -119,7 +119,6 @@ export default function AlertasContent() {
           )}
         </div>
 
-        {/* History Section */}
         <div className="space-y-6">
           <h2 className="text-xl font-bold text-zinc-800 flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-zinc-700" />
@@ -132,29 +131,36 @@ export default function AlertasContent() {
               {historyAlerts.map(h => (
                 <div
                   key={h.id}
-                  className="bg-white rounded-xl border border-zinc-300 p-4 flex items-center justify-between shadow-md hover:shadow-lg transition-shadow duration-300 w-full"
+                  className="bg-white rounded-xl border border-zinc-300 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow duration-200 w-full"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="bg-zinc-100 rounded-lg p-2">
-                      <AlertTriangle className="h-5 w-5 text-zinc-700" />
+                    <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 flex items-center justify-center">
+                      <AlertTriangle className="h-6 w-6 text-zinc-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3">
                         <h4 className="text-base font-semibold text-zinc-800 truncate">
-                          Alerta {h.parameterId}
+                          {`Alerta ${h.parameterId}`}
                         </h4>
-                        <span className="bg-zinc-200 text-zinc-800 rounded-full px-2 py-1 text-xs font-semibold">
+                        <span className="bg-zinc-100 text-zinc-700 rounded-full px-2 py-1 text-xs font-semibold">
                           Resolvido
                         </span>
                       </div>
-                      <p className="text-sm text-zinc-600 truncate">
-                        {h.stationId} • {h.createdAt.toLocaleString()}
-                      </p>
+                      <div className="flex items-center gap-3 mt-2 text-sm text-zinc-500">
+                        <span className="flex items-center gap-1 min-w-0 truncate">
+                          <MapPin className="h-4 w-4" />
+                          <span className="truncate">{h.stationId}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          <span>{new Date(h.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
                   {user && (
                     <button
-                      className="bg-white border border-zinc-400 rounded-lg py-2 px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 cursor-pointer"
+                      className="bg-white border border-zinc-300 rounded-lg py-2 px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-50 transition-colors duration-200"
                     >
                       Ver Detalhes
                     </button>

@@ -1,7 +1,5 @@
 
 import React from 'react';
-import StatusEstacoes from '../../components/dashboard/StatusEstacoes';
-import AlertasRecentes from '../../components/dashboard/AlertasRecentes';
 import Charts from '../../components/dashboard/Charts';
 import { useStations } from '../../hooks/stations/useStations';
 import { useAlerts } from '../../hooks/alerts/useAlerts';

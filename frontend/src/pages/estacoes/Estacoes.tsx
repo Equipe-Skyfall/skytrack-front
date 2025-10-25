@@ -1,5 +1,6 @@
-import React from 'react';
-import Estacao from '../../components/station/estacaoCard';
+import React, { useState, useEffect } from 'react';
+import Estacao from '../../components/conteudoPaginas/estacao/EstacaoCard';
+import type { Station } from '../../interfaces/stations';
 
 const Estacoes: React.FC = () => {
   const [stations, setStations] = useState<Station[]>([]);

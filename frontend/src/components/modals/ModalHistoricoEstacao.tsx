@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Thermometer, Droplets, Gauge, AlertTriangle, RefreshCw, CloudRain, Wifi } from 'lucide-react';
-import { getSensorReadings, getAllSensorReadings, testSensorReadingsConnection } from '../../services/api/sensorReadings';
-import type { SensorReading, SensorReadingsResponse } from '../../interfaces/stations';
+import { getSensorReadings } from '../../services/api/sensorReadings';
+import type { SensorReading, SensorReadingsResponse } from '../../interfaces/sensor-readings';
 import Pagination from '../pagination/pagination';
 
 interface ModalHistoricoEstacaoProps {
@@ -43,9 +43,15 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
 
   const testConnection = async () => {
     console.log('🧪 Iniciando teste de conexão...');
-    const isConnected = await testSensorReadingsConnection();
-    setConnectionTested(true);
-    console.log('🧪 Resultado do teste:', isConnected ? 'CONECTADO' : 'FALHOU');
+    try {
+      // Try a tiny fetch to validate the sensor-readings endpoint
+      await getSensorReadings({ limit: 1 });
+      setConnectionTested(true);
+      console.log('🧪 Resultado do teste: CONECTADO');
+    } catch (err) {
+      setConnectionTested(false);
+      console.log('🧪 Resultado do teste: FALHOU', err);
+    }
   };
 
   const fetchReadings = async (page: number) => {
@@ -75,13 +81,13 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
           strategy = 'filtered';
           console.log('✅ Busca filtrada retornou dados:', response.data.length);
         } else {
-          // Se não retornou dados, busca todos
+          // Se não retornou dados, busca um conjunto maior sem filtros
           console.log('🔍 Busca filtrada não retornou dados, buscando todos...');
-          response = await getAllSensorReadings(page, 50);
+          response = await getSensorReadings({ page, limit: 50 });
         }
       } catch (filterError) {
         console.log('❌ Busca filtrada falhou, buscando todos os dados...');
-        response = await getAllSensorReadings(page, 50);
+        response = await getSensorReadings({ page, limit: 50 });
       }
 
       // Filtra os dados no frontend para mostrar apenas os da estação atual

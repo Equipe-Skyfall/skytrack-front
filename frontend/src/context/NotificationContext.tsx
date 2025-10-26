@@ -1,6 +1,7 @@
 // context/NotificationContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getAlerts } from '../services/api/alerts';
+import { useAuth } from './AuthContext';
 
 type Alert = {
   id: string;
@@ -26,6 +27,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { user } = useAuth();
 
   const loadAlerts = async () => {
     try {
@@ -38,17 +40,24 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }));
 
       setAlerts(newAlerts);
-      setUnreadCount(newAlerts.filter(a => !a.read).length);
+  setUnreadCount(newAlerts.filter((a: Alert) => !a.read).length);
     } catch (err) {
       console.error('Erro ao carregar alertas:', err);
     }
   };
 
   useEffect(() => {
+    // Only load alerts if a user is authenticated
+    if (!user) {
+      setAlerts([]);
+      setUnreadCount(0);
+      return;
+    }
+
     loadAlerts();
     const interval = setInterval(loadAlerts, 60000); // Polling a cada 60s
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   const markAllAsRead = () => {
     setAlerts(prev => prev.map(alert => ({ ...alert, read: true })));

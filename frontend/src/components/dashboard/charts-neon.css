@@ -1,0 +1,101 @@
+.neon-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.neon-glow {
+  filter: drop-shadow(0 0 8px rgba(59,130,246,0.6)) drop-shadow(0 0 20px rgba(59,130,246,0.35));
+}
+
+.neon-glow-red {
+  filter: drop-shadow(0 0 8px rgba(239,68,68,0.6)) drop-shadow(0 0 20px rgba(239,68,68,0.35));
+}
+
+.neon-glow-sky {
+  filter: drop-shadow(0 0 8px rgba(14,165,233,0.6)) drop-shadow(0 0 20px rgba(14,165,233,0.35));
+}
+
+.pulse {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0% {
+    filter: drop-shadow(0 0 6px rgba(99,102,241,0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(99,102,241,0.85));
+  }
+  100% {
+    filter: drop-shadow(0 0 6px rgba(99,102,241,0.45));
+  }
+}
+
+.pulse-slow {
+  animation: pulseGlow 4s infinite ease-in-out;
+}
+
+.neon-title {
+  text-shadow: 0 0 6px rgba(99,102,241,0.9), 0 0 12px rgba(99,102,241,0.6);
+}
+
+.chart-overlay-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  top: 68px;
+  background: linear-gradient(90deg, rgba(99,102,241,0.0), rgba(99,102,241,0.25), rgba(99,102,241,0.0));
+  animation: slide 3s linear infinite;
+  opacity: 0.7;
+}
+
+/* Neon color variants */
+.neon-card.neon-blue {
+  box-shadow: 0 8px 30px rgba(59,130,246,0.12), 0 0 40px rgba(59,130,246,0.06) inset;
+}
+.neon-card.neon-red {
+  box-shadow: 0 8px 30px rgba(239,68,68,0.12), 0 0 40px rgba(239,68,68,0.06) inset;
+}
+.neon-card.neon-sky {
+  box-shadow: 0 8px 30px rgba(14,165,233,0.12), 0 0 40px rgba(14,165,233,0.06) inset;
+}
+
+.neon-glow-blue {
+  filter: drop-shadow(0 0 10px rgba(59,130,246,0.7)) drop-shadow(0 0 26px rgba(59,130,246,0.35));
+}
+.neon-glow-red {
+  filter: drop-shadow(0 0 10px rgba(239,68,68,0.7)) drop-shadow(0 0 26px rgba(239,68,68,0.35));
+}
+.neon-glow-sky {
+  filter: drop-shadow(0 0 10px rgba(14,165,233,0.7)) drop-shadow(0 0 26px rgba(14,165,233,0.35));
+}
+
+.chart-overlay-line.overlay-blue {
+  background: linear-gradient(90deg, rgba(59,130,246,0.0), rgba(59,130,246,0.25), rgba(59,130,246,0.0));
+}
+.chart-overlay-line.overlay-red {
+  background: linear-gradient(90deg, rgba(239,68,68,0.0), rgba(239,68,68,0.25), rgba(239,68,68,0.0));
+}
+.chart-overlay-line.overlay-sky {
+  background: linear-gradient(90deg, rgba(14,165,233,0.0), rgba(14,165,233,0.25), rgba(14,165,233,0.0));
+}
+
+/* subtle wave animation for area path */
+.wave {
+  transform-origin: center;
+  animation: waveY 4s ease-in-out infinite;
+}
+
+@keyframes waveY {
+  0% { transform: translateY(0px); }
+  20% { transform: translateY(-12px); }
+  50% { transform: translateY(0px); }
+  80% { transform: translateY(10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

@@ -15,9 +15,8 @@ import {
 } from 'lucide-react';
 import { getStations } from '../../services/api/stations';
 import { getAlerts } from '../../services/api/alerts';
-import { getAllSensorReadings } from '../../services/api/sensorReadings';
+import { getSensorReadings } from '../../services/api/sensorReadings';
 import { getParameters } from '../../services/api/parameters';
-import type { StationDto } from '../../interfaces/stations';
 import type { Alert } from '../../interfaces/alerts';
 import type { SensorReading } from '../../interfaces/stations';
 
@@ -48,7 +47,7 @@ const Relatorios: React.FC = () => {
             const [stations, alerts, sensorReadings, parameters] = await Promise.all([
                 getStations(),
                 getAlerts(),
-                getAllSensorReadings(1, 1000), // Buscar mais dados para análise
+                getSensorReadings({ limit: 1000 }), // Buscar mais dados para análise
                 getParameters(1, 100)
             ]);
 

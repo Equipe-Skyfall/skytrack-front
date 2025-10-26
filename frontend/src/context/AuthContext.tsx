@@ -1,7 +1,8 @@
 
 import { useAuthService } from '../hooks/auth/useAuthService';
-import type { AuthContextType } from '../interfaces/auth';
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { updateUser as updateUserApi } from '../services/api/users';
+import type { User as ApiUser, AuthContextType as ApiAuthContextType } from '../interfaces/auth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AUTH_BASE } from '../services/api/config';
 
@@ -27,25 +28,11 @@ const decodeJWT = (token: string) => {
   }
 };
 
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: 'ADMIN' | 'USER';
-}
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<ApiAuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const authService = useAuthService();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<ApiUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
@@ -116,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           throw new Error(data.message || 'Falha ao verificar autenticação');
         }
 
-        const newUser: User = {
+  const newUser: ApiUser = {
           id: data.data.id,
           email: data.data.email,
           username: data.data.username,
@@ -185,7 +172,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Falha ao decodificar o token');
       }
 
-      const newUser: User = {
+  const newUser: ApiUser = {
         id: decodedToken.userId || '',
         email: decodedToken.email || email,
         username: decodedToken.username || email.split('@')[0],
@@ -227,9 +214,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     navigate('/login', { replace: true });
   };
 
+  const updateUser = async (userData: Partial<ApiUser>) => {
+    if (!user) {
+      return Promise.reject(new Error('Usuário não autenticado'));
+    }
+
+    try {
+  // Send update to API
+  const updated = await updateUserApi(user.id, userData as Partial<ApiUser>);
+
+      // Update local state and localStorage
+      setUser(updated as ApiUser);
+      try {
+        localStorage.setItem('skytrack_user', JSON.stringify(updated));
+      } catch (e) {
+        console.warn('Falha ao salvar usuário no localStorage', e);
+      }
+
+      return Promise.resolve();
+    } catch (err: any) {
+      return Promise.reject(err instanceof Error ? err : new Error(String(err)));
+    }
+  };
+
   return (
-    <AuthContext.Provider value={authService}>
-      {authService.isCheckingAuth ? (
+  <AuthContext.Provider value={{ ...authService, login, logout, updateUser }}>
+      {isCheckingAuth ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-lg text-zinc-600">Carregando...</div>
         </div>

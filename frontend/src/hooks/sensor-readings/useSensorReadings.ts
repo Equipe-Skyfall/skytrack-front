@@ -7,7 +7,7 @@ import {
   transformToChartData,
   aggregateReadingsByTimestamp,
   searchReadings,
-} from '../../services/api/sensor-readings';
+} from '../../services/api/sensorReadings';
 import type {
   SensorReading,
   SensorReadingsResponse,
@@ -76,6 +76,9 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
 
   // Cache duration: 30 seconds
   const CACHE_DURATION = 30 * 1000; // 30s
+  // Backoff on server errors (500) to avoid tight retry loops
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
+  const BACKOFF_DURATION = 60 * 1000; // 60s
 
   // Check if cache is still valid
   const isCacheValid = useCallback(() => {
@@ -129,6 +132,11 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
   // 🚀 Auto-load data on mount
   useEffect(() => {
     const autoLoadData = async () => {
+      // If in cooldown due to previous server error, skip auto-load
+      if (cooldownUntil && Date.now() < cooldownUntil) {
+        console.warn('Auto-load skipped due to server cooldown');
+        return;
+      }
       console.log('🚀 Auto-loading sensor readings on hook mount');
       
       // Check cache first
@@ -160,6 +168,12 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
         setReadings(aggregatedReadings);
         setPagination(response.pagination);
       } catch (err: any) {
+        // If server returned 5xx, set cooldown to avoid rapid retries
+        const status = err.response?.status || null;
+        if (status && status >= 500) {
+          setCooldownUntil(Date.now() + BACKOFF_DURATION);
+          console.warn(`Server error ${status} - engaging cooldown for ${BACKOFF_DURATION / 1000}s`);
+        }
         const errorMessage = err.message || 'Erro ao carregar dados automaticamente';
         setError(errorMessage);
         console.error('Error auto-loading sensor readings:', err);
@@ -221,7 +235,12 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
     
     try {
       console.log('📊 Fetching sensor readings from API with filters:', mergedFilters);
-      
+      // Respect server error cooldown
+      if (cooldownUntil && Date.now() < cooldownUntil) {
+        const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
+        throw new Error(`Server is in cooldown; try again in ${remaining}s`);
+      }
+
       const response = await getSensorReadings(mergedFilters);
       
       // Aggregate readings by timestamp to handle duplicate station data
@@ -241,6 +260,11 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
       setReadings(aggregatedReadings);
       setPagination(response.pagination);
     } catch (err: any) {
+      const status = err.response?.status || null;
+      if (status && status >= 500) {
+        setCooldownUntil(Date.now() + BACKOFF_DURATION);
+        console.warn(`Server error ${status} - engaging cooldown for ${BACKOFF_DURATION / 1000}s`);
+      }
       const errorMessage = err.message || 'Erro ao carregar leituras do sensor';
       setError(errorMessage);
       console.error('Error loading sensor readings:', err);
@@ -260,6 +284,10 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
     try {
       console.log('🏭 Loading station readings for:', stationId);
       
+      if (cooldownUntil && Date.now() < cooldownUntil) {
+        throw new Error('Server is in cooldown; try again later');
+      }
+
       const response = await getStationReadings(stationId, filters);
       
       // Aggregate readings by timestamp to handle duplicate station data
@@ -270,6 +298,11 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
       setPagination(response.pagination);
       setCurrentFilters({ ...filters, stationId });
     } catch (err: any) {
+      const status = err.response?.status || null;
+      if (status && status >= 500) {
+        setCooldownUntil(Date.now() + BACKOFF_DURATION);
+        console.warn(`Server error ${status} - engaging cooldown for ${BACKOFF_DURATION / 1000}s`);
+      }
       const errorMessage = err.message || 'Erro ao carregar leituras da estação';
       setError(errorMessage);
       console.error('Error loading station readings:', err);

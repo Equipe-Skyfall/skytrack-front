@@ -3,8 +3,7 @@ import {
   getStations, 
   createStation, 
   updateStation, 
-  deleteStation, 
-  processStationData
+  deleteStation
 } from '../../services/api/stations';
 import type { 
   Station, 
@@ -28,10 +27,27 @@ export const useStations = (initialPage = 1, limit = 10) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getStations(page, limit);
-      const processedStations = response.data.map(processStationData);
-      setStations(processedStations);
-      setPagination(response.pagination);
+      // getStations was refactored to sometimes return a raw array or an envelope { data, pagination }
+      const response: any = await getStations(page, limit);
+
+      let list: StationDto[] = [];
+      let newPagination: PaginationData | undefined;
+
+      if (response && Array.isArray(response)) {
+        list = response as StationDto[];
+      } else if (response && response.data && Array.isArray(response.data)) {
+        list = response.data as StationDto[];
+        newPagination = response.pagination;
+      }
+
+      // Map StationDto -> Station by adding UI helpers
+      const processedStations = list.map((s: StationDto) => ({
+        ...s,
+        statusColor: s.status === 'ACTIVE' ? 'green' : 'gray',
+      }));
+
+      setStations(processedStations as Station[]);
+      if (newPagination) setPagination(newPagination);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar estações');
     } finally {

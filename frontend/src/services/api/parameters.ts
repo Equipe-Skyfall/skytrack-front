@@ -1,6 +1,4 @@
-import { API_BASE } from './config';
-
-import apiClient from './axios';
+import apiClient from "./axios";
 
 export interface ParameterDto {
   id: string;
@@ -30,129 +28,49 @@ export interface ParametersListResponse {
   };
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}, token?: string): Promise<T> {
-  const url = `${API_BASE}${endpoint}`;
-
-  // Auto-fetch token from localStorage if not provided
-  const finalToken = token || (typeof window !== 'undefined' ? localStorage.getItem('skytrack_token') : null);
-
-  console.log('🛠️ Parameters API Request:', { 
-    method: options.method || 'GET', 
-    url, 
-    hasToken: !!finalToken 
-  });
-
-  const headers: Record<string, string> = {
-    'Accept': 'application/json',
-  };
-
-  if (options.body) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  if (finalToken) {
-    headers['Authorization'] = `Bearer ${finalToken}`;
-  } else {
-    console.warn('⚠️ No token provided for parameters request:', url);
-  }
-
-  const config: RequestInit = {
-    ...options,
-    headers: {
-      ...headers,
-      ...options.headers,
-    },
-    credentials: 'include',
-  };
-
-  const response = await fetch(url, config);
-  console.log('📡 Parameters API Response:', {
-    status: response.status,
-    statusText: response.statusText,
-    url,
-  });
-
-  if (!response.ok) {
-    let errorData: any = {};
-    try {
-      const text = await response.text();
-      if (text) {
-        errorData = JSON.parse(text);
-      }
-    } catch {
-      // Ignore JSON parse errors
-    }
-    throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-  }
-
-  const contentType = response.headers.get('content-type');
-  if (!contentType || !contentType.includes('application/json')) {
-    return undefined as T;
-  }
-
-  const text = await response.text();
-  if (!text) {
-    return undefined as T;
-  }
-
-  const data = JSON.parse(text);
-  console.log('✅ Parameters API Success Data:', data);
-  return data;
-}
-
 export async function getParameters(page = 1, limit = 10, name?: string, token?: string | null): Promise<ParametersListResponse> {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-  });
+  const params: Record<string, any> = { page, limit };
+  if (name) params.name = name;
 
-  if (name) {
-    params.append('name', name);
-  }
+  const config: any = { params };
+  if (token) config.headers = { Authorization: `Bearer ${token}` };
 
-  return await request<ParametersListResponse>(`/api/parameters?${params}`, {}, token || undefined);
+  const res = await apiClient.get<ParametersListResponse>('/api/parameters', config);
+  return res.data;
 }
 
 export async function getParameterById(id: string, token?: string | null): Promise<ParameterDto> {
-  return await request<ParameterDto>(`/api/parameters/${id}`, {}, token || undefined);
+  const config: any = {};
+  if (token) config.headers = { Authorization: `Bearer ${token}` };
+  const res = await apiClient.get<ParameterDto>(`/api/parameters/${id}`, config);
+  return res.data;
 }
 
 export async function getParametersByStationId(stationId: string, page = 1, limit = 10, name?: string, token?: string | null): Promise<ParametersListResponse> {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-  });
+  const params: Record<string, any> = { page, limit };
+  if (name) params.name = name;
+  const config: any = { params };
+  if (token) config.headers = { Authorization: `Bearer ${token}` };
 
-  if (name) {
-    params.append('name', name);
-  }
-
-  return await request<ParametersListResponse>(`/api/parameters/station/${stationId}?${params}`, {}, token || undefined);
+  const res = await apiClient.get<ParametersListResponse>(`/api/parameters/station/${stationId}`, config);
+  return res.data;
 }
 
 export async function createParameter(data: CreateParameterDto, token?: string | null): Promise<ParameterDto> {
-  return await request<ParameterDto>(
-    '/api/parameters',
-    {
-      method: 'POST',
-      body: JSON.stringify(data),
-    },
-    token || undefined
-  );
+  const config: any = {};
+  if (token) config.headers = { Authorization: `Bearer ${token}` };
+  const res = await apiClient.post<ParameterDto>('/api/parameters', data, config);
+  return res.data;
 }
 
 export async function updateParameter(id: string, data: UpdateParameterDto, token?: string | null): Promise<ParameterDto> {
-  return await request<ParameterDto>(
-    `/api/parameters/${id}`,
-    {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    },
-    token || undefined
-  );
+  const config: any = {};
+  if (token) config.headers = { Authorization: `Bearer ${token}` };
+  const res = await apiClient.put<ParameterDto>(`/api/parameters/${id}`, data, config);
+  return res.data;
 }
 export async function deleteParameter(id: string, token?: string | null): Promise<void> {
-  return request<void>(`/api/parameters/${id}`, {
-    method: 'DELETE',
-  }, token || undefined);
+  const config: any = {};
+  if (token) config.headers = { Authorization: `Bearer ${token}` };
+  await apiClient.delete<void>(`/api/parameters/${id}`, config);
 }

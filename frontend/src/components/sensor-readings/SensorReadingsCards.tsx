@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Thermometer, Droplets, CloudRain, AlertCircle, Wifi, WifiOff } from 'lucide-react';
-import { getLatestReadings } from '../../services/api/sensor-readings';
+import { getSensorReadings } from '../../services/api/sensorReadings';
 import type { SensorReading } from '../../interfaces/sensor-readings';
 
 interface SensorReadingsCardsProps {
@@ -34,7 +34,8 @@ const SensorReadingsCards: React.FC<SensorReadingsCardsProps> = ({
     try {
       console.log('📊 Loading current sensor readings...');
       
-      const readings = await getLatestReadings(stationId);
+  const response = await getSensorReadings({ limit: 200 });
+  const readings: SensorReading[] = response.data || response || [];
       
       // Group readings by station and get the most recent for each station
       const stationMap = new Map<string, StationData>();

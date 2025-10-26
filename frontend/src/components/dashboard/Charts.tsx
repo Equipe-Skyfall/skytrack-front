@@ -13,7 +13,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { TrendingUp, Thermometer, Droplets, CloudRain, MapPin } from 'lucide-react';
+import { TrendingUp, MapPin } from 'lucide-react';
 import useSensorReadings from '../../hooks/sensor-readings/useSensorReadings';
 import { useStations } from '../../hooks/stations/useStations';
 
@@ -101,7 +101,7 @@ const Charts: React.FC = () => {
         name: sensorType.label,
         color: sensorType.color,
         unit: sensorType.unit,
-        icon: getSensorIcon(sensorKey)
+        // icons removed (mocked); UI uses a colored dot instead
       };
     }
 
@@ -115,18 +115,7 @@ const Charts: React.FC = () => {
     };
   };
 
-  const getSensorIcon = (sensorKey: string) => {
-    const iconMap: { [key: string]: React.ReactElement } = {
-      temperatura: <Thermometer className="h-4 w-4" />,
-      temperature: <Thermometer className="h-4 w-4" />,
-      umidade: <Droplets className="h-4 w-4" />,
-      humidity: <Droplets className="h-4 w-4" />,
-      chuva: <CloudRain className="h-4 w-4" />,
-      rain: <CloudRain className="h-4 w-4" />,
-    };
-    
-    return iconMap[sensorKey] || <TrendingUp className="h-4 w-4" />;
-  };
+  // Removed getSensorIcon — icons were mocked. Use colored dot + label instead.
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -191,10 +180,10 @@ const Charts: React.FC = () => {
     // Only show "no data" message AFTER loading is complete
     if (!loading && !hasData) {
       return (
-        <div className="flex items-center justify-center h-96">
-          <div className="text-gray-400 text-center">
-            <TrendingUp className="h-12 w-12 mx-auto mb-2" />
-            <p>Nenhum dado disponível</p>
+        <div className="flex items-center z-10 fixed justify-center h-96 w-full text-center ">
+          <div className="text-gray-400 text-center items-center  m mb-2 m-auto">
+            <TrendingUp className="h-12 w-12" />
+            <p >Nenhum dado disponível</p>
           </div>
         </div>
       );

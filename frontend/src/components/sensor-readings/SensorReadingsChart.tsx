@@ -13,9 +13,9 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import { Calendar, RefreshCw, Download, TrendingUp, Thermometer, Droplets, Gauge } from 'lucide-react';
+import {  RefreshCw, Download, TrendingUp, Thermometer, Droplets, Gauge } from 'lucide-react';
 import useSensorReadings from '../../hooks/sensor-readings/useSensorReadings';
-import type { SensorType } from '../../interfaces/sensor-readings';
+
 import '../dashboard/charts-neon.css';
 
 interface SensorReadingsChartProps {
@@ -281,9 +281,11 @@ const SensorReadingsChart: React.FC<SensorReadingsChartProps> = ({
             Leituras dos Sensores
             {stationId && <span className="text-base text-gray-600 ml-2">- Estação {stationId.slice(-8)}</span>}
           </h3>
-          <p className="text-sm text-gray-500">
-            {totalReadings} leituras • Últimas {chartData.length} exibidas
-          </p>
+          {hasData && (
+            <p className="text-sm text-gray-500">
+              {totalReadings} leituras • Últimas {chartData.length} exibidas
+            </p>
+          )}
         </div>
         
         {showControls && (
@@ -309,7 +311,7 @@ const SensorReadingsChart: React.FC<SensorReadingsChartProps> = ({
       </div>
 
       {/* Controls */}
-      {showControls && (
+        {showControls && hasData && (
         <div className="mb-6 space-y-4">
           {/* Time Range Selector */}
           <div className="flex gap-2 flex-wrap">
@@ -435,7 +437,7 @@ const SensorReadingsChart: React.FC<SensorReadingsChartProps> = ({
         ) : !hasData ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <p className="text-gray-500 mb-2">Nenhum dado encontrado</p>
+              <p className="text-gray-600 mb-2 text-lg font-medium">Nenhum dado disponível</p>
               <p className="text-sm text-gray-400">
                 Verifique se há dados disponíveis para o período selecionado
               </p>

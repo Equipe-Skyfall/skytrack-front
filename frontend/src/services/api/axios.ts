@@ -48,13 +48,29 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('❌ API Error:', {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      url: error.config?.url,
-      message: error.message,
-      data: error.response?.data,
-    });
+    // Throttle repetitive error logs per URL to avoid console spam
+    try {
+      const url = error.config?.url || 'unknown';
+      const now = Date.now();
+      const last = (apiClient as any).__lastErrorLogMap || new Map<string, number>();
+      const lastTs = last.get(url) || 0;
+      const THROTTLE_MS = 5000; // 5s
+      if (now - lastTs > THROTTLE_MS) {
+        // Use warn for 5xx errors to reduce severity
+        const logFn = error.response?.status === 401 ? console.error : console.warn;
+        logFn('❌ API Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          url: error.config?.url,
+          message: error.message,
+          data: error.response?.data,
+        });
+        last.set(url, now);
+        (apiClient as any).__lastErrorLogMap = last;
+      }
+    } catch (e) {
+      // ignore logging failures
+    }
     
     // Handle common errors
     if (error.response?.status === 401) {

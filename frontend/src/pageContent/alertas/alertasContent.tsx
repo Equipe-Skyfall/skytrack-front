@@ -1,4 +1,4 @@
-import { AlertTriangle, Settings, Trash2, MapPin, Clock } from 'lucide-react';
+import { AlertTriangle, Settings, Check, MapPin, Clock } from 'lucide-react';
 import AlertForm from '../../components/alerts/AlertForm';
 import ConfirmDelete from '../../components/alerts/ConfirmDelete';
 import TipoAlertaModal from '../../components/modals/TipoAlertaModal';
@@ -8,23 +8,19 @@ import { useAlertasPage } from '../../hooks/pages/useAlertasPage';
 export default function AlertasContent() {
   const { user } = useAuth();
   const {
-    // Data
     activeAlerts,
     historyAlerts,
     loading,
     error,
     
-    // Form state
     editing,
     form,
     showForm,
     submitting,
     
-    // Modal state
     showTipoAlertaModal,
     deletingId,
     
-  // Actions
   onDelete,
     onSubmit,
     onConfirmDelete,
@@ -58,7 +54,6 @@ export default function AlertasContent() {
           )}
         </div>
 
-        {/* Active Alerts Section */}
         <div className="space-y-6">
           <h2 className="text-xl font-bold text-zinc-800 flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-zinc-700" />
@@ -98,10 +93,11 @@ export default function AlertasContent() {
                     <div className="flex justify-center gap-4">
                       <button
                         onClick={() => onDelete(a.id)}
-                        className="bg-red-500 text-white rounded-lg py-2 px-6 flex items-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
+                        className="bg-slate-900 text-white rounded-lg py-2 px-8 flex items-center gap-2 text-base font-semibold hover:bg-sky-700 transition-colors duration-300 shadow-sm cursor-pointer w-44 justify-center"
+                        aria-label={`Resolver alerta ${a.id}`}
                       >
-                        <Trash2 className="h-5 w-5" />
-                        Deletar
+                        <Check className="h-5 w-5" />
+                        Resolver
                       </button>
                     </div>
                   )}
@@ -186,10 +182,8 @@ export default function AlertasContent() {
           open={showTipoAlertaModal}
           onClose={onCloseTipoAlertaModal}
           onSave={() => {
-            // Hook will automatically reload
           }}
         />
-  {/* AlertDetailModal removed per request */}
       </main>
     </div>
   );

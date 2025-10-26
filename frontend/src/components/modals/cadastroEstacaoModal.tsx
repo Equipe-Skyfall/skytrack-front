@@ -120,7 +120,6 @@ const ModalCadastroEstacao: React.FC<ModalSimplesProps> = ({
                 value={formData.macAddress} onChange={handleChange} required
               />
             </div>
-
         
             <div className="mb-3">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="status">

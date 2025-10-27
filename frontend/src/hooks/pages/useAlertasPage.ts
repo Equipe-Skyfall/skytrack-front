@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlerts } from '../alerts/useAlerts';
 import type { Alert, AlertFormData } from '../../interfaces/alerts';
+import { getHistoryAlerts } from '../../services/api/historyAlerts';
+// removed detail-related remote fetches (stations/parameters/tipo-alerta) — not needed after details removal
+import type { HistoryQuery } from '../../services/api/historyAlerts';
 
 const emptyForm: AlertFormData = { 
   stationId: '', 
@@ -14,7 +17,6 @@ export const useAlertasPage = () => {
   const { user } = useAuth();
   const {
     activeAlerts,
-    historyAlerts,
     loading,
     error,
     createAlert,
@@ -22,15 +24,19 @@ export const useAlertasPage = () => {
     deleteAlert,
   } = useAlerts();
   
-  // Estado da página
   const [editing, setEditing] = useState<Alert | null>(null);
   const [form, setForm] = useState<AlertFormData>(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showTipoAlertaModal, setShowTipoAlertaModal] = useState(false);
+  const [historyData, setHistoryData] = useState<Alert[]>([]);
+  const [historyPagination, setHistoryPagination] = useState<any>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyQuery, setHistoryQuery] = useState<HistoryQuery>({ page: 1, limit: 10 });
+  // detail modal removed
 
-  // Handlers da página
   const onEdit = (alert: Alert) => {
     setEditing(alert);
     setForm(alert);
@@ -75,6 +81,7 @@ export const useAlertasPage = () => {
     if (!deletingId) return;
     try {
       await deleteAlert(deletingId);
+      await loadHistory();
     } catch (err: any) {
       alert(err.message || 'Erro ao excluir');
     } finally {
@@ -86,6 +93,25 @@ export const useAlertasPage = () => {
     setDeletingId(null);
   };
 
+  const loadHistory = async (query: HistoryQuery = historyQuery) => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const res = await getHistoryAlerts(query);
+      setHistoryData((res && res.data) || []);
+      setHistoryPagination((res && res.pagination) || null);
+      setHistoryQuery(query);
+    } catch (err: any) {
+      setHistoryError(err.message || 'Erro ao carregar histórico');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHistory(historyQuery);
+  }, []);
+
   const onOpenTipoAlertaModal = () => {
     setShowTipoAlertaModal(true);
   };
@@ -94,23 +120,28 @@ export const useAlertasPage = () => {
     setShowTipoAlertaModal(false);
   };
 
+  // details handlers removed
+
   return {
-    // Estado dos dados
-    user,
-    activeAlerts,
-    historyAlerts,
-    loading,
-    error,
+  user,
+  activeAlerts,
+  loading,
+  error,
+
+  historyAlerts: historyData,
+  historyPagination,
+  historyLoading,
+  historyError,
     
-    // Estado da UI
     editing,
     form,
     showForm,
     deletingId,
     submitting,
     showTipoAlertaModal,
+  // detailAlert, showDetailModal removed
     
-    // Handlers
+
     onEdit,
     onDelete,
     onSubmit,
@@ -120,8 +151,9 @@ export const useAlertasPage = () => {
     onCancelDelete,
     onOpenTipoAlertaModal,
     onCloseTipoAlertaModal,
+  // onOpenDetails, onCloseDetails removed
+  loadHistory,
     
-    // Computed values
     formTitle: editing ? 'Editar Alerta' : 'Novo Alerta',
   };
 };

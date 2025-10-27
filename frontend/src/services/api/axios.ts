@@ -9,22 +9,38 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000, // 10 seconds timeout
+  withCredentials: true, // IMPORTANTE: Envia cookies automaticamente
 });
 
 // Request interceptor for logging and auth
 apiClient.interceptors.request.use(
   (config) => {
-    // Add auth token if available
+    // Adiciona token do localStorage se disponível
     const token = localStorage.getItem('skytrack_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    // Remove empty query parameters to avoid validation errors
+    if (config.params) {
+      const cleanParams: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(config.params)) {
+        // Only include non-empty values
+        if (value !== '' && value !== null && value !== undefined) {
+          cleanParams[key] = value;
+        }
+      }
+      config.params = cleanParams;
+      console.log('🧹 Cleaned params:', config.params);
     }
     
     console.log('🚀 API Request:', {
       method: config.method?.toUpperCase(),
       url: config.url,
       baseURL: config.baseURL,
+      params: config.params,
       data: config.data,
+      hasToken: !!token,
     });
     
     return config;
@@ -74,10 +90,14 @@ apiClient.interceptors.response.use(
     
     // Handle common errors
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
+      // Unauthorized - limpa token e usuário
       localStorage.removeItem('skytrack_token');
       localStorage.removeItem('skytrack_user');
-      window.location.href = '/login';
+      // Redireciona para login apenas se não estiver em uma rota pública
+      const publicRoutes = ['/login', '/estacoes', '/dashboard', '/alertas', '/educacao'];
+      if (!publicRoutes.includes(window.location.pathname)) {
+        window.location.href = '/login';
+      }
     }
     
     // Extract error message from response

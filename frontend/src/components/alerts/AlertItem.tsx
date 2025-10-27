@@ -1,9 +1,11 @@
 // components/alerts/AlertItem.tsx
 import React from 'react';
 import { AlertTriangle, AlertCircle, Info, MapPin, Clock, CheckCircle } from 'lucide-react';
+import { formatDate } from '../../utils/dateFormatter';
 
 type Alert = {
   id?: string;
+  alert_name?: string;
   stationId: string;
   parameterId?: string;
   parameter?: string;
@@ -53,22 +55,6 @@ const AlertItem: React.FC<Props> = ({ alert }) => {
     return level === 'critical' ? 'Crítico' : 'Aviso';
   };
 
-  const formatTime = (dateString?: string) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return 'Agora mesmo';
-    if (diffMins < 60) return `Há ${diffMins} min`;
-    if (diffHours < 24) return `Há ${diffHours} h`;
-    if (diffDays === 1) return 'Ontem';
-    return `Há ${diffDays} dias`;
-  };
-
   const config = getLevelConfig(alert.level);
 
   return (
@@ -97,7 +83,7 @@ const AlertItem: React.FC<Props> = ({ alert }) => {
 
           {/* Mensagem principal */}
           <h3 className="font-semibold text-slate-900 text-sm mb-2 leading-tight">
-            {alert.description}
+            {alert.alert_name || alert.description}
           </h3>
 
           {/* Informações secundárias */}
@@ -109,7 +95,7 @@ const AlertItem: React.FC<Props> = ({ alert }) => {
             
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              <span>{formatTime(alert.createdAt)}</span>
+              <span>{alert.createdAt ? formatDate(alert.createdAt) : '-'}</span>
             </div>
           </div>
 

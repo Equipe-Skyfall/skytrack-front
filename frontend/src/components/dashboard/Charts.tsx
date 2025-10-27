@@ -180,10 +180,12 @@ const Charts: React.FC = () => {
     // Only show "no data" message AFTER loading is complete
     if (!loading && !hasData) {
       return (
-        <div className="flex items-center z-10 fixed justify-center h-96 w-full text-center ">
-          <div className="text-gray-400 text-center items-center  m mb-2 m-auto">
-            <TrendingUp className="h-12 w-12" />
-            <p >Nenhum dado disponível</p>
+        <div className="relative h-96 w-full">
+          <div className="absolute inset-0 flex items-center ml-150">
+            <div className="text-center">
+              <TrendingUp className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+              <p className="text-gray-400">Nenhum dado disponível</p>
+            </div>
           </div>
         </div>
       );

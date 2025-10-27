@@ -52,6 +52,8 @@ export async function getHistoryAlerts(query: HistoryQuery = {}) {
   if (query.level) params.set('level', query.level);
   if (typeof query.limit !== 'undefined') params.set('limit', String(query.limit));
   if (typeof query.page !== 'undefined') params.set('page', String(query.page));
+  // Sempre buscar apenas alertas inativos no histórico
+  params.set('is_active', 'false');
 
   const path = `/api/alerts${params.toString() ? `?${params.toString()}` : ''}`;
   const res = await request(path);

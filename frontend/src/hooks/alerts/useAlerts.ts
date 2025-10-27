@@ -23,7 +23,7 @@ export const useAlerts = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await getAlerts();
+      const res = await getAlerts(true); // Busca apenas alertas ativos (is_active=true)
       setAlerts(res || []);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar alertas');
@@ -62,16 +62,16 @@ export const useAlerts = () => {
   };
 
   // Filtros para alertas ativos e histórico
-  const activeAlerts = alerts.filter(a => !(a as any).resolved);
-  const historyAlerts = alerts.filter(a => (a as any).resolved);
+  // O backend já retorna filtrado por is_active, então não precisa filtrar aqui
+  const activeAlerts = alerts;
+  const historyAlerts: Alert[] = []; // O histórico vem de outra fonte (getHistoryAlerts)
 
   const { user } = useAuth();
 
   useEffect(() => {
-    // only load alerts when a user is authenticated
-    if (!user) return;
+    // Carrega alertas mesmo sem usuário (site é público)
     loadAlerts();
-  }, [loadAlerts, user]);
+  }, [loadAlerts]);
 
   return {
     alerts,

@@ -2,12 +2,14 @@
 
 export interface Alert {
   id: string;
+  alert_name?: string;
   data: Date;
   stationId: string;
   parameterId: string;
   tipoAlertaId: string;
   medidasId?: string;
   createdAt: Date;
+  is_active: boolean;
 }
 
 export type AlertFormData = Partial<Alert>;

@@ -10,7 +10,7 @@ import {
   LogIn,
   Settings,
   User,
-  BarChart3
+  // BarChart3 // COMENTADO - Não usado mais (relatórios desabilitado)
 } from "lucide-react";
 
 const Sidebar: React.FC = () => {
@@ -31,7 +31,7 @@ const Sidebar: React.FC = () => {
 
   // Menu adicional apenas para ADMIN
   const adminMenuItems = [
-    { path: '/relatorios', label: 'Relatórios', icon: <BarChart3 /> },
+    // { path: '/relatorios', label: 'Relatórios', icon: <BarChart3 /> }, // COMENTADO - Relatórios desabilitado
     { path: '/parametros', label: 'Parâmetros', icon: <Settings /> },
     { path: '/perfil', label: 'Perfil', icon: <User /> },
   ];

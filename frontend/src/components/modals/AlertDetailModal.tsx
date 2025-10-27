@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import type { Alert } from '../../interfaces/alerts';
+import { formatDate } from '../../utils/dateFormatter';
 
 type Props = {
   open: boolean;
@@ -10,12 +11,6 @@ type Props = {
 
 const AlertDetailModal: React.FC<Props> = ({ open, alert, onClose }) => {
   if (!open || !alert) return null;
-
-  const formatDate = (iso?: string | Date) => {
-    if (!iso) return '-';
-    const d = iso instanceof Date ? iso : new Date(iso);
-    return d.toLocaleString();
-  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -28,6 +23,12 @@ const AlertDetailModal: React.FC<Props> = ({ open, alert, onClose }) => {
         </div>
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-1 gap-3">
+            {alert.alert_name && (
+              <div>
+                <div className="text-xs text-zinc-500">Nome do Alerta</div>
+                <div className="text-sm text-zinc-800 font-medium">{alert.alert_name}</div>
+              </div>
+            )}
             <div>
               <div className="text-xs text-zinc-500">ID</div>
               <div className="text-sm text-zinc-800 font-medium break-all">{alert.id}</div>

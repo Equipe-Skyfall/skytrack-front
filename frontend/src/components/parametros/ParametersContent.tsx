@@ -6,7 +6,7 @@ import TipoParametroModal from '../modals/TipoParametroModal';
 
 import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, UpdateParameterDto, ParameterFormData } from '../../interfaces/parameters';
 import type { StationDto } from '../../interfaces/stations';
-import { getParameters, createParameter, updateParameter } from '../../services/api/parameters';
+import { getParameters, createParameter, updateParameter, deleteParameter } from '../../services/api/parameters';
 
 import { getTipoParametros } from '../../services/api/tipo-parametro';
 import { getTipoAlertas } from '../../services/api/tipo-alerta';
@@ -44,8 +44,20 @@ const ParametersContent: React.FC = () => {
         }
 
         // Fetch stations
-        const stationsData = await getStations(token);
-        setStations(stationsData);
+        console.log('🏢 Fetching stations...');
+        const stationsData = await getStations();
+        console.log('🏢 Stations response:', stationsData);
+        
+        // Handle different response formats
+        let stationsList: StationDto[] = [];
+        if (Array.isArray(stationsData)) {
+          stationsList = stationsData;
+        } else if (stationsData && typeof stationsData === 'object' && 'data' in stationsData) {
+          stationsList = stationsData.data as StationDto[];
+        }
+        
+        console.log('🏢 Stations list:', stationsList);
+        setStations(stationsList);
 
         // Fetch parameters
         const paramResponse = await getParameters(1, 100, undefined, token);
@@ -114,8 +126,9 @@ const ParametersContent: React.FC = () => {
       await deleteParameter(deleteParamId, token);
       setParameters((prev) => prev.filter((param) => param.id !== deleteParamId));
       handleModalClose();
-    } catch (error: any) {
-      setError(error.message || 'Erro ao excluir parâmetro');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao excluir parâmetro';
+      setError(errorMessage);
       setTimeout(() => handleModalClose(), 3000);
     }
   };
@@ -196,8 +209,9 @@ const ParametersContent: React.FC = () => {
         );
       }
       handleModalClose();
-    } catch (error: any) {
-      setError(error.message || 'Erro ao salvar parâmetro');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao salvar parâmetro';
+      setError(errorMessage);
     }
   };
 

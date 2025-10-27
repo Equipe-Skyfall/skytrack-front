@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useAlerts } from '../alerts/useAlerts';
 import type { Alert, AlertFormData } from '../../interfaces/alerts';
 import { getHistoryAlerts } from '../../services/api/historyAlerts';
+import { resolveAlert, activateAlert } from '../../services/api/alerts';
+import { useNotifications } from '../../context/NotificationContext';
 // removed detail-related remote fetches (stations/parameters/tipo-alerta) — not needed after details removal
 import type { HistoryQuery } from '../../services/api/historyAlerts';
 
@@ -15,19 +17,21 @@ const emptyForm: AlertFormData = {
 
 export const useAlertasPage = () => {
   const { user } = useAuth();
+  const { reloadAlerts } = useNotifications();
   const {
     activeAlerts,
     loading,
     error,
     createAlert,
     updateAlert,
-    deleteAlert,
+    loadAlerts,
   } = useAlerts();
   
   const [editing, setEditing] = useState<Alert | null>(null);
   const [form, setForm] = useState<AlertFormData>(emptyForm);
   const [showForm, setShowForm] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [activatingId, setActivatingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showTipoAlertaModal, setShowTipoAlertaModal] = useState(false);
   const [historyData, setHistoryData] = useState<Alert[]>([]);
@@ -43,9 +47,14 @@ export const useAlertasPage = () => {
     setShowForm(true);
   };
 
-  const onDelete = (id?: string) => {
+  const onResolve = (id?: string) => {
     if (!id) return;
-    setDeletingId(id);
+    setResolvingId(id);
+  };
+
+  const onActivate = (id?: string) => {
+    if (!id) return;
+    setActivatingId(id);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -77,20 +86,40 @@ export const useAlertasPage = () => {
     setForm({ ...form, ...value });
   };
 
-  const onConfirmDelete = async () => {
-    if (!deletingId) return;
+  const onConfirmResolve = async () => {
+    if (!resolvingId) return;
     try {
-      await deleteAlert(deletingId);
-      await loadHistory();
+      await resolveAlert(resolvingId);
+      await loadAlerts(); // Recarrega alertas ativos
+      await loadHistory(); // Recarrega histórico
+      await reloadAlerts(); // Recarrega notificações
     } catch (err: any) {
-      alert(err.message || 'Erro ao excluir');
+      alert(err.message || 'Erro ao resolver alerta');
     } finally {
-      setDeletingId(null);
+      setResolvingId(null);
     }
   };
 
-  const onCancelDelete = () => {
-    setDeletingId(null);
+  const onCancelResolve = () => {
+    setResolvingId(null);
+  };
+
+  const onConfirmActivate = async () => {
+    if (!activatingId) return;
+    try {
+      await activateAlert(activatingId);
+      await loadAlerts(); // Recarrega alertas ativos
+      await loadHistory(); // Recarrega histórico
+      await reloadAlerts(); // Recarrega notificações
+    } catch (err: any) {
+      alert(err.message || 'Erro ao ativar alerta');
+    } finally {
+      setActivatingId(null);
+    }
+  };
+
+  const onCancelActivate = () => {
+    setActivatingId(null);
   };
 
   const loadHistory = async (query: HistoryQuery = historyQuery) => {
@@ -136,19 +165,23 @@ export const useAlertasPage = () => {
     editing,
     form,
     showForm,
-    deletingId,
+    resolvingId,
+    activatingId,
     submitting,
     showTipoAlertaModal,
   // detailAlert, showDetailModal removed
     
 
     onEdit,
-    onDelete,
+    onResolve,
+    onActivate,
     onSubmit,
     onCancelForm,
     onFormChange,
-    onConfirmDelete,
-    onCancelDelete,
+    onConfirmResolve,
+    onConfirmActivate,
+    onCancelResolve,
+    onCancelActivate,
     onOpenTipoAlertaModal,
     onCloseTipoAlertaModal,
   // onOpenDetails, onCloseDetails removed

@@ -7,15 +7,18 @@ import ModalExcluirEstacao from "../modals/modalExcluirEstacao";
 import ModalHistoricoEstacao from "../modals/ModalHistoricoEstacao";
 import { useAuth } from "../../context/AuthContext";
 import Pagination from "../pagination/pagination";
+import { 
+  getStations, 
+  createStation, 
+  updateStation, 
+  deleteStation 
+} from '../../services/api/stations';
 import type {
   PaginationData,
-  StationsListResponse,
   Station,
   StationFormData,
   EstacaoCardProps
 } from '../../interfaces/stations';
-
-const API_URL = 'https://sky-track-backend.vercel.app/api/stations';
 
 const EstacaoCard: React.FC<EstacaoCardProps> = ({
   station,
@@ -132,24 +135,28 @@ const Estacao: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_URL}?limit=${STATIONS_PER_PAGE}&page=${page}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar estações: ${response.status}`);
+      
+      const response = await getStations(page, STATIONS_PER_PAGE);
+      
+      let stationsFromApi: Station[] = [];
+      let pagination: PaginationData | null = null;
+      
+      if (Array.isArray(response)) {
+        stationsFromApi = response as Station[];
+      } else if (response && 'data' in response) {
+        stationsFromApi = response.data as Station[];
+        pagination = response.pagination as PaginationData;
       }
-      const responseData: StationsListResponse = await response.json();
-      if (!responseData.data) {
-        throw new Error('Formato de resposta inesperado da API');
-      }
-      const stationsFromApi = responseData.data;
+      
       const displayStations: Station[] = stationsFromApi.map((station) => ({
         ...station,
         statusColor: getStatusColor(station.status),
       }));
+      
       setListaDeEstacoes(displayStations);
-      setPaginationData(responseData.pagination);
+      if (pagination) {
+        setPaginationData(pagination);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
       console.error('Erro:', err);
@@ -173,24 +180,14 @@ const Estacao: React.FC = () => {
         latitude: parseFloat(data.latitude || '0'),
         longitude: parseFloat(data.longitude || '0'),
       };
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(createDto),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Erro ao salvar: ${response.status}`);
-      }
+      
+      await createStation(createDto);
       setIsModalOpen(false);
       await fetchStations(currentPage);
-    } catch (error: any) {
-      console.error("Erro ao criar estação:", error);
-      alert(`Erro ao salvar estação: ${error.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao salvar estação';
+      console.error("Erro ao criar estação:", err);
+      alert(`Erro ao salvar estação: ${errorMessage}`);
     }
   };
 
@@ -201,7 +198,7 @@ const Estacao: React.FC = () => {
       return;
     }
     try {
-      const changedData: any = {};
+      const changedData: Partial<StationFormData> = {};
       if (data.name !== editingStation.name) {
         changedData.name = data.name;
       }
@@ -217,10 +214,10 @@ const Estacao: React.FC = () => {
       const formLat = parseFloat(data.latitude || '0');
       const formLng = parseFloat(data.longitude || '0');
       if (formLat !== editingStation.latitude) {
-        changedData.latitude = formLat;
+        changedData.latitude = formLat.toString();
       }
       if (formLng !== editingStation.longitude) {
-        changedData.longitude = formLng;
+        changedData.longitude = formLng.toString();
       }
       if (data.macAddress !== (editingStation.macAddress || '')) {
         changedData.macAddress = data.macAddress;
@@ -230,24 +227,14 @@ const Estacao: React.FC = () => {
         setEditingStation(null);
         return;
       }
-      const response = await fetch(`${API_URL}/${editingStation.id}`, {
-        method: 'PUT',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(changedData),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Erro ao editar: ${response.status}`);
-      }
+      
+      await updateStation(editingStation.id, changedData);
       setEditingStation(null);
       await fetchStations(currentPage);
-    } catch (error: any) {
-      console.error("Erro ao editar estação:", error);
-      alert(`Erro ao salvar alteração: ${error.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao salvar alteração';
+      console.error("Erro ao editar estação:", err);
+      alert(`Erro ao salvar alteração: ${errorMessage}`);
     }
   };
 
@@ -259,17 +246,7 @@ const Estacao: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/${deletingStation.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Falha ao excluir a estação');
-      }
+      await deleteStation(deletingStation.id);
 
       setListaDeEstacoes(prevList =>
         prevList.filter(station => station.id !== deletingStation.id)
@@ -277,9 +254,10 @@ const Estacao: React.FC = () => {
 
       setDeletingStation(null);
 
-    } catch (error: any) {
-      console.error("Erro ao excluir estação:", error);
-      alert(`Erro ao excluir estação: ${error.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao excluir estação';
+      console.error("Erro ao excluir estação:", err);
+      alert(`Erro ao excluir estação: ${errorMessage}`);
       setDeletingStation(null);
     }
   };

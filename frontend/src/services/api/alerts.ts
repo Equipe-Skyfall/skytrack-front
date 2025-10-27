@@ -1,8 +1,12 @@
 import apiClient from './axios';
 
-export async function getAlerts() {
-  console.log('🔔 getAlerts called');
-  const response = await apiClient.get('/api/alerts');
+export async function getAlerts(is_active?: boolean) {
+  console.log('🔔 getAlerts called', { is_active });
+  const params: Record<string, string> = {};
+  if (is_active !== undefined) {
+    params.is_active = String(is_active);
+  }
+  const response = await apiClient.get('/api/alerts', { params });
   // NestJS returns { data: RegisteredAlertDto[], pagination: { ... } }
   if (response.data && typeof response.data === 'object' && 'data' in response.data) {
     return response.data.data;
@@ -28,7 +32,7 @@ export async function updateAlert(id: string, payload: Record<string, unknown>) 
 }
 
 function sanitizeAlertPayload(payload: Record<string, unknown>) {
-  // Allowed by backend CreateAlertDto: data, stationId, parameterId, tipoAlertaId, medidasId
+  // Allowed by backend CreateAlertDto: data, stationId, parameterId, tipoAlertaId, medidasId, is_active
   const out: Record<string, unknown> = {};
   if (payload == null) return out;
   const data = payload.data as unknown;
@@ -41,7 +45,20 @@ function sanitizeAlertPayload(payload: Record<string, unknown>) {
   if (typeof payload.parameterId !== 'undefined') out.parameterId = payload.parameterId;
   if (typeof payload.tipoAlertaId !== 'undefined') out.tipoAlertaId = payload.tipoAlertaId;
   if (typeof payload.medidasId !== 'undefined') out.medidasId = payload.medidasId;
+  if (typeof payload.is_active !== 'undefined') out.is_active = payload.is_active;
   return out;
+}
+
+export async function resolveAlert(id: string) {
+  // O backend atual faz toggle do campo active, então basta chamar PUT sem body
+  const response = await apiClient.put(`/api/alerts/${id}`);
+  return response.data;
+}
+
+export async function activateAlert(id: string) {
+  // O backend faz toggle, então se está inativo, ficará ativo
+  const response = await apiClient.put(`/api/alerts/${id}`);
+  return response.data;
 }
 
 export async function deleteAlert(id: string) {
@@ -49,4 +66,4 @@ export async function deleteAlert(id: string) {
   return response.data;
 }
 
-export default { getAlerts, getAlert, createAlert, updateAlert, deleteAlert };
+export default { getAlerts, getAlert, createAlert, updateAlert, resolveAlert, activateAlert, deleteAlert };

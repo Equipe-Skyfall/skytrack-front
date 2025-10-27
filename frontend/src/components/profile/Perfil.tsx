@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { User, Pencil, Settings } from 'lucide-react';
 import EditUserModal from '../modals/EditUserModal';
 import AddUserModal from '../modals/AddUserModal';
+import { AlertTriangle, Check, Edit2, X, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { API_BASE } from '../../services/api/config';
 
 type Usuario = {
   id: string;
@@ -16,10 +18,20 @@ type Usuario = {
   updatedAt?: string;
 };
 
+// Tipo para usuário que vem da API do auth.skytrack.space
+type AuthApiUser = {
+  id: string;
+  email: string;
+  username?: string;
+  role: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 interface ApiResponse {
   success: boolean;
   message: string;
-  data: Usuario | Usuario[] | null;
+  data: AuthApiUser | AuthApiUser[] | null;
   pagination?: {
     skip: number;
     take: number;
@@ -107,31 +119,14 @@ const Perfil: React.FC = () => {
       try {
         setLoading(true);
 
-        // Buscar perfil do usuário atual
-        const profileResponse = await fetch('https://auth.skytrack.space/auth/profile', {
+        // Buscar todos os usuários via localhost (que faz proxy para auth.skytrack.space)
+        // Isso evita problemas de CORS ao chamar auth.skytrack.space diretamente
+        const usersResponse = await fetch(`${API_BASE}/api/users`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
-          },
-        });
-
-        if (!profileResponse.ok) {
-          throw new Error(`Erro ao buscar perfil: ${profileResponse.status}`);
-        }
-
-        const profileData: ApiResponse = await profileResponse.json();
-
-        if (!profileData.success || !profileData.data) {
-          throw new Error(profileData.message || 'Erro ao carregar perfil');
-        }
-
-        // Buscar todos os usuários
-        const usersResponse = await fetch('https://auth.skytrack.space/users', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
         });
 
@@ -139,22 +134,26 @@ const Perfil: React.FC = () => {
           throw new Error(`Erro ao buscar usuários: ${usersResponse.status}`);
         }
 
-        const usersData: ApiResponse = await usersResponse.json(); // Corrigido: usersResponse em vez de usersData
+        const usersData: ApiResponse = await usersResponse.json();
 
         if (!usersData.success || !usersData.data) {
           throw new Error(usersData.message || 'Erro ao carregar usuários');
         }
 
-        // Processar dados
-        const currentUser = profileData.data as Usuario;
-        const allUsers = usersData.data as Usuario[];
+        // Processar dados - mapear da API para o formato esperado pelo componente
+        const apiUsers = Array.isArray(usersData.data) ? usersData.data : [usersData.data];
 
         // Marcar o usuário atual como principal
-        const processedUsers = allUsers.map(user => ({
-          ...user,
-          nome: user.username,
+        const processedUsers: Usuario[] = apiUsers.map(u => ({
+          id: u.id,
+          email: u.email,
+          username: u.username || u.email.split('@')[0],
+          nome: u.username || u.email.split('@')[0],
+          role: u.role,
           status: 'Ativo' as const,
-          principal: user.id === currentUser.id,
+          principal: user ? u.id === user.id : false,
+          createdAt: u.createdAt,
+          updatedAt: u.updatedAt,
         }));
 
         setUsuarios(processedUsers);
@@ -166,10 +165,10 @@ const Perfil: React.FC = () => {
       }
     };
 
-    if (token) {
+    if (token && user) {
       fetchData();
     }
-  }, [token]);
+  }, [token, user]);
 
   const usuarioPrincipal = usuarios.find((u) => u.principal);
   const outrosUsuarios = usuarios.filter((u) => !u.principal);

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Shield,
   UsersRound,
@@ -14,7 +13,6 @@ import { useAuth } from '../../context/AuthContext';
 
 const ConteudoLogin: React.FC = () => {
   const { login } = useAuth();
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -31,11 +29,19 @@ const ConteudoLogin: React.FC = () => {
   };
 
   const handlePublicEntry = () => {
-    navigate('/dashboard');
+    // Limpar o estado de autenticação antes de ir para entrada pública
+    localStorage.removeItem('skytrack_token');
+    localStorage.removeItem('skytrack_user');
+    // Usar window.location para forçar reload completo e limpar todo o estado
+    window.location.href = '/dashboard';
   };
 
   const handleBack = () => {
-    navigate('/dashboard');
+    // Limpar o estado de autenticação antes de voltar
+    localStorage.removeItem('skytrack_token');
+    localStorage.removeItem('skytrack_user');
+    // Usar window.location para forçar reload completo e limpar todo o estado
+    window.location.href = '/dashboard';
   };
 
   return (

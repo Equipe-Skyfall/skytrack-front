@@ -4,6 +4,7 @@ import ConfirmDelete from '../../components/alerts/ConfirmDelete';
 import TipoAlertaModal from '../../components/modals/TipoAlertaModal';
 import { useAuth } from '../../context/AuthContext';
 import { useAlertasPage } from '../../hooks/pages/useAlertasPage';
+import { formatDate, formatTime } from '../../utils/dateFormatter';
 
 export default function AlertasContent() {
   const { user } = useAuth();
@@ -19,13 +20,17 @@ export default function AlertasContent() {
     submitting,
     
     showTipoAlertaModal,
-    deletingId,
+    resolvingId,
+    activatingId,
     
-  onDelete,
+    onResolve,
+    onActivate,
     onSubmit,
-    onConfirmDelete,
+    onConfirmResolve,
+    onConfirmActivate,
     onCancelForm,
-    onCancelDelete,
+    onCancelResolve,
+    onCancelActivate,
     onFormChange,
     onOpenTipoAlertaModal,
     onCloseTipoAlertaModal
@@ -78,7 +83,7 @@ export default function AlertasContent() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-bold text-zinc-800 truncate">
-                        Alerta {a.parameterId}
+                        {a.alert_name || `Alerta ${a.id}`}
                       </h3>
                       <p className="text-sm text-zinc-600 truncate">{a.stationId}</p>
                     </div>
@@ -87,12 +92,12 @@ export default function AlertasContent() {
                     </div>
                   </div>
                   <p className="text-sm text-zinc-600">
-                    <strong>Data:</strong> {a.createdAt.toLocaleString()}
+                    <strong>Data:</strong> {formatDate(a.createdAt)}
                   </p>
                   {user && (
                     <div className="flex justify-center gap-4">
                       <button
-                        onClick={() => onDelete(a.id)}
+                        onClick={() => onResolve(a.id)}
                         className="bg-slate-900 text-white rounded-lg py-2 px-8 flex items-center gap-2 text-base font-semibold hover:bg-sky-700 transition-colors duration-300 shadow-sm cursor-pointer w-44 justify-center"
                         aria-label={`Resolver alerta ${a.id}`}
                       >
@@ -119,20 +124,20 @@ export default function AlertasContent() {
               {historyAlerts.map(h => (
                 <div
                   key={h.id}
-                  className="bg-white rounded-xl border border-zinc-300 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow duration-200 w-full"
+                  className="bg-zinc-50 rounded-xl border border-zinc-300 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200 w-full"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 flex items-center justify-center">
-                      <AlertTriangle className="h-6 w-6 text-zinc-600" />
+                    <div className="bg-zinc-100 rounded-lg p-3 flex items-center justify-center">
+                      <AlertTriangle className="h-6 w-6 text-zinc-500" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3">
-                        <h4 className="text-base font-semibold text-zinc-800 truncate">
-                          {`Alerta ${h.parameterId}`}
+                        <h4 className="text-base font-semibold text-zinc-600 truncate">
+                          {h.alert_name || `Alerta ${h.id}`}
                         </h4>
-                        { /* <span className="bg-zinc-100 text-zinc-700 rounded-full px-2 py-1 text-xs font-semibold">
+                        <span className="bg-zinc-200 text-zinc-700 rounded-full px-3 py-1 text-xs font-semibold">
                           Resolvido
-                        </span>   */}
+                        </span>
                       </div>
                       <div className="flex items-center gap-3 mt-2 text-sm text-zinc-500">
                         <span className="flex items-center gap-1 min-w-0 truncate">
@@ -141,19 +146,19 @@ export default function AlertasContent() {
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          <span>{new Date(h.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          <span>{formatTime(h.createdAt)}</span>
                         </span>
                       </div>
                     </div>
                   </div>
-                  {/* {user && (
+                  {user && (
                     <button
-                      onClick={() => onOpenDetails(h)}
-                      className="bg-white border border-zinc-300 rounded-lg py-2 px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-50 transition-colors duration-200"
+                      onClick={() => onActivate(h.id)}
+                      className="bg-green-600 text-white rounded-lg py-2 px-4 text-sm font-semibold hover:bg-green-700 transition-colors duration-200 shadow-sm"
                     >
-                      Ver Detalhes
+                      Ativar
                     </button>
-                  )} */}
+                  )}
                 </div>
               ))}
             </div>
@@ -172,10 +177,23 @@ export default function AlertasContent() {
         )}
 
         <ConfirmDelete
-          open={!!deletingId}
-          onCancel={onCancelDelete}
-          onConfirm={onConfirmDelete}
-          message="Deseja realmente excluir este alerta?"
+          open={!!resolvingId}
+          onCancel={onCancelResolve}
+          onConfirm={onConfirmResolve}
+          title="Confirmar resolução"
+          confirmText="Resolver"
+          confirmClass="bg-sky-600 hover:bg-sky-700"
+          message="Deseja marcar este alerta como resolvido? Ele ficará inativo e aparecerá no histórico."
+        />
+
+        <ConfirmDelete
+          open={!!activatingId}
+          onCancel={onCancelActivate}
+          onConfirm={onConfirmActivate}
+          title="Confirmar ativação"
+          confirmText="Ativar"
+          confirmClass="bg-green-600 hover:bg-green-700"
+          message="Deseja reativar este alerta? Ele voltará para os alertas ativos."
         />
 
         <TipoAlertaModal

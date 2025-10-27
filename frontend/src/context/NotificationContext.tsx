@@ -11,6 +11,7 @@ type Alert = {
   tipoAlertaId: string;
   medidasId?: string;
   createdAt: Date;
+  is_active: boolean;
   read?: boolean;
   description?: string;
   level?: 'warning' | 'critical';
@@ -20,6 +21,7 @@ type NotificationContextType = {
   alerts: Alert[];
   unreadCount: number;
   markAllAsRead: () => void;
+  reloadAlerts: () => Promise<void>;
 };
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -31,16 +33,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const loadAlerts = async () => {
     try {
-      const res = await getAlerts();
+      const res = await getAlerts(true); // Busca apenas alertas ativos (is_active=true)
+      console.log('🔔 NotificationContext - Alertas recebidos:', res);
+      console.log('🔍 Primeiro alerta completo:', res && res[0] ? JSON.stringify(res[0], null, 2) : 'Nenhum alerta');
+      
+      // Backend já filtra por is_active=true, então não precisa filtrar aqui
       const newAlerts = (res || []).map((alert: Alert) => ({
         ...alert,
         read: alert.read ?? false,
-        description: alert.description ?? undefined, // Será preenchido em Notification.tsx
+        description: alert.description ?? undefined,
         level: alert.level ?? 'warning',
       }));
 
+      console.log('✅ NotificationContext - Alertas processados:', newAlerts);
       setAlerts(newAlerts);
-  setUnreadCount(newAlerts.filter((a: Alert) => !a.read).length);
+      setUnreadCount(newAlerts.filter((a: Alert) => !a.read).length);
     } catch (err) {
       console.error('Erro ao carregar alertas:', err);
     }
@@ -65,7 +72,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   return (
-    <NotificationContext.Provider value={{ alerts, unreadCount, markAllAsRead }}>
+    <NotificationContext.Provider value={{ alerts, unreadCount, markAllAsRead, reloadAlerts: loadAlerts }}>
       {children}
     </NotificationContext.Provider>
   );

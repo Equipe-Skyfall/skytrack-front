@@ -5,6 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNotifications } from '../../context/NotificationContext';
 import AlertItem from '../alerts/AlertItem';
+import { formatDate } from '../../utils/dateFormatter';
 
 const Notification: React.FC = () => {
   const { alerts, unreadCount, markAllAsRead } = useNotifications();
@@ -38,7 +39,7 @@ const Notification: React.FC = () => {
               {message}
             </strong>
             <p className="text-xs text-slate-500 mt-1">
-              {new Date(alert.createdAt).toLocaleString('pt-BR')}
+              {formatDate(alert.createdAt)}
             </p>
           </div>
         </div>,
@@ -59,6 +60,11 @@ const Notification: React.FC = () => {
 
   // Função para gerar mensagem do alerta
   const getAlertMessage = (alert: any) => {
+    // Se tiver alert_name, usa ele
+    if (alert.alert_name) {
+      return alert.alert_name;
+    }
+    
     const tipoMap: { [key: string]: string } = {
       TEMPERATURE_HIGH: '🌡️ Temperatura elevada detectada',
       TEMPERATURE_LOW: '🌡️ Temperatura baixa detectada',
@@ -68,7 +74,7 @@ const Notification: React.FC = () => {
       PRESSURE_LOW: '📉 Queda de pressão atmosférica',
       WIND_HIGH: '💨 Ventos fortes detectados',
     };
-    return tipoMap[alert.tipoAlertaId] || `⚠️ Alerta: ${alert.parameterId}`;
+    return tipoMap[alert.tipoAlertaId] || `⚠️ Alerta`;
   };
 
   // Abrir modal

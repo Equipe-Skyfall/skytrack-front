@@ -1,35 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import type { 
+  DashboardStats, 
+  RecentActivity, 
+  ChartData, 
+  UseDashboardPageResult 
+} from '../../interfaces/dashboard';
 
-// Tipos para dados do dashboard
-export interface DashboardStats {
-  totalStations: number;
-  activeStations: number;
-  totalAlerts: number;
-  criticalAlerts: number;
-  totalParameters: number;
-  totalUsers: number;
-}
-
-export interface RecentActivity {
-  id: string;
-  type: 'alert' | 'station' | 'parameter' | 'user';
-  message: string;
-  timestamp: string;
-  severity?: 'low' | 'medium' | 'high' | 'critical';
-}
-
-export interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    backgroundColor?: string;
-    borderColor?: string;
-  }[];
-}
-
-export const useDashboardPage = () => {
+export const useDashboardPage = (): UseDashboardPageResult => {
   const { user } = useAuth();
   
   // Estado dos dados

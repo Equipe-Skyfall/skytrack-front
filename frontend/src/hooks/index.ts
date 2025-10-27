@@ -9,3 +9,7 @@ export * from './alerts/useAlerts';
 // Page hooks
 export * from './pages/useAlertasPage';
 export * from './pages/useEstacoesPage';
+export * from './auth/useAuthService';
+export * from './stations/useStations';
+export * from './alerts/useAlerts';
+export * from './sensor-readings/useSensorReadings';

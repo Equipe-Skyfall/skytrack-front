@@ -1,3 +1,4 @@
+// Sidebar.tsx (atualizado)
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -8,7 +9,8 @@ import {
   Gauge,
   LogIn,
   Settings,
-  User
+  User,
+  BarChart3
 } from "lucide-react";
 
 const Sidebar: React.FC = () => {
@@ -19,21 +21,25 @@ const Sidebar: React.FC = () => {
   // Verifica se é admin
   const isAdmin = user?.role === 'ADMIN';
 
-  const menuItems = isAdmin
-    ? [
-        { path: '/dashboard', label: 'Dashboard', icon: <Gauge /> },
-        { path: '/estacoes', label: 'Estações', icon: <MapPin /> },
-        { path: '/alertas', label: 'Alertas', icon: <TriangleAlert /> },
-        { path: '/educacao', label: 'Educação', icon: <BookOpen /> },
-        { path: '/parametros', label: 'Parâmetros', icon: <Settings /> },
-        { path: '/perfil', label: 'Perfil', icon: <User /> },
-      ]
-    : [
-        { path: '/dashboard', label: 'Dashboard', icon: <Gauge /> },
-        { path: '/estacoes', label: 'Estações', icon: <MapPin /> },
-        { path: '/alertas', label: 'Alertas', icon: <TriangleAlert /> },
-        { path: '/educacao', label: 'Educação', icon: <BookOpen /> },
-      ];
+  // Menu base para todos os usuários
+  const baseMenuItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: <Gauge /> },
+    { path: '/estacoes', label: 'Estações', icon: <MapPin /> },
+    { path: '/alertas', label: 'Alertas', icon: <TriangleAlert /> },
+    { path: '/educacao', label: 'Educação', icon: <BookOpen /> },
+  ];
+
+  // Menu adicional apenas para ADMIN
+  const adminMenuItems = [
+    { path: '/relatorios', label: 'Relatórios', icon: <BarChart3 /> },
+    { path: '/parametros', label: 'Parâmetros', icon: <Settings /> },
+    { path: '/perfil', label: 'Perfil', icon: <User /> },
+  ];
+
+  // Menu completo baseado no tipo de usuário
+  const menuItems = isAdmin 
+    ? [...baseMenuItems, ...adminMenuItems]
+    : baseMenuItems;
 
   const handleLogoffClick = () => {
     setIsModalOpen(true);

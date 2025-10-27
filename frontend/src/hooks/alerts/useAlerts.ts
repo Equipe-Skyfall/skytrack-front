@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { 
   getAlerts, 
   createAlert, 
@@ -64,9 +65,13 @@ export const useAlerts = () => {
   const activeAlerts = alerts.filter(a => !(a as any).resolved);
   const historyAlerts = alerts.filter(a => (a as any).resolved);
 
+  const { user } = useAuth();
+
   useEffect(() => {
+    // only load alerts when a user is authenticated
+    if (!user) return;
     loadAlerts();
-  }, [loadAlerts]);
+  }, [loadAlerts, user]);
 
   return {
     alerts,

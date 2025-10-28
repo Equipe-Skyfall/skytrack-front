@@ -8,6 +8,7 @@ export interface Alert {
   tipoAlertaId: string;
   medidasId?: string;
   createdAt: Date;
+  active: boolean;
 }
 
 export type AlertFormData = Partial<Alert>;

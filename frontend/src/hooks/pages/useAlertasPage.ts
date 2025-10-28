@@ -97,7 +97,8 @@ export const useAlertasPage = () => {
     setHistoryLoading(true);
     setHistoryError(null);
     try {
-      const res = await getHistoryAlerts(query);
+      // Always request inactive alerts for history
+      const res = await getHistoryAlerts({ ...query, is_active: false });
       setHistoryData((res && res.data) || []);
       setHistoryPagination((res && res.pagination) || null);
       setHistoryQuery(query);

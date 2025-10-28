@@ -12,7 +12,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./frontend  
+        working-direc#ry: ./frontend  
 
     steps:
       - name: Checkout repository

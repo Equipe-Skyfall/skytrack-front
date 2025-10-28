@@ -44,16 +44,21 @@ export type HistoryQuery = {
   level?: string;
   limit?: number;
   page?: number;
+  is_active?: boolean;
 };
 
 export async function getHistoryAlerts(query: HistoryQuery = {}) {
   console.log('🔔 getHistoryAlerts called', query);
   const params = new URLSearchParams();
+
+  // Always include is_active with default value of true
+  params.set('is_active', String(query.is_active ?? true));
+
   if (query.level) params.set('level', query.level);
   if (typeof query.limit !== 'undefined') params.set('limit', String(query.limit));
   if (typeof query.page !== 'undefined') params.set('page', String(query.page));
 
-  const path = `/api/alerts${params.toString() ? `?${params.toString()}` : ''}`;
+  const path = `/api/alerts?${params.toString()}`;
   const res = await request(path);
   return res || { data: [], pagination: null };
 }

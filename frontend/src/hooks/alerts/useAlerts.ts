@@ -62,14 +62,13 @@ export const useAlerts = () => {
   };
 
   // Filtros para alertas ativos e histórico
-  const activeAlerts = alerts.filter(a => !(a as any).resolved);
-  const historyAlerts = alerts.filter(a => (a as any).resolved);
+  const activeAlerts = alerts.filter(a => a.active === true);
+  const historyAlerts = alerts.filter(a => a.active === false);
 
   const { user } = useAuth();
 
   useEffect(() => {
-    // only load alerts when a user is authenticated
-    if (!user) return;
+    // Load alerts for all users (authentication not required for GET)
     loadAlerts();
   }, [loadAlerts, user]);
 

@@ -1,8 +1,30 @@
 import apiClient from './axios';
 
-export async function getAlerts() {
-  console.log('🔔 getAlerts called');
-  const response = await apiClient.get('/api/alerts');
+export interface AlertsQueryParams {
+  page?: number;
+  limit?: number;
+  level?: string;
+  search?: string;
+  is_active?: boolean;
+}
+
+export async function getAlerts(params?: AlertsQueryParams) {
+  console.log('🔔 getAlerts called', params);
+
+  // Build query parameters object
+  const queryParams: Record<string, any> = {
+    is_active: true, // Default to true to show only active alerts
+  };
+
+  if (params?.page !== undefined) queryParams.page = params.page;
+  if (params?.limit !== undefined) queryParams.limit = params.limit;
+  if (params?.level !== undefined) queryParams.level = params.level;
+  if (params?.search !== undefined) queryParams.search = params.search;
+  // Override default if explicitly provided
+  if (typeof params?.is_active === 'boolean') queryParams.is_active = params.is_active;
+
+  const response = await apiClient.get('/api/alerts', { params: queryParams });
+
   // NestJS returns { data: RegisteredAlertDto[], pagination: { ... } }
   if (response.data && typeof response.data === 'object' && 'data' in response.data) {
     return response.data.data;

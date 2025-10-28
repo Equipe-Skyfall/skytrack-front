@@ -1,44 +1,4 @@
-import { API_BASE } from './config';
-
-async function request(path: string, opts: RequestInit = {}) {
-  const url = `${API_BASE}${path}`;
-  console.log('🔔 History Alerts API Request:', {
-    method: opts.method || 'GET',
-    url,
-    body: opts.body ? JSON.parse(opts.body as string) : undefined,
-  });
-
-  const token = typeof window !== 'undefined' ? localStorage.getItem('skytrack_token') : null;
-  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) } as Record<string, string>;
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const credentials = (opts && (opts as RequestInit).credentials) || 'include';
-  const res = await fetch(url, {
-    headers,
-    credentials,
-    ...opts,
-  });
-
-  console.log('📡 History Alerts API Response:', {
-    status: res.status,
-    statusText: res.statusText,
-    url: res.url,
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('❌ History Alerts API Error:', text);
-    try { const json = JSON.parse(text); throw new Error(json.message || text); } catch { throw new Error(text || res.statusText); }
-  }
-
-  const contentType = res.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) {
-    const data = await res.json();
-    console.log('✅ History Alerts API Success Data:', data);
-    return data;
-  }
-  return null;
-}
+import apiClient from './axios';
 
 export type HistoryQuery = {
   level?: string;
@@ -48,20 +8,21 @@ export type HistoryQuery = {
 
 export async function getHistoryAlerts(query: HistoryQuery = {}) {
   console.log('🔔 getHistoryAlerts called', query);
-  const params = new URLSearchParams();
-  if (query.level) params.set('level', query.level);
-  if (typeof query.limit !== 'undefined') params.set('limit', String(query.limit));
-  if (typeof query.page !== 'undefined') params.set('page', String(query.page));
+  const params: Record<string, string> = {};
+  if (query.level) params.level = query.level;
+  if (typeof query.limit !== 'undefined') params.limit = String(query.limit);
+  if (typeof query.page !== 'undefined') params.page = String(query.page);
   // Sempre buscar apenas alertas inativos no histórico
-  params.set('is_active', 'false');
+  params.is_active = 'false';
 
-  const path = `/api/alerts${params.toString() ? `?${params.toString()}` : ''}`;
-  const res = await request(path);
-  return res || { data: [], pagination: null };
+  const res = await apiClient.get('/api/alerts', { params });
+  console.log('✅ History Alerts API Success Data:', res.data);
+  return res.data || { data: [], pagination: null };
 }
 
 export async function getHistoryAlert(id: string) {
-  return await request(`/api/alerts/${id}`);
+  const res = await apiClient.get(`/api/alerts/${id}`);
+  return res.data;
 }
 
 export default { getHistoryAlerts, getHistoryAlert };

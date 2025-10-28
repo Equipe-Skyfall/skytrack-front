@@ -4,7 +4,7 @@ import EditUserModal from '../modals/EditUserModal';
 import AddUserModal from '../modals/AddUserModal';
 import { AlertTriangle, Check, Edit2, X, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { API_BASE } from '../../services/api/config';
+import { AUTH_BASE } from '../../services/api/config';
 
 type Usuario = {
   id: string;
@@ -119,15 +119,15 @@ const Perfil: React.FC = () => {
       try {
         setLoading(true);
 
-        // Buscar todos os usuários via localhost (que faz proxy para auth.skytrack.space)
-        // Isso evita problemas de CORS ao chamar auth.skytrack.space diretamente
-        const usersResponse = await fetch(`${API_BASE}/api/users`, {
+        // Buscar todos os usuários do serviço de autenticação
+        const usersResponse = await fetch(`${AUTH_BASE}/users`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
+          credentials: 'include',
         });
 
         if (!usersResponse.ok) {

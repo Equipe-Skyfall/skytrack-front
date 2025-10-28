@@ -54,15 +54,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   useEffect(() => {
-    // Only load alerts if a user is authenticated
-    if (!user) {
-      setAlerts([]);
-      setUnreadCount(0);
-      return;
-    }
-
+    // Load alerts for both public users and authenticated users.
+    // If user exists we may later add user-specific behavior, but alerts
+    // themselves should be visible to anonymous visitors as well.
     loadAlerts();
-    const interval = setInterval(loadAlerts, 60000); // Polling a cada 60s
+    const interval = setInterval(loadAlerts, 60000); // Polling every 60s
     return () => clearInterval(interval);
   }, [user]);
 

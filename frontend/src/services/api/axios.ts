@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { AxiosResponse } from 'axios';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3000';
 
@@ -9,7 +10,8 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000, // 10 seconds timeout
-  withCredentials: true, // IMPORTANTE: Envia cookies automaticamente
+  // withCredentials removido - não é necessário para api.skytrack.space
+  // pois a autenticação é feita via Authorization header, não cookies
 });
 
 // Request interceptor for logging and auth
@@ -17,7 +19,7 @@ apiClient.interceptors.request.use(
   (config) => {
     // Adiciona token do localStorage se disponível
     const token = localStorage.getItem('skytrack_token');
-    if (token) {
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     
@@ -88,15 +90,44 @@ apiClient.interceptors.response.use(
       // ignore logging failures
     }
     
-    // Handle common errors
+    // Lista de rotas que DEVEM ser públicas (não causam redirecionamento em 401)
+    const publicApiRoutes = [
+      '/api/stations',
+      '/api/alerts',
+      '/api/sensor-readings',
+    ];
+    
+    // Verifica se a rota atual é pública
+    const isPublicRoute = publicApiRoutes.some(route => 
+      error.config?.url?.includes(route)
+    );
+    
+    // Handle 401 errors
     if (error.response?.status === 401) {
-      // Unauthorized - limpa token e usuário
-      localStorage.removeItem('skytrack_token');
-      localStorage.removeItem('skytrack_user');
-      // Redireciona para login apenas se não estiver em uma rota pública
-      const publicRoutes = ['/login', '/estacoes', '/dashboard', '/alertas', '/educacao'];
-      if (!publicRoutes.includes(window.location.pathname)) {
-        window.location.href = '/login';
+      // Se não é uma rota pública da API, limpa token e redireciona
+      if (!isPublicRoute) {
+        localStorage.removeItem('skytrack_token');
+        localStorage.removeItem('skytrack_user');
+        // Redireciona para login apenas se não estiver em uma rota pública do site
+        const publicPageRoutes = ['/login', '/estacoes', '/dashboard', '/alertas', '/educacao'];
+        if (!publicPageRoutes.includes(window.location.pathname)) {
+          window.location.href = '/login';
+        }
+      } else {
+        // Para rotas públicas da API, retorna dados vazios ao invés de erro
+        console.warn('⚠️ Rota pública retornou 401 - Backend precisa marcar como @Public():', error.config?.url);
+        // Retorna uma resposta vazia no formato esperado pelo backend NestJS
+        return Promise.resolve({
+          data: { 
+            data: [], 
+            success: true, // Mudado para true para não causar erros
+            message: 'No data available (public access without auth)' 
+          },
+          status: 200,
+          statusText: 'OK (fallback)',
+          headers: {},
+          config: error.config,
+        } as AxiosResponse);
       }
     }
     

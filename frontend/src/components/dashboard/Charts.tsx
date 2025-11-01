@@ -17,10 +17,12 @@ import { TrendingUp, MapPin } from 'lucide-react';
 import useSensorReadings from '../../hooks/sensor-readings/useSensorReadings';
 import { useStations } from '../../hooks/stations/useStations';
 
+const GLOBAL_STATION_ID = null; // Use null to represent "all stations"
+
 const Charts: React.FC = () => {
   const [activeChart, setActiveChart] = useState<'line' | 'area' | 'bar'>('line');
   const [selectedSensors, setSelectedSensors] = useState<Set<string>>(new Set());
-  const [selectedStationId, setSelectedStationId] = useState<string>('');
+  const [selectedStationId, setSelectedStationId] = useState<string | null>(GLOBAL_STATION_ID);
 
   const {
     readings,
@@ -34,7 +36,13 @@ const Charts: React.FC = () => {
 
 
   // Stations hook for dropdown
-  const { stations, loading: stationsLoading } = useStations();
+  const { stations } = useStations();
+
+  // Add "Todas as estações" as first option with null id (global)
+  const stationsWithGlobal: Array<{ id: string | null; name: string }> = [
+    { id: GLOBAL_STATION_ID, name: 'Todas as estações' },
+    ...(stations?.map(s => ({ id: s.id, name: s.name })) || []),
+  ];
 
   // Initialize selected sensors based on available sensor types
   useEffect(() => {
@@ -46,20 +54,26 @@ const Charts: React.FC = () => {
 
   // When the selected station changes, reload readings for that station
   useEffect(() => {
-    // If no station selected, load global readings
     const load = async () => {
-      if (!selectedStationId) {
-        await loadReadings();
-      } else {
-        // loadStationReadings is provided by the hook
-        if (typeof loadStationReadings === 'function') {
-          await loadStationReadings(selectedStationId);
+      try {
+        if (selectedStationId === GLOBAL_STATION_ID) {
+          // Global view - load all readings and explicitly clear station filters
+          console.log('Loading global readings (all stations)');
+          await loadReadings({}, true); // Force refresh to clear any cached station filters
+        } else {
+          // Station-specific view
+          console.log('Loading readings for station:', selectedStationId);
+          if (typeof loadStationReadings === 'function') {
+            await loadStationReadings(selectedStationId);
+          }
         }
+      } catch (err) {
+        console.error('Erro ao carregar leituras da estação:', err);
       }
     };
 
     load();
-  }, [selectedStationId]);
+  }, [selectedStationId]); // Remove loadReadings, loadStationReadings from deps to prevent infinite loops
 
   // Transform readings to chart data
   const chartData = readings.map(reading => {
@@ -345,13 +359,17 @@ const Charts: React.FC = () => {
             <label className="sr-only">Selecionar estação</label>
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
             <select
-              value={selectedStationId}
-              onChange={(e) => setSelectedStationId(e.target.value)}
+              value={selectedStationId ?? ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedStationId(val === '' ? GLOBAL_STATION_ID : val);
+              }}
               className="appearance-none pl-10 pr-8 py-2 border border-gray-200 rounded-md bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
             >
-              <option value="">{stationsLoading ? 'Carregando estações...' : 'Todas as estações'}</option>
-              {stations && stations.map(st => (
-                <option key={st.id} value={st.id}>{st.name}</option>
+              {stationsWithGlobal.map(st => (
+                <option key={st.id ?? 'global'} value={st.id ?? ''}>
+                  {st.name}
+                </option>
               ))}
             </select>
             {/* Caret */}

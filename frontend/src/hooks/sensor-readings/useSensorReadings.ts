@@ -62,6 +62,10 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
   
   // Current filters
   const [currentFilters, setCurrentFilters] = useState<ReadingsFilters>(initialFilters || {});
+  
+  // Rate limiting - prevent excessive API calls
+  const [lastRequestTime, setLastRequestTime] = useState<number>(0);
+  const MIN_REQUEST_INTERVAL = 1000; // 1 second minimum between requests
 
   // 🚀 CACHE STATE - Simple cache using React State
   const [cache, setCache] = useState<{
@@ -142,6 +146,7 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
       // Check cache first
       if (cache.rawData && isCacheValid()) {
         console.log('📊 Using cached data for auto-load');
+
         setReadings(cache.rawData);
         return;
       }
@@ -197,7 +202,11 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
     const isDefaultQuery = Object.keys(mergedFilters).length === 0 || 
                           (Object.keys(mergedFilters).length === 1 && mergedFilters.limit);
     
-    if (!forceRefresh && isDefaultQuery && isCacheValid()) {
+    // Check cache validity inline to avoid dependency issues
+    const cacheIsValid = cache.rawData && cache.lastFetch && 
+                        (Date.now() - cache.lastFetch) < CACHE_TTL;
+    
+    if (!forceRefresh && isDefaultQuery && cacheIsValid) {
       console.log('📊 Using cached sensor readings');
       
       // Apply client-side filtering to cached data
@@ -234,6 +243,16 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
     setError(null);
     
     try {
+      // Rate limiting: ensure minimum interval between requests
+      const now = Date.now();
+      const timeSinceLastRequest = now - lastRequestTime;
+      if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+        const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+        console.log(`⏳ Rate limiting: waiting ${waitTime}ms before next request`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+      setLastRequestTime(Date.now());
+      
       console.log('📊 Fetching sensor readings from API with filters:', mergedFilters);
       // Respect server error cooldown
       if (cooldownUntil && Date.now() < cooldownUntil) {
@@ -271,7 +290,7 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
     } finally {
       setLoading(false);
     }
-  }, [currentFilters, cache.rawData, cache.lastFetch, isCacheValid]);
+  }, []); // Empty dependency array to prevent infinite loops
 
   // Load readings for specific station
   const loadStationReadings = useCallback(async (
@@ -341,7 +360,7 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
     } finally {
       setRefreshing(false);
     }
-  }, [loadReadings, currentFilters]);
+  }, []); // Remove dependencies to prevent infinite loops
 
   // Update sensor types configuration
   const updateSensorTypes = useCallback((types: SensorType[]) => {
@@ -363,7 +382,7 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
   const setDateRange = useCallback(async (startDate: string, endDate: string) => {
     const newFilters = { ...currentFilters, startDate, endDate };
     await loadReadings(newFilters);
-  }, [currentFilters, loadReadings]);
+  }, []); // Remove dependencies to prevent infinite loops
 
   // Search readings with complex criteria
   const handleSearchReadings = useCallback(async (searchParams: any) => {

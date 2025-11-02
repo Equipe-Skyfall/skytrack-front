@@ -5,10 +5,10 @@ const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3
 // Create axios instance with base configuration
 const apiClient = axios.create({
   baseURL: API_BASE,
+  timeout: 30000, // 30 second timeout to prevent hanging requests
   headers: {
     'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 seconds timeout
+  }
 });
 
 // Request interceptor for logging and auth

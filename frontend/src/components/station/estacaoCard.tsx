@@ -38,31 +38,31 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
             <div className="bg-zinc-100 rounded-lg p-2">
               <MapPin className="h-5 w-5 text-zinc-700" />
             </div>
-            <h3 className="text-lg font-bold text-zinc-800">{station.name}</h3>
+            <h3 className="text-lg font-bold text-zinc-800 font-poppins">{station.name}</h3>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-semibold ${station.status === 'ACTIVE' ? 'bg-lime-500 text-white' : 'bg-red-500 text-white'
+          <div className={`px-3 py-1 rounded-full text-xs font-semibold font-poppins ${station.status === 'ACTIVE' ? 'bg-lime-500 text-white' : 'bg-red-500 text-white'
             }`}>
             {displayStatus[station.status] || station.status}
           </div>
         </div>
         <div className="bg-zinc-100 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-sm text-zinc-600">
+          <div className="flex items-center gap-2 text-sm text-zinc-600 font-poppins">
             <MapPin className="h-4 w-4" />
             <span>{station.address || 'Endereço não informado'}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-zinc-600">
+        <div className="flex items-center gap-2 text-sm text-zinc-600 font-poppins">
           <Wifi className="h-4 w-4" />
           <span className="font-mono">MAC: {station.macAddress || 'Não configurado'}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-zinc-600">
+        <div className="flex items-center gap-2 text-sm text-zinc-600 font-poppins">
           <Activity className="h-4 w-4" />
           <span className="font-mono">Coords: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}</span>
         </div>
-        <p className="text-sm text-zinc-600">
+        <p className="text-sm text-zinc-600 font-poppins">
           <strong>Descrição:</strong> {station.description || 'Sem descrição'}
         </p>
-        <div className="text-xs text-zinc-500">
+        <div className="text-xs text-zinc-500 font-poppins">
           Criado: {new Date(station.createdAt).toLocaleDateString("pt-BR")} |
           Atualizado: {new Date(station.updatedAt).toLocaleDateString("pt-BR")}
         </div>
@@ -71,7 +71,7 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
             {/* Botão de Histórico - NOVO */}
             <button
               onClick={() => setShowHistoryModal(true)}
-              className="bg-blue-500 text-white rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold hover:bg-blue-600 transition-colors duration-300 shadow-sm cursor-pointer"
+              className="bg-slate-900 text-white rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold font-poppins hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
             >
               <History className="h-5 w-5" />
               Histórico
@@ -79,14 +79,14 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
 
             <button
               onClick={onConfigurarClick}
-              className="bg-white border border-zinc-400 rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
+              className="bg-white border border-gray-300 rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold text-zinc-800 hover:bg-gray-50 transition-colors duration-300 shadow-sm cursor-pointer"
             >
               <Settings className="h-5 w-5" />
               Configurar
             </button>
             <button
               onClick={onDeleteClick}
-              className="bg-red-500 text-white rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
+              className="bg-red-600 text-white rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold hover:bg-red-700 transition-colors duration-300 shadow-sm cursor-pointer"
             >
               <Trash2 className="h-5 w-5" />
               Excluir

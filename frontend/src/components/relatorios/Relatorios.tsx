@@ -46,7 +46,7 @@ const Relatorios: React.FC = () => {
             // Buscar dados de todas as APIs
             const [stations, alerts, sensorReadings, parameters] = await Promise.all([
                 getStations(),
-                getAlerts(),
+                getAlerts(true), // Busca alertas ativos
                 getSensorReadings({ limit: 1000 }), // Buscar mais dados para análise
                 getParameters(1, 100)
             ]);
@@ -85,7 +85,7 @@ const Relatorios: React.FC = () => {
 
         alerts.forEach(alert => {
             // Ajuste conforme a estrutura real dos seus alertas
-            const tipo = alert.tipoAlertaId || 'Desconhecido';
+            const tipo = (alert as any).alert_name || alert.tipoAlertaId || 'Desconhecido';
             alertCounts[tipo] = (alertCounts[tipo] || 0) + 1;
         });
 

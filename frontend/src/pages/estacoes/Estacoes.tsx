@@ -33,7 +33,7 @@ const Estacoes: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="text-lg text-zinc-600">Carregando estações...</div>
+        <div className="text-lg text-zinc-600 font-poppins">Carregando estações...</div>
       </div>
     );
   }
@@ -41,7 +41,7 @@ const Estacoes: React.FC = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="text-lg text-red-600">Erro: {error}</div>
+        <div className="text-lg text-red-600 font-poppins">Erro: {error}</div>
       </div>
     );
   }

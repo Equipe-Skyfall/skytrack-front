@@ -11,7 +11,7 @@ import Educacao from './pages/educacao/Educacao';
 import Parametros from './pages/parametros/Parametros';
 import Perfil from './pages/perfil/Perfil';
 import Usuarios from './pages/usuarios/Usuarios';
-import Relatorios from './pages/relatorios/Relatorios';
+// import Relatorios from './pages/relatorios/Relatorios'; // DESATIVADO
 import Login from './pages/login/Login';
 import NotFoundPage from './components/notFound/notFoundPage';
 
@@ -31,12 +31,13 @@ const App: React.FC = () => {
             <Route path="/estacoes" element={<Layout><Estacoes /></Layout>} />
             <Route path="/alertas" element={<Layout><Alertas /></Layout>} />
             <Route path="/educacao" element={<Layout><Educacao /></Layout>} />
-            {/* RELATÓRIOS APENAS PARA ADMIN */}
+            {/* RELATÓRIOS DESATIVADO
             <Route path="/relatorios" element={
               <AdminRoute>
                 <Layout><Relatorios /></Layout>
               </AdminRoute>
             } />
+            */}
             <Route path="/perfil" element={<Layout><Perfil /></Layout>} />
             <Route path="/parametros" element={
               <AdminRoute>

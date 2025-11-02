@@ -116,9 +116,9 @@ const TipoParametroModal: React.FC<TipoParametroModalProps> = ({ open, onClose, 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-full max-w-lg sm:max-w-2xl md:max-w-4xl lg:max-w-5xl mx-4 max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex justify-between items-center p-6 border-b border-zinc-200">
-          <h2 className="text-xl md:text-2xl font-bold text-zinc-800">Gerenciar Tipos de Parâmetro</h2>
+          <h2 className="text-2xl font-bold text-zinc-800 font-poppins">Gerenciar Tipos de Parâmetro</h2>
           <button
             onClick={onClose}
             className="text-zinc-600 hover:text-zinc-800 cursor-pointer"
@@ -129,13 +129,13 @@ const TipoParametroModal: React.FC<TipoParametroModalProps> = ({ open, onClose, 
         <div className="p-6 overflow-y-auto" style={{ maxHeight: '70vh' }}>
           {showForm && (
             <div className="bg-white rounded-xl border border-zinc-200 p-6 mb-6 shadow-md">
-              <h4 className="text-lg font-bold text-zinc-800 mb-4">
+              <h4 className="text-xl font-semibold text-zinc-800 font-poppins mb-4">
                 {editing ? 'Editar Tipo de Parâmetro' : 'Novo Tipo de Parâmetro'}
               </h4>
               <form onSubmit={onSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700">Nome</label>
+                    <label className="block text-sm font-medium text-zinc-700 font-poppins">Nome</label>
                     <input
                       type="text"
                       value={form.nome || ''}
@@ -202,7 +202,7 @@ const TipoParametroModal: React.FC<TipoParametroModalProps> = ({ open, onClose, 
                   <button
                     type="button"
                     onClick={() => { setShowForm(false); setEditing(null); setForm({ metrica: '', coeficiente: [0, 1], leitura: {} }); }}
-                    className="bg-zinc-200 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-zinc-300 transition-colors duration-300 cursor-pointer"
+                    className="bg-white border border-gray-300 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -268,7 +268,7 @@ const TipoParametroModal: React.FC<TipoParametroModalProps> = ({ open, onClose, 
                     </button>
                     <button
                       onClick={() => onDelete(tp.id)}
-                      className="bg-red-500 text-white rounded-lg py-2 px-4 text-sm font-semibold hover:bg-red-600 transition-colors duration-300 cursor-pointer"
+                      className="bg-red-600 text-white rounded-lg py-2 px-4 text-sm font-semibold hover:bg-red-700 transition-colors duration-300 cursor-pointer"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -285,13 +285,13 @@ const TipoParametroModal: React.FC<TipoParametroModalProps> = ({ open, onClose, 
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setDeletingId(null)}
-                    className="bg-zinc-200 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-zinc-300 transition-colors duration-300 cursor-pointer"
+                    className="bg-white border border-gray-300 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={confirmDelete}
-                    className="bg-red-500 text-white rounded-lg py-3 px-8 text-base font-semibold hover:bg-red-600 transition-colors duration-300 cursor-pointer"
+                    className="bg-red-600 text-white rounded-lg py-3 px-8 text-base font-semibold hover:bg-red-700 transition-colors duration-300 cursor-pointer"
                   >
                     Excluir
                   </button>

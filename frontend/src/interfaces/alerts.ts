@@ -2,6 +2,8 @@
 
 export interface Alert {
   id: string;
+  alert_name?: string;
+  active?: boolean;
   data: Date;
   stationId: string;
   parameterId: string;

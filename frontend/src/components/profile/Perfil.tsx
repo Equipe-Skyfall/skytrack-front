@@ -188,7 +188,7 @@ const Perfil: React.FC = () => {
         <div className="text-red-500 text-lg">Erro: {error}</div>
         <button
           onClick={() => window.location.reload()}
-          className="ml-4 px-4 py-2 bg-blue-500 text-white rounded"
+          className="ml-4 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded transition-colors"
         >
           Tentar Novamente
         </button>
@@ -297,7 +297,7 @@ const Perfil: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <span className="text-xl font-bold text-black">Outros usuários</span>
           <button
-            className="flex items-center gap-2 w-48 h-11 bg-slate-900 rounded-lg text-white text-sm font-normal px-4 py-2 hover:bg-blue-900 transition"
+            className="flex items-center gap-2 w-48 h-11 bg-slate-900 rounded-lg text-white text-sm font-normal px-4 py-2 hover:bg-slate-800 transition"
             onClick={() => setIsAddModalOpen(true)}
             type="button"
           >
@@ -326,7 +326,7 @@ const Perfil: React.FC = () => {
                     </span>
                   </div>
                   <button
-                    className="w-36 h-10 bg-slate-900 rounded-lg border border-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-blue-900 transition-colors ml-6 shadow-sm"
+                    className="w-36 h-10 bg-slate-900 rounded-lg border border-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors ml-6 shadow-sm"
                     onClick={() => {
                       setEditUserInitialData({
                         email: u.email,

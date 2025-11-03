@@ -68,7 +68,7 @@ apiClient.interceptors.response.use(
         last.set(url, now);
         (apiClient as any).__lastErrorLogMap = last;
       }
-    } catch (e) {
+    } catch {
       // ignore logging failures
     }
     

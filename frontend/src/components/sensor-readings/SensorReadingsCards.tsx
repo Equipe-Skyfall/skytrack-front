@@ -34,8 +34,8 @@ const SensorReadingsCards: React.FC<SensorReadingsCardsProps> = ({
     try {
       console.log('📊 Loading current sensor readings...');
       
-  const response = await getSensorReadings({ limit: 200 });
-  const readings: SensorReading[] = response.data || response || [];
+      const response = await getSensorReadings({ limit: 200 });
+      const readings: SensorReading[] = Array.isArray(response) ? response : (response.data || []);
       
       // Group readings by station and get the most recent for each station
       const stationMap = new Map<string, StationData>();

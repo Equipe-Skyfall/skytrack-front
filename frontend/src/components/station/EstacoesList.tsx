@@ -6,7 +6,7 @@ import ModalExcluirEstacao from "../modals/modalExcluirEstacao";
 import { useAuth } from "../../context/AuthContext";
 import { useStations } from "../../hooks/stations/useStations";
 import Pagination from "../pagination/pagination";
-import EstacaoCard from "./estacaoCard";
+import { EstacaoCard } from "./estacaoCard";
 import type { Station, StationFormData } from '../../interfaces/stations';
 
 const STATIONS_PER_PAGE = 10;

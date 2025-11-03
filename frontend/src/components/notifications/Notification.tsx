@@ -200,7 +200,8 @@ const Notification: React.FC = () => {
                       alert={{ 
                         ...alert, 
                         description: alert.description || getAlertMessage(alert),
-                        level: alert.level || 'warning'
+                        level: alert.level || 'warning',
+                        createdAt: alert.createdAt instanceof Date ? alert.createdAt.toISOString() : alert.createdAt
                       }}
                       onEdit={() => {}}
                       onDelete={() => {}}
@@ -238,7 +239,6 @@ const Notification: React.FC = () => {
       <ToastContainer
         toastClassName="!bg-white !border !border-slate-200 !rounded-xl !shadow-lg"
         progressClassName="!bg-slate-600"
-        bodyClassName="!p-0"
       />
     </>
   );

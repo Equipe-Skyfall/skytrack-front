@@ -80,6 +80,7 @@ export const useSensorReadings = (initialFilters?: ReadingsFilters): UseSensorRe
 
   // Cache duration: 30 seconds
   const CACHE_DURATION = 30 * 1000; // 30s
+  const CACHE_TTL = 30 * 1000; // 30s - alias for compatibility
   // Backoff on server errors (500) to avoid tight retry loops
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
   const BACKOFF_DURATION = 60 * 1000; // 60s

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-import type { Station } from '../../interfaces/stations';
 import Estacao from '../../components/station/estacaoCard';
 
 const Estacoes: React.FC = () => {
-  const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,10 +14,8 @@ const Estacoes: React.FC = () => {
         
         // TODO: Replace with real API call
         // const response = await getStations();
-        // setStations(response.data);
         
         // For now, provide empty array to avoid mock data
-        setStations([]);
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar estações');
       } finally {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, X } from 'lucide-react';
-import type { Alert, AlertFormData } from '../../interfaces/alerts';
+import type { AlertFormData } from '../../interfaces/alerts';
 
 type Props = {
   value: AlertFormData;
@@ -31,7 +31,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
         const json = await res.json();
         const list = Array.isArray(json) ? json : (json.data || []);
         if (mounted) setStations(list.map((s: any) => ({ id: s.id, mac: s.macAddress ?? s.mac ?? s.id, name: s.name, region: s.address })));
-      } catch (e) {
+      } catch {
         // ignore
       } finally {
         if (mounted) setLoadingStations(false);
@@ -50,7 +50,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
           const mapped = list.map((p: any) => ({ id: p.id, name: p.name || p.tipoParametroId || p.id, tipoParametroId: p.tipoParametroId }));
           setParameters(mapped);
         }
-      } catch (e) {
+      } catch {
         // ignore
       } finally {
         if (mounted) setLoadingParams(false);
@@ -64,7 +64,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
         const json = await res.json();
         const list = Array.isArray(json) ? json : (json.data || json);
         if (mounted) setTipoParametros(list.map((t: any) => ({ id: t.id, nome: t.nome })));
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -76,7 +76,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
         const json = await res.json();
         const list = Array.isArray(json) ? json : (json.data || json);
         if (mounted) setTipoAlertas(list.map((t: any) => ({ id: t.id, tipo: t.tipo })));
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -86,7 +86,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
     loadTipoAlertas();
     loadParameters(value.stationId || undefined);
     return () => { mounted = false; };
-  }, []);
+  }, [value.stationId]);
 
   useEffect(() => {
     let mounted = true;
@@ -106,7 +106,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
           });
           setParameters(mapped);
         }
-      } catch (e) {
+      } catch {
         // ignore
       } finally {
         if (mounted) setLoadingParams(false);

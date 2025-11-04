@@ -25,7 +25,8 @@ interface ModalEdicaoProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: StationFormData) => void;
-    stationToEdit: StationData;
+    stationToEdit?: StationData;
+    initialData?: StationFormData;
 }
 
 const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
@@ -33,6 +34,7 @@ const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
     onClose,
     onSubmit,
     stationToEdit,
+    initialData,
 }) => {
     const [formData, setFormData] = useState<StationFormData>({
         name: "",
@@ -45,18 +47,22 @@ const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
     });
 
     useEffect(() => {
-        if (isOpen && stationToEdit) {
-            setFormData({
-                name: stationToEdit.name,
-                address: stationToEdit.address || "",
-                macAddress: stationToEdit.macAddress || "",
-                latitude: String(stationToEdit.latitude),
-                longitude: String(stationToEdit.longitude),
-                description: stationToEdit.description || "",
-                status: stationToEdit.status,
-            });
+        if (isOpen) {
+            if (initialData) {
+                setFormData(initialData);
+            } else if (stationToEdit) {
+                setFormData({
+                    name: stationToEdit.name,
+                    address: stationToEdit.address || "",
+                    macAddress: stationToEdit.macAddress || "",
+                    latitude: String(stationToEdit.latitude),
+                    longitude: String(stationToEdit.longitude),
+                    description: stationToEdit.description || "",
+                    status: stationToEdit.status,
+                });
+            }
         }
-    }, [stationToEdit, isOpen]);
+    }, [stationToEdit, initialData, isOpen]);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>

@@ -6,11 +6,11 @@ import TipoParametroModal from '../modals/TipoParametroModal';
 
 import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, UpdateParameterDto, ParameterFormData } from '../../interfaces/parameters';
 import type { StationDto } from '../../interfaces/stations';
-import { getParameters, createParameter, updateParameter } from '../../services/api/parameters';
+import { getParameters, createParameter, updateParameter, deleteParameter } from '../../services/api/parameters';
 
 import { getTipoParametros } from '../../services/api/tipo-parametro';
 import { getTipoAlertas } from '../../services/api/tipo-alerta';
-import { getStations } from '../../services/api/stations';
+import { getStations as getStationsAPI } from '../../services/api/stations';
 
 const ParametersContent: React.FC = () => {
   const { token } = useAuth();
@@ -30,7 +30,7 @@ const ParametersContent: React.FC = () => {
   const [deleteParamId, setDeleteParamId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'parametros' | 'tipos'>('parametros');
+  const [activeTab] = useState<'parametros' | 'tipos'>('parametros');
   const [showTipoParametroModal, setShowTipoParametroModal] = useState(false);
 
   useEffect(() => {
@@ -44,8 +44,8 @@ const ParametersContent: React.FC = () => {
         }
 
         // Fetch stations
-        const stationsData = await getStations(token);
-        setStations(stationsData);
+        const stationsData = await getStationsAPI(token);
+        setStations(stationsData as any);
 
         // Fetch parameters
         const paramResponse = await getParameters(1, 100, undefined, token);

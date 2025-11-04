@@ -10,14 +10,16 @@ export default defineConfig({
         target: 'https://apitest.skytrack.space',
         changeOrigin: true,
         secure: true,
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
+        configure: (proxy) => {
+          // Type assertion to access event emitter methods
+          const proxyServer = proxy as any;
+          proxyServer.on('error', (err: Error) => {
             console.log('proxy error', err);
           });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
+          proxyServer.on('proxyReq', (proxyReq: any, req: any) => {
             console.log('Sending Request to the Target:', req.method, req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
+          proxyServer.on('proxyRes', (proxyRes: any, req: any) => {
             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
           });
         },

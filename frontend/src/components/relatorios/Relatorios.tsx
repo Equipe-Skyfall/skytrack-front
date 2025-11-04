@@ -1,5 +1,6 @@
 // src/components/relatorios/Relatorios.tsx
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
     BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -16,9 +17,8 @@ import {
 import { getStations } from '../../services/api/stations';
 import { getAlerts } from '../../services/api/alerts';
 import { getSensorReadings } from '../../services/api/sensorReadings';
-import { getParameters } from '../../services/api/parameters';
 import type { Alert } from '../../interfaces/alerts';
-import type { SensorReading } from '../../interfaces/stations';
+import type { SensorReading } from '../../interfaces/sensor-readings';
 
 interface ReportData {
     totalStations: number;
@@ -44,24 +44,23 @@ const Relatorios: React.FC = () => {
         setLoading(true);
         try {
             // Buscar dados de todas as APIs
-            const [stations, alerts, sensorReadings, parameters] = await Promise.all([
+            const [stations, alerts, sensorReadings] = await Promise.all([
                 getStations(),
                 getAlerts(true), // Busca alertas ativos
                 getSensorReadings({ limit: 1000 }), // Buscar mais dados para análise
-                getParameters(1, 100)
             ]);
 
             // Processar dados para relatórios
             const processedData: ReportData = {
                 totalStations: stations.length,
-                activeStations: stations.filter(s => s.status === 'ACTIVE').length,
-                inactiveStations: stations.filter(s => s.status === 'INACTIVE').length,
+                activeStations: Array.isArray(stations) ? stations.filter((s: any) => s.status === 'ACTIVE').length : 0,
+                inactiveStations: Array.isArray(stations) ? stations.filter((s: any) => s.status === 'INACTIVE').length : 0,
                 totalAlerts: alerts.length,
                 totalReadings: sensorReadings.data?.length || 0,
 
                 stationsByStatus: [
-                    { name: 'Ativas', value: stations.filter(s => s.status === 'ACTIVE').length },
-                    { name: 'Inativas', value: stations.filter(s => s.status === 'INACTIVE').length }
+                    { name: 'Ativas', value: Array.isArray(stations) ? stations.filter((s: any) => s.status === 'ACTIVE').length : 0 },
+                    { name: 'Inativas', value: Array.isArray(stations) ? stations.filter((s: any) => s.status === 'INACTIVE').length : 0 }
                 ],
 
                 alertsByType: processAlertsByType(alerts),
@@ -213,9 +212,13 @@ const Relatorios: React.FC = () => {
 
         return recentReadings.map((reading, index) => ({
             name: `Leitura ${index + 1}`,
-            temperatura: reading.valor.temperature || reading.valor.temperatura || 0,
-            umidade: reading.valor.humidity || reading.valor.umidade || 0,
-            chuva: reading.valor.chuva || 0
+            temperatura: typeof reading.valor === 'object' && reading.valor !== null 
+                ? (reading.valor.temperature || 0)
+                : 0,
+            umidade: typeof reading.valor === 'object' && reading.valor !== null 
+                ? (reading.valor.humidity || 0)
+                : 0,
+            chuva: 0 // Não temos dados de chuva no schema atual
         }));
     };
 
@@ -355,7 +358,7 @@ const Relatorios: React.FC = () => {
                                     cx="50%"
                                     cy="50%"
                                     labelLine={false}
-                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    label={({ name, percent }: any) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                                     outerRadius={80}
                                     fill="#8884d8"
                                     dataKey="value"

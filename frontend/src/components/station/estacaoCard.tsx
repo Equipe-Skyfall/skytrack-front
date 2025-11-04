@@ -370,4 +370,5 @@ const Estacao: React.FC = () => {
   );
 };
 
+export { EstacaoCard };
 export default Estacao;

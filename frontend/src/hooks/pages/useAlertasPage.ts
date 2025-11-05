@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlerts } from '../alerts/useAlerts';
+import { useNotifications } from '../../context/NotificationContext';
 import type { Alert, AlertFormData } from '../../interfaces/alerts';
 import { getHistoryAlerts } from '../../services/api/historyAlerts';
+import { resolveAlert as resolveAlertAPI } from '../../services/api/alerts';
 // removed detail-related remote fetches (stations/parameters/tipo-alerta) — not needed after details removal
 import type { HistoryQuery } from '../../services/api/historyAlerts';
 
@@ -15,6 +17,7 @@ const emptyForm: AlertFormData = {
 
 export const useAlertasPage = () => {
   const { user } = useAuth();
+  const { reloadAlerts: reloadNotifications } = useNotifications();
   const {
     activeAlerts,
     loading,
@@ -22,6 +25,7 @@ export const useAlertasPage = () => {
     createAlert,
     updateAlert,
     deleteAlert,
+    loadAlerts, // Adicionar loadAlerts para recarregar alertas ativos manualmente
   } = useAlerts();
   
   const [editing, setEditing] = useState<Alert | null>(null);
@@ -46,6 +50,28 @@ export const useAlertasPage = () => {
   const onDelete = (id?: string) => {
     if (!id) return;
     setDeletingId(id);
+  };
+
+  const onResolve = async (id: string) => {
+    console.log('🔄 onResolve iniciado para ID:', id);
+    try {
+      // Chama a API diretamente sem esperar o reload automático do hook
+      console.log('📡 Chamando API resolveAlert...');
+      await resolveAlertAPI(id);
+      console.log('✅ API respondeu, recarregando listas...');
+      
+      // Recarrega manualmente e em paralelo para ser mais rápido
+      await Promise.all([
+        loadAlerts(), // Recarrega alertas ativos
+        loadHistory(historyQuery), // Recarrega histórico
+        reloadNotifications(), // Recarrega notificações
+      ]);
+      
+      console.log('✅ Todas as listas recarregadas!');
+    } catch (err: any) {
+      console.error('❌ Erro ao resolver/reativar:', err);
+      alert('Erro ao resolver/reativar alerta');
+    }
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -144,6 +170,7 @@ export const useAlertasPage = () => {
 
     onEdit,
     onDelete,
+    onResolve,
     onSubmit,
     onCancelForm,
     onFormChange,

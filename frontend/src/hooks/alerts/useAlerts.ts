@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { 
   getAlerts, 
   createAlert, 
-  updateAlert, 
+  updateAlert,
+  resolveAlert,
   deleteAlert 
 } from '../../services/api/alerts';
 import { 
@@ -23,7 +23,7 @@ export const useAlerts = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await getAlerts();
+      const res = await getAlerts(true); // Busca apenas alertas ativos (is_active=true)
       setAlerts(res || []);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar alertas');
@@ -61,17 +61,24 @@ export const useAlerts = () => {
     }
   };
 
-  // Filtros para alertas ativos e histórico
-  const activeAlerts = alerts.filter(a => !(a as any).resolved);
-  const historyAlerts = alerts.filter(a => (a as any).resolved);
+  const handleResolveAlert = async (id: string): Promise<void> => {
+    try {
+      await resolveAlert(id);
+      await loadAlerts(); // Reload alerts
+    } catch (error) {
+      throw error;
+    }
+  };
 
-  const { user } = useAuth();
+  // Filtros para alertas ativos e histórico
+  // Backend retorna 'active' não 'resolved'
+  const activeAlerts = alerts.filter(a => (a as any).active !== false);
+  const historyAlerts = alerts.filter(a => (a as any).active === false);
 
   useEffect(() => {
-    // only load alerts when a user is authenticated
-    if (!user) return;
+    // Carregar alertas sempre, mesmo sem usuário autenticado (para usuários públicos)
     loadAlerts();
-  }, [loadAlerts, user]);
+  }, [loadAlerts]);
 
   return {
     alerts,
@@ -82,6 +89,7 @@ export const useAlerts = () => {
     loadAlerts,
     createAlert: handleCreateAlert,
     updateAlert: handleUpdateAlert,
+    resolveAlert: handleResolveAlert,
     deleteAlert: handleDeleteAlert,
   };
 };

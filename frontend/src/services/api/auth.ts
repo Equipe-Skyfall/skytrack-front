@@ -13,7 +13,7 @@ const decodeJWT = (token: string) => {
         .join('')
     );
     return JSON.parse(jsonPayload);
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -105,7 +105,7 @@ export async function getUserProfile(): Promise<User> {
     } else {
       throw new Error('Resposta vazia do servidor');
     }
-  } catch (e) {
+  } catch {
     throw new Error('Erro ao processar resposta do servidor');
   }
 

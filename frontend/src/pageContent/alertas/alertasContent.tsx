@@ -21,7 +21,7 @@ export default function AlertasContent() {
     showTipoAlertaModal,
     deletingId,
     
-  onDelete,
+  onResolve,
     onSubmit,
     onConfirmDelete,
     onCancelForm,
@@ -36,17 +36,17 @@ export default function AlertasContent() {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-800 tracking-tight">
+            <h1 className="text-3xl font-bold text-zinc-800 font-poppins">
               Alertas Meteorológicos
             </h1>
-            <p className="text-base sm:text-lg text-zinc-600">
+            <p className="text-base sm:text-lg text-zinc-600 font-poppins">
               Monitore condições adversas e gerencie notificações
             </p>
           </div>
           {user && (
             <button
               onClick={onOpenTipoAlertaModal}
-              className="bg-slate-900 text-white rounded-lg py-3 px-8 flex items-center gap-2 text-base font-semibold hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
+              className="bg-slate-900 text-white rounded-lg py-3 px-8 flex items-center gap-2 text-base font-semibold font-poppins hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
             >
               <Settings className="h-5 w-5" />
               Gerenciar Tipos
@@ -55,7 +55,7 @@ export default function AlertasContent() {
         </div>
 
         <div className="space-y-6">
-          <h2 className="text-xl font-bold text-zinc-800 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-zinc-800 font-poppins flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-zinc-700" />
             Alertas Ativos
           </h2>
@@ -78,22 +78,30 @@ export default function AlertasContent() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-bold text-zinc-800 truncate">
-                        Alerta {a.parameterId}
+                        {(a as any).alert_name || (a as any).tipoAlerta?.tipo || `Alerta ${a.tipoAlertaId}`}
                       </h3>
-                      <p className="text-sm text-zinc-600 truncate">{a.stationId}</p>
+                      <p className="text-sm text-zinc-600 truncate">
+                        {(a as any).station?.name || a.stationId}
+                      </p>
                     </div>
-                    <div className="bg-blue-500 text-white rounded-full px-3 py-1 text-xs font-semibold">
+                    <div className="bg-slate-900 text-white rounded-full px-3 py-1 text-xs font-semibold">
                       Ativo
                     </div>
                   </div>
                   <p className="text-sm text-zinc-600">
-                    <strong>Data:</strong> {a.createdAt.toLocaleString()}
+                    <strong>Data:</strong> {new Date(a.createdAt).toLocaleString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </p>
                   {user && (
                     <div className="flex justify-center gap-4">
                       <button
-                        onClick={() => onDelete(a.id)}
-                        className="bg-slate-900 text-white rounded-lg py-2 px-8 flex items-center gap-2 text-base font-semibold hover:bg-sky-700 transition-colors duration-300 shadow-sm cursor-pointer w-44 justify-center"
+                        onClick={() => onResolve(a.id)}
+                        className="bg-slate-900 text-white rounded-lg py-2 px-8 flex items-center gap-2 text-base font-semibold hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer w-44 justify-center"
                         aria-label={`Resolver alerta ${a.id}`}
                       >
                         <Check className="h-5 w-5" />
@@ -128,7 +136,7 @@ export default function AlertasContent() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3">
                         <h4 className="text-base font-semibold text-zinc-800 truncate">
-                          {`Alerta ${h.parameterId}`}
+                          {(h as any).alert_name || (h as any).tipoAlerta?.tipo || `Alerta ${h.tipoAlertaId}`}
                         </h4>
                         { /* <span className="bg-zinc-100 text-zinc-700 rounded-full px-2 py-1 text-xs font-semibold">
                           Resolvido
@@ -137,23 +145,32 @@ export default function AlertasContent() {
                       <div className="flex items-center gap-3 mt-2 text-sm text-zinc-500">
                         <span className="flex items-center gap-1 min-w-0 truncate">
                           <MapPin className="h-4 w-4" />
-                          <span className="truncate">{h.stationId}</span>
+                          <span className="truncate">{(h as any).station?.name || h.stationId}</span>
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          <span>{new Date(h.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          <span>{new Date(h.createdAt).toLocaleDateString('pt-BR', { 
+                            day: '2-digit', 
+                            month: '2-digit',
+                            year: 'numeric'
+                          })} às {new Date(h.createdAt).toLocaleTimeString('pt-BR', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}</span>
                         </span>
                       </div>
                     </div>
                   </div>
-                  {/* {user && (
+                  {user && (
                     <button
-                      onClick={() => onOpenDetails(h)}
-                      className="bg-white border border-zinc-300 rounded-lg py-2 px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-50 transition-colors duration-200"
+                      onClick={() => onResolve(h.id)}
+                      className="bg-slate-900 hover:bg-slate-800 text-white rounded-lg py-2 px-4 text-sm font-semibold transition-colors duration-200 flex items-center gap-2"
+                      title="Reativar alerta"
                     >
-                      Ver Detalhes
+                      <Check className="h-4 w-4" />
+                      Reativar
                     </button>
-                  )} */}
+                  )}
                 </div>
               ))}
             </div>

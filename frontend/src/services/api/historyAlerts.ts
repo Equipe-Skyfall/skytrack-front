@@ -49,6 +49,8 @@ export type HistoryQuery = {
 export async function getHistoryAlerts(query: HistoryQuery = {}) {
   console.log('🔔 getHistoryAlerts called', query);
   const params = new URLSearchParams();
+  // Sempre buscar apenas alertas inativos no histórico
+  params.set('is_active', 'false');
   if (query.level) params.set('level', query.level);
   if (typeof query.limit !== 'undefined') params.set('limit', String(query.limit));
   if (typeof query.page !== 'undefined') params.set('page', String(query.page));

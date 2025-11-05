@@ -109,11 +109,15 @@ export const useAuthService = () => {
       console.warn('Erro no logout:', error);
     }
 
+    // Limpar completamente o estado
     setUser(null);
     setToken(null);
     localStorage.removeItem('skytrack_user');
     localStorage.removeItem('skytrack_token');
+    
+    // Navegar e recarregar para limpar todos os estados
     navigate('/login', { replace: true });
+    window.location.reload();
   };
 
   return {

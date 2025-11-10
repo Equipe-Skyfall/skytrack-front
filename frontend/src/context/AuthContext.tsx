@@ -207,11 +207,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Mesmo com erro, limpa o estado local
     }
 
+    // Limpar TUDO antes de navegar
     setUser(null);
     setToken(null);
     localStorage.removeItem('skytrack_user');
     localStorage.removeItem('skytrack_token');
+    
+    // Forçar reload completo após logout para garantir que todos os estados sejam limpos
     navigate('/login', { replace: true });
+    window.location.reload();
   };
 
   const updateUser = async (userData: Partial<ApiUser>) => {

@@ -293,7 +293,7 @@ const SensorReadingsChart: React.FC<SensorReadingsChartProps> = ({
             <button
               onClick={refreshData}
               disabled={refreshing}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
@@ -301,7 +301,7 @@ const SensorReadingsChart: React.FC<SensorReadingsChartProps> = ({
             {hasData && (
               <button
                 onClick={downloadData}
-                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Download className="h-4 w-4" />
               </button>
@@ -328,7 +328,7 @@ const SensorReadingsChart: React.FC<SensorReadingsChartProps> = ({
                 onClick={() => setSelectedTimeRange(range.value as any)}
                 className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                   selectedTimeRange === range.value
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-slate-900 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -350,7 +350,7 @@ const SensorReadingsChart: React.FC<SensorReadingsChartProps> = ({
                 onClick={() => setSelectedChartType(type.value as any)}
                 className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                   selectedChartType === type.value
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-slate-900 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >

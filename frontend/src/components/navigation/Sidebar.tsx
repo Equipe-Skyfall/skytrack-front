@@ -10,7 +10,7 @@ import {
   LogIn,
   Settings,
   User,
-  BarChart3
+  // BarChart3 // DESATIVADO - usado em Relatórios
 } from "lucide-react";
 
 const Sidebar: React.FC = () => {
@@ -31,7 +31,7 @@ const Sidebar: React.FC = () => {
 
   // Menu adicional apenas para ADMIN
   const adminMenuItems = [
-    { path: '/relatorios', label: 'Relatórios', icon: <BarChart3 /> },
+    // { path: '/relatorios', label: 'Relatórios', icon: <BarChart3 /> }, // DESATIVADO
     { path: '/parametros', label: 'Parâmetros', icon: <Settings /> },
     { path: '/perfil', label: 'Perfil', icon: <User /> },
   ];
@@ -142,13 +142,13 @@ const Sidebar: React.FC = () => {
             <div className="flex justify-end space-x-4">
               <button
                 onClick={cancelLogoff}
-                className="bg-gray-300 text-black py-2 px-4 rounded hover:bg-gray-400 transition-colors font-poppins"
+                className="bg-white border border-gray-300 text-black py-2 px-4 rounded hover:bg-gray-50 transition-colors font-poppins"
               >
                 Não
               </button>
               <button
                 onClick={confirmLogoff}
-                className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors font-poppins"
+                className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors font-poppins"
               >
                 Sim
               </button>

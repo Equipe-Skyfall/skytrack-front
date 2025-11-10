@@ -59,6 +59,11 @@ const Notification: React.FC = () => {
 
   // Função para gerar mensagem do alerta
   const getAlertMessage = (alert: any) => {
+    // Prioriza alert_name vindo do backend
+    if (alert.alert_name) {
+      return alert.alert_name;
+    }
+    
     const tipoMap: { [key: string]: string } = {
       TEMPERATURE_HIGH: '🌡️ Temperatura elevada detectada',
       TEMPERATURE_LOW: '🌡️ Temperatura baixa detectada',
@@ -68,7 +73,7 @@ const Notification: React.FC = () => {
       PRESSURE_LOW: '📉 Queda de pressão atmosférica',
       WIND_HIGH: '💨 Ventos fortes detectados',
     };
-    return tipoMap[alert.tipoAlertaId] || `⚠️ Alerta: ${alert.parameterId}`;
+    return tipoMap[alert.tipoAlertaId] || `⚠️ Alerta`;
   };
 
   // Abrir modal
@@ -119,7 +124,7 @@ const Notification: React.FC = () => {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-white">
-                      Histórico de Alertas
+                      Notificações
                     </h2>
                     <p className="text-slate-300 text-sm mt-1">
                       {unreadCount > 0 ? `${unreadCount} não lida${unreadCount !== 1 ? 's' : ''}` : 'Todas lidas'}
@@ -195,7 +200,8 @@ const Notification: React.FC = () => {
                       alert={{ 
                         ...alert, 
                         description: alert.description || getAlertMessage(alert),
-                        level: alert.level || 'warning'
+                        level: alert.level || 'warning',
+                        createdAt: alert.createdAt instanceof Date ? alert.createdAt.toISOString() : alert.createdAt
                       }}
                       onEdit={() => {}}
                       onDelete={() => {}}
@@ -233,7 +239,6 @@ const Notification: React.FC = () => {
       <ToastContainer
         toastClassName="!bg-white !border !border-slate-200 !rounded-xl !shadow-lg"
         progressClassName="!bg-slate-600"
-        bodyClassName="!p-0"
       />
     </>
   );

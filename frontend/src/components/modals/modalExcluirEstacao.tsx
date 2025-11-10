@@ -4,8 +4,9 @@ interface ModalExcluirEstacaoProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  title: string;
-  message: string | React.ReactNode;
+  title?: string;
+  message?: string | React.ReactNode;
+  stationName?: string;
 }
 
 const ModalExcluirEstacao: React.FC<ModalExcluirEstacaoProps> = ({
@@ -14,7 +15,11 @@ const ModalExcluirEstacao: React.FC<ModalExcluirEstacaoProps> = ({
   onConfirm,
   title,
   message,
+  stationName,
 }) => {
+  
+  const displayTitle = title || 'Confirmar Exclusão';
+  const displayMessage = message || (stationName ? `Tem certeza que deseja excluir a estação "${stationName}"?` : 'Tem certeza que deseja excluir esta estação?');
   
   const handleContentClick = (e: React.MouseEvent) => e.stopPropagation();
 
@@ -45,9 +50,9 @@ const ModalExcluirEstacao: React.FC<ModalExcluirEstacaoProps> = ({
           </svg>
         </div>
 
-        <h2 className="text-xl text-center font-bold mb-3">{title}</h2>
+        <h2 className="text-xl text-center font-bold mb-3">{displayTitle}</h2>
         
-        <p className="text-gray-600 text-center mb-6">{message}</p>
+        <p className="text-gray-600 text-center mb-6">{displayMessage}</p>
 
         <div className="flex justify-end gap-4 mt-4">
           <button

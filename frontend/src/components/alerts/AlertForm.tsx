@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, X } from 'lucide-react';
-import type { Alert, AlertFormData } from '../../interfaces/alerts';
+import type { AlertFormData } from '../../interfaces/alerts';
 
 type Props = {
   value: AlertFormData;
@@ -31,7 +31,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
         const json = await res.json();
         const list = Array.isArray(json) ? json : (json.data || []);
         if (mounted) setStations(list.map((s: any) => ({ id: s.id, mac: s.macAddress ?? s.mac ?? s.id, name: s.name, region: s.address })));
-      } catch (e) {
+      } catch {
         // ignore
       } finally {
         if (mounted) setLoadingStations(false);
@@ -50,7 +50,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
           const mapped = list.map((p: any) => ({ id: p.id, name: p.name || p.tipoParametroId || p.id, tipoParametroId: p.tipoParametroId }));
           setParameters(mapped);
         }
-      } catch (e) {
+      } catch {
         // ignore
       } finally {
         if (mounted) setLoadingParams(false);
@@ -64,7 +64,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
         const json = await res.json();
         const list = Array.isArray(json) ? json : (json.data || json);
         if (mounted) setTipoParametros(list.map((t: any) => ({ id: t.id, nome: t.nome })));
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -76,7 +76,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
         const json = await res.json();
         const list = Array.isArray(json) ? json : (json.data || json);
         if (mounted) setTipoAlertas(list.map((t: any) => ({ id: t.id, tipo: t.tipo })));
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -86,7 +86,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
     loadTipoAlertas();
     loadParameters(value.stationId || undefined);
     return () => { mounted = false; };
-  }, []);
+  }, [value.stationId]);
 
   useEffect(() => {
     let mounted = true;
@@ -106,7 +106,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
           });
           setParameters(mapped);
         }
-      } catch (e) {
+      } catch {
         // ignore
       } finally {
         if (mounted) setLoadingParams(false);
@@ -118,9 +118,9 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <form onSubmit={onSubmit} className="bg-white rounded-xl p-6 w-full max-w-lg sm:max-w-xl md:max-w-2xl space-y-4">
+      <form onSubmit={onSubmit} className="bg-white rounded-xl p-6 w-full max-w-2xl space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl md:text-2xl font-bold text-zinc-800">
+          <h2 className="text-2xl font-bold text-zinc-800 font-poppins">
             {title || 'Formulário de Alerta'}
           </h2>
           <button
@@ -132,7 +132,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
           </button>
         </div>
         <div>
-          <label className="block text-sm font-medium text-zinc-700">Estação (MAC)</label>
+          <label className="block text-sm font-medium text-zinc-700 font-poppins">Estação (MAC)</label>
           {loadingStations ? (
             <div className="mt-1 text-sm text-zinc-600 flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -213,7 +213,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
           <button
             type="button"
             onClick={onCancel}
-            className="bg-zinc-200 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-zinc-300 transition-colors duration-300 cursor-pointer"
+            className="bg-white border border-gray-300 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
           >
             Cancelar
           </button>

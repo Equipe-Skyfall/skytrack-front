@@ -15,8 +15,8 @@ const ConfirmDelete: React.FC<Props> = ({ open, onCancel, onConfirm, message }) 
         <h3 className="text-lg font-semibold mb-2">Confirmar exclusão</h3>
         <p className="text-sm text-gray-700 mb-4">{message || 'Deseja realmente excluir este item?'}</p>
         <div className="flex justify-end space-x-2">
-          <button onClick={onCancel} className="px-4 py-2 rounded border">Cancelar</button>
-          <button onClick={onConfirm} className="px-4 py-2 rounded bg-red-600 text-white">Excluir</button>
+          <button onClick={onCancel} className="px-4 py-2 rounded bg-white border border-gray-300 hover:bg-gray-50 transition-colors">Cancelar</button>
+          <button onClick={onConfirm} className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white transition-colors">Excluir</button>
         </div>
       </div>
     </div>

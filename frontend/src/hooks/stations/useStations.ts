@@ -23,12 +23,12 @@ export const useStations = (initialPage = 1, limit = 10) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadStations = useCallback(async (page = 1) => {
+  const loadStations = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // getStations was refactored to sometimes return a raw array or an envelope { data, pagination }
-      const response: any = await getStations(page, limit);
+      // getStations returns an array directly (no pagination params)
+      const response: any = await getStations();
 
       let list: StationDto[] = [];
       let newPagination: PaginationData | undefined;
@@ -41,7 +41,7 @@ export const useStations = (initialPage = 1, limit = 10) => {
       }
 
       // Map StationDto -> Station by adding UI helpers
-      const processedStations = list.map((s: StationDto) => ({
+      const processedStations = list.map((s: any) => ({
         ...s,
         statusColor: s.status === 'ACTIVE' ? 'green' : 'gray',
       }));
@@ -53,44 +53,32 @@ export const useStations = (initialPage = 1, limit = 10) => {
     } finally {
       setLoading(false);
     }
-  }, [limit]);
+  }, []);
 
   const handleCreateStation = async (stationData: StationFormData): Promise<StationDto> => {
-    try {
-      const newStation = await createStation(stationData);
-      await loadStations(pagination.page); // Reload current page
-      return newStation;
-    } catch (error) {
-      throw error;
-    }
+    const newStation = await createStation(stationData as any);
+    await loadStations(); // Reload
+    return newStation as any;
   };
 
   const handleUpdateStation = async (id: string, stationData: Partial<StationFormData>): Promise<StationDto> => {
-    try {
-      const updatedStation = await updateStation(id, stationData);
-      await loadStations(pagination.page); // Reload current page
-      return updatedStation;
-    } catch (error) {
-      throw error;
-    }
+    const updatedStation = await updateStation(id, stationData as any);
+    await loadStations(); // Reload
+    return updatedStation as any;
   };
 
   const handleDeleteStation = async (id: string): Promise<void> => {
-    try {
-      await deleteStation(id);
-      await loadStations(pagination.page); // Reload current page
-    } catch (error) {
-      throw error;
-    }
+    await deleteStation(id);
+    await loadStations(); // Reload
   };
 
-  const changePage = (page: number) => {
-    loadStations(page);
+  const changePage = () => {
+    loadStations();
   };
 
   useEffect(() => {
-    loadStations(initialPage);
-  }, [loadStations, initialPage]);
+    loadStations();
+  }, [loadStations]);
 
   return {
     stations,

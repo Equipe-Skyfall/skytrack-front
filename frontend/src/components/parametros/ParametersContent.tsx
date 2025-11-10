@@ -6,11 +6,11 @@ import TipoParametroModal from '../modals/TipoParametroModal';
 
 import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, UpdateParameterDto, ParameterFormData } from '../../interfaces/parameters';
 import type { StationDto } from '../../interfaces/stations';
-import { getParameters, createParameter, updateParameter } from '../../services/api/parameters';
+import { getParameters, createParameter, updateParameter, deleteParameter } from '../../services/api/parameters';
 
 import { getTipoParametros } from '../../services/api/tipo-parametro';
 import { getTipoAlertas } from '../../services/api/tipo-alerta';
-import { getStations } from '../../services/api/stations';
+import { getStations as getStationsAPI } from '../../services/api/stations';
 
 const ParametersContent: React.FC = () => {
   const { token } = useAuth();
@@ -30,7 +30,7 @@ const ParametersContent: React.FC = () => {
   const [deleteParamId, setDeleteParamId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'parametros' | 'tipos'>('parametros');
+  const [activeTab] = useState<'parametros' | 'tipos'>('parametros');
   const [showTipoParametroModal, setShowTipoParametroModal] = useState(false);
 
   useEffect(() => {
@@ -44,8 +44,8 @@ const ParametersContent: React.FC = () => {
         }
 
         // Fetch stations
-        const stationsData = await getStations(token);
-        setStations(stationsData);
+        const stationsData = await getStationsAPI(token);
+        setStations(stationsData as any);
 
         // Fetch parameters
         const paramResponse = await getParameters(1, 100, undefined, token);
@@ -292,7 +292,7 @@ const ParametersContent: React.FC = () => {
                         </button>
                         <button
                           onClick={() => handleDeleteParameter(param.id)}
-                          className="bg-red-500 text-white rounded-lg py-3 px-10 flex items-center justify-center gap-2 text-base font-semibold hover:bg-red-600 transition-colors duration-300 shadow-sm cursor-pointer"
+                          className="bg-red-600 text-white rounded-lg py-3 px-10 flex items-center justify-center gap-2 text-base font-semibold hover:bg-red-700 transition-colors duration-300 shadow-sm cursor-pointer"
                         >
                           <Trash2 className="h-5 w-5" />
                           Deletar
@@ -411,7 +411,7 @@ const ParametersContent: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleModalClose}
-                    className="bg-zinc-200 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-zinc-300 transition-colors duration-300 cursor-pointer"
+                    className="bg-white border border-gray-300 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -456,13 +456,13 @@ const ParametersContent: React.FC = () => {
               <div className="flex justify-end gap-2">
                 <button
                   onClick={handleModalClose}
-                  className="bg-zinc-200 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-zinc-300 transition-colors duration-300 cursor-pointer"
+                  className="bg-white border border-gray-300 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="bg-red-500 text-white rounded-lg py-3 px-8 text-base font-semibold hover:bg-red-600 transition-colors duration-300 cursor-pointer"
+                  className="bg-red-600 text-white rounded-lg py-3 px-8 text-base font-semibold hover:bg-red-700 transition-colors duration-300 cursor-pointer"
                 >
                   Deletar
                 </button>

@@ -245,7 +245,7 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
               </div>
               <button
                 onClick={handleRetry}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-300"
+                className="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors duration-300"
               >
                 Tentar Novamente
               </button>

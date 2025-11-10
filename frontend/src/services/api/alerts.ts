@@ -1,10 +1,15 @@
 import apiClient from './axios';
 
-export async function getAlerts() {
-  console.log('🔔 getAlerts called');
-  const response = await apiClient.get('/api/alerts');
+export async function getAlerts(is_active?: boolean) {
+  console.log('🔔 getAlerts called with is_active:', is_active);
+  const params: Record<string, string> = {};
+  if (is_active !== undefined) {
+    params.is_active = String(is_active);
+  }
+  const response = await apiClient.get('/api/alerts', { params });
   // NestJS returns { data: RegisteredAlertDto[], pagination: { ... } }
   if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+    console.log('📦 Alert completo do backend:', response.data.data[0]);
     return response.data.data;
   }
   return response.data || [];
@@ -24,6 +29,12 @@ export async function createAlert(payload: Record<string, unknown>) {
 export async function updateAlert(id: string, payload: Record<string, unknown>) {
   const body = sanitizeAlertPayload(payload);
   const response = await apiClient.put(`/api/alerts/${id}`, body);
+  return response.data;
+}
+
+export async function resolveAlert(id: string) {
+  // PUT /api/alerts/:id sem body - alterna is_active no backend
+  const response = await apiClient.put(`/api/alerts/${id}`);
   return response.data;
 }
 
@@ -49,4 +60,4 @@ export async function deleteAlert(id: string) {
   return response.data;
 }
 
-export default { getAlerts, getAlert, createAlert, updateAlert, deleteAlert };
+export default { getAlerts, getAlert, createAlert, updateAlert, resolveAlert, deleteAlert };

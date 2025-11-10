@@ -31,10 +31,10 @@ const Usuarios: React.FC = () => {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Usuários</h1>
+        <h1 className="text-3xl font-bold text-zinc-800 font-poppins mb-6">Usuários</h1>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-center min-h-32">
-            <div className="text-lg text-zinc-600">Carregando usuários...</div>
+            <div className="text-lg text-zinc-600 font-poppins">Carregando usuários...</div>
           </div>
         </div>
       </div>
@@ -44,10 +44,10 @@ const Usuarios: React.FC = () => {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Usuários</h1>
+        <h1 className="text-3xl font-bold text-zinc-800 font-poppins mb-6">Usuários</h1>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-center min-h-32">
-            <div className="text-lg text-red-600">Erro: {error}</div>
+            <div className="text-lg text-red-600 font-poppins">Erro: {error}</div>
           </div>
         </div>
       </div>
@@ -56,17 +56,17 @@ const Usuarios: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Usuários</h1>
+      <h1 className="text-3xl font-bold text-zinc-800 font-poppins mb-6">Usuários</h1>
       <div className="bg-white p-6 rounded-lg shadow-md">
         {users.length === 0 ? (
-          <p className="text-gray-600">Nenhum usuário encontrado.</p>
+          <p className="text-zinc-600 font-poppins">Nenhum usuário encontrado.</p>
         ) : (
           <div className="space-y-4">
             {users.map((user) => (
               <div key={user.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                <h3 className="font-semibold text-gray-900">{user.username}</h3>
-                <p className="text-gray-600">{user.email}</p>
-                <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                <h3 className="font-semibold text-zinc-900 font-poppins">{user.username}</h3>
+                <p className="text-zinc-600 font-poppins">{user.email}</p>
+                <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded font-poppins">
                   {user.role}
                 </span>
               </div>

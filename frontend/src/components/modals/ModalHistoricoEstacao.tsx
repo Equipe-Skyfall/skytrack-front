@@ -5,6 +5,7 @@ import { X, Calendar, Thermometer, Droplets, Gauge, AlertTriangle, RefreshCw, Cl
 import { getSensorReadings } from '../../services/api/sensorReadings';
 import type { SensorReading, SensorReadingsResponse } from '../../interfaces/sensor-readings';
 import Pagination from '../pagination/pagination';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ModalHistoricoEstacaoProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
   stationName,
   stationMac,
 }) => {
+  const { isDarkMode } = useTheme();
   const [readings, setReadings] = useState<SensorReading[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -185,19 +187,19 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className={`rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-200">
+        <div className={`flex items-center justify-between p-6 border-b ${isDarkMode ? 'border-slate-700' : 'border-zinc-200'}`}>
           <div className="flex items-center gap-3">
-            <Calendar className="h-6 w-6 text-zinc-700" />
+            <Calendar className={`h-6 w-6 ${isDarkMode ? 'text-gray-300' : 'text-zinc-700'}`} />
             <div>
-              <h2 className="text-xl font-bold text-zinc-800">
+              <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                 Histórico de Dados
               </h2>
-              <p className="text-sm text-zinc-600">
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
                 Estação: {stationName}
               </p>
-              <div className="text-xs text-zinc-500 space-y-1 mt-1">
+              <div className={`text-xs space-y-1 mt-1 ${isDarkMode ? 'text-gray-400' : 'text-zinc-500'}`}>
                 <div>ID: {stationId}</div>
                 {stationMac && <div>MAC: {stationMac}</div>}
                 <div className="flex items-center gap-2">
@@ -215,16 +217,20 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
             <button
               onClick={handleRetry}
               disabled={loading}
-              className="p-2 hover:bg-zinc-100 rounded-lg transition-colors duration-300 disabled:opacity-50"
+              className={`p-2 rounded-lg transition-colors duration-300 disabled:opacity-50 ${
+                isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-zinc-100'
+              }`}
               title="Recarregar dados"
             >
-              <RefreshCw className={`h-5 w-5 text-zinc-600 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''} ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-zinc-100 rounded-lg transition-colors duration-300"
+              className={`p-2 rounded-lg transition-colors duration-300 ${
+                isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-zinc-100'
+              }`}
             >
-              <X className="h-5 w-5 text-zinc-600" />
+              <X className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`} />
             </button>
           </div>
         </div>
@@ -233,28 +239,32 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
         <div className="flex-1 overflow-auto p-6">
           {loading ? (
             <div className="text-center py-8">
-              <RefreshCw className="h-8 w-8 text-zinc-400 animate-spin mx-auto mb-4" />
-              <div className="text-lg text-zinc-600">Carregando dados históricos...</div>
+              <RefreshCw className={`h-8 w-8 animate-spin mx-auto mb-4 ${isDarkMode ? 'text-gray-400' : 'text-zinc-400'}`} />
+              <div className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Carregando dados históricos...</div>
             </div>
           ) : error ? (
             <div className="text-center py-8">
               <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <div className="text-red-500 text-lg mb-4">Erro ao carregar dados</div>
-              <div className="text-zinc-600 text-sm mb-4 max-w-md mx-auto">
+              <div className={`text-sm mb-4 max-w-md mx-auto ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
                 {error}
               </div>
               <button
                 onClick={handleRetry}
-                className="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors duration-300"
+                className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
+                  isDarkMode 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                    : 'bg-slate-900 hover:bg-slate-800 text-white'
+                }`}
               >
                 Tentar Novamente
               </button>
             </div>
           ) : readings.length === 0 ? (
             <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
-              <div className="text-zinc-600 mb-2">Nenhum dado histórico encontrado para esta estação.</div>
-              <div className="text-zinc-500 text-sm mb-4 max-w-md mx-auto">
+              <Calendar className={`h-12 w-12 mx-auto mb-4 ${isDarkMode ? 'text-gray-400' : 'text-zinc-400'}`} />
+              <div className={`mb-2 ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Nenhum dado histórico encontrado para esta estação.</div>
+              <div className={`text-sm mb-4 max-w-md mx-auto ${isDarkMode ? 'text-gray-400' : 'text-zinc-500'}`}>
                 <p className="mb-2">Possíveis causas:</p>
                 <ul className="text-left space-y-1">
                   <li>• A estação ainda não enviou dados</li>
@@ -262,7 +272,7 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
                   <li>• Os dados podem estar em outra estação</li>
                 </ul>
               </div>
-              <div className="mt-4 text-xs text-zinc-400">
+              <div className={`mt-4 text-xs ${isDarkMode ? 'text-gray-500' : 'text-zinc-400'}`}>
                 IDs buscados: {stationId} {stationMac && `| MAC: ${stationMac}`}
               </div>
             </div>
@@ -270,12 +280,16 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-zinc-50">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-600 uppercase border-b">
+                  <tr className={isDarkMode ? 'bg-slate-700' : 'bg-zinc-50'}>
+                    <th className={`px-4 py-3 text-left text-xs font-semibold uppercase border-b ${
+                      isDarkMode ? 'text-gray-300 border-slate-600' : 'text-zinc-600 border-zinc-200'
+                    }`}>
                       Data/Hora
                     </th>
                     {availableSensors.includes('temperatura') && (
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-600 uppercase border-b">
+                      <th className={`px-4 py-3 text-left text-xs font-semibold uppercase border-b ${
+                        isDarkMode ? 'text-gray-300 border-slate-600' : 'text-zinc-600 border-zinc-200'
+                      }`}>
                         <div className="flex items-center gap-2">
                           <Thermometer className="h-4 w-4" />
                           Temperatura
@@ -283,7 +297,9 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
                       </th>
                     )}
                     {availableSensors.includes('umidade') && (
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-600 uppercase border-b">
+                      <th className={`px-4 py-3 text-left text-xs font-semibold uppercase border-b ${
+                        isDarkMode ? 'text-gray-300 border-slate-600' : 'text-zinc-600 border-zinc-200'
+                      }`}>
                         <div className="flex items-center gap-2">
                           <Droplets className="h-4 w-4" />
                           Umidade
@@ -291,7 +307,9 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
                       </th>
                     )}
                     {availableSensors.includes('chuva') && (
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-600 uppercase border-b">
+                      <th className={`px-4 py-3 text-left text-xs font-semibold uppercase border-b ${
+                        isDarkMode ? 'text-gray-300 border-slate-600' : 'text-zinc-600 border-zinc-200'
+                      }`}>
                         <div className="flex items-center gap-2">
                           <CloudRain className="h-4 w-4" />
                           Chuva
@@ -299,51 +317,59 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
                       </th>
                     )}
                     {availableSensors.includes('pressure') && (
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-600 uppercase border-b">
+                      <th className={`px-4 py-3 text-left text-xs font-semibold uppercase border-b ${
+                        isDarkMode ? 'text-gray-300 border-slate-600' : 'text-zinc-600 border-zinc-200'
+                      }`}>
                         <div className="flex items-center gap-2">
                           <Gauge className="h-4 w-4" />
                           Pressão
                         </div>
                       </th>
                     )}
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-600 uppercase border-b">
+                    <th className={`px-4 py-3 text-left text-xs font-semibold uppercase border-b ${
+                      isDarkMode ? 'text-gray-300 border-slate-600' : 'text-zinc-600 border-zinc-200'
+                    }`}>
                       Alertas
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-200">
+                <tbody className={`divide-y ${isDarkMode ? 'divide-slate-700' : 'divide-zinc-200'}`}>
                   {readings.map((reading) => (
-                    <tr key={reading.id} className="hover:bg-zinc-50 transition-colors duration-200">
-                      <td className="px-4 py-3 text-sm text-zinc-600">
+                    <tr key={reading.id} className={`transition-colors duration-200 ${
+                      isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-zinc-50'
+                    }`}>
+                      <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
                         {formatDate(reading.timestamp)}
                       </td>
                       {availableSensors.includes('temperatura') && (
-                        <td className="px-4 py-3 text-sm text-zinc-800">
+                        <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                           {getSensorValue(reading, 'temperatura')} °C
                         </td>
                       )}
                       {availableSensors.includes('umidade') && (
-                        <td className="px-4 py-3 text-sm text-zinc-800">
+                        <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                           {getSensorValue(reading, 'umidade')}%
                         </td>
                       )}
                       {availableSensors.includes('chuva') && (
-                        <td className="px-4 py-3 text-sm text-zinc-800">
+                        <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                           {getSensorValue(reading, 'chuva')} mm
                         </td>
                       )}
                       {availableSensors.includes('pressure') && (
-                        <td className="px-4 py-3 text-sm text-zinc-800">
+                        <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                           {getSensorValue(reading, 'pressure')} hPa
                         </td>
                       )}
                       <td className="px-4 py-3 text-sm">
                         {reading.alerts.length > 0 ? (
-                          <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-800'
+                          }`}>
                             {reading.alerts.length} alerta(s)
                           </span>
                         ) : (
-                          <span className="text-zinc-400">-</span>
+                          <span className={isDarkMode ? 'text-gray-500' : 'text-zinc-400'}>-</span>
                         )}
                       </td>
                     </tr>
@@ -355,7 +381,7 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-200 p-4">
+        <div className={`border-t p-4 ${isDarkMode ? 'border-slate-700' : 'border-zinc-200'}`}>
           {!loading && !error && readings.length > 0 && pagination.totalPages > 1 && (
             <Pagination
               currentPage={currentPage}

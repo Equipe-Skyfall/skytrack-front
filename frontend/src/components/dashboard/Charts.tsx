@@ -16,10 +16,12 @@ import {
 import { TrendingUp, MapPin } from 'lucide-react';
 import useSensorReadings from '../../hooks/sensor-readings/useSensorReadings';
 import { useStations } from '../../hooks/stations/useStations';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const GLOBAL_STATION_ID = null; // Use null to represent "all stations"
 
 const Charts: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const [activeChart, setActiveChart] = useState<'line' | 'area' | 'bar'>('line');
   const [selectedSensors, setSelectedSensors] = useState<Set<string>>(new Set());
   const [selectedStationId, setSelectedStationId] = useState<string | null>(GLOBAL_STATION_ID);
@@ -134,20 +136,24 @@ const Charts: React.FC = () => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200 min-w-40">
-          <div className="font-medium text-gray-700 mb-2">{label}</div>
+        <div className={`p-3 rounded-lg shadow-lg border min-w-40 ${
+          isDarkMode 
+            ? 'bg-slate-800 border-slate-700' 
+            : 'bg-white border-gray-200'
+        }`}>
+          <div className={`font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{label}</div>
           {payload.map((entry: any, index: number) => {
             const config = getSensorConfig(entry.dataKey);
             return (
               <div key={index} className="flex items-center justify-between text-sm mb-1">
-                <span className="flex items-center gap-2">
+                <span className={`flex items-center gap-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                   <div 
                     className="w-3 h-3 rounded-full" 
                     style={{ backgroundColor: entry.color }}
                   />
                   {config?.name}:
                 </span>
-                <span className="font-semibold text-gray-900 ml-2">
+                <span className={`font-semibold ml-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   {entry.value.toFixed(1)}{config?.unit}
                 </span>
               </div>
@@ -274,11 +280,11 @@ const Charts: React.FC = () => {
             </linearGradient>
           </defs>
         )}
-        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-        <XAxis dataKey="time" tick={{ fill: '#6b7280', fontSize: 12 }} />
-        <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} />
+        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#475569' : '#e5e7eb'} />
+        <XAxis dataKey="time" tick={{ fill: isDarkMode ? '#d1d5db' : '#6b7280', fontSize: 12 }} />
+        <YAxis tick={{ fill: isDarkMode ? '#d1d5db' : '#6b7280', fontSize: 12 }} />
         <Tooltip content={<CustomTooltip />} />
-        <Legend />
+        <Legend wrapperStyle={{ color: isDarkMode ? '#d1d5db' : '#374151' }} />
         {renderSensorLines()}
       </ChartComponent>
     );
@@ -307,27 +313,35 @@ const Charts: React.FC = () => {
   const stats = getStats();
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+    <div className={`p-6 rounded-lg shadow-md border ${
+      isDarkMode 
+        ? 'bg-slate-800 border-slate-700' 
+        : 'bg-white border-gray-200'
+    }`}>
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center mb-2">
-            <TrendingUp className="w-5 h-5 text-gray-600 mr-2" />
-            <h2 className="text-lg font-semibold text-gray-800">
+            <TrendingUp className={`w-5 h-5 mr-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`} />
+            <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
               Dados Meteorológicos - Tempo Real
             </h2>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             {hasData ? `${readings.length} leituras` : 'Aguardando dados...'}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className={`flex rounded-lg p-1 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
             <button
               onClick={() => setActiveChart('line')}
               className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
                 activeChart === 'line'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? isDarkMode 
+                    ? 'bg-slate-600 text-white shadow-sm'
+                    : 'bg-white text-gray-900 shadow-sm'
+                  : isDarkMode
+                    ? 'text-gray-300 hover:text-white hover:bg-slate-600'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Linha
@@ -336,8 +350,12 @@ const Charts: React.FC = () => {
               onClick={() => setActiveChart('area')}
               className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
                 activeChart === 'area'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? isDarkMode 
+                    ? 'bg-slate-600 text-white shadow-sm'
+                    : 'bg-white text-gray-900 shadow-sm'
+                  : isDarkMode
+                    ? 'text-gray-300 hover:text-white hover:bg-slate-600'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Área
@@ -346,8 +364,12 @@ const Charts: React.FC = () => {
               onClick={() => setActiveChart('bar')}
               className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
                 activeChart === 'bar'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? isDarkMode 
+                    ? 'bg-slate-600 text-white shadow-sm'
+                    : 'bg-white text-gray-900 shadow-sm'
+                  : isDarkMode
+                    ? 'text-gray-300 hover:text-white hover:bg-slate-600'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               Barras
@@ -357,14 +379,20 @@ const Charts: React.FC = () => {
           {/* Station selector */}
           <div className="relative">
             <label className="sr-only">Selecionar estação</label>
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            <MapPin className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-400'
+            }`} />
             <select
               value={selectedStationId ?? ''}
               onChange={(e) => {
                 const val = e.target.value;
                 setSelectedStationId(val === '' ? GLOBAL_STATION_ID : val);
               }}
-              className="appearance-none pl-10 pr-8 py-2 border border-gray-200 rounded-md bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+              className={`appearance-none pl-10 pr-8 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 transition ${
+                isDarkMode
+                  ? 'bg-slate-700 border-slate-600 text-gray-200 focus:ring-blue-400'
+                  : 'bg-white border-gray-200 text-gray-700 focus:ring-blue-200'
+              }`}
             >
               {stationsWithGlobal.map(st => (
                 <option key={st.id ?? 'global'} value={st.id ?? ''}>
@@ -373,7 +401,9 @@ const Charts: React.FC = () => {
               ))}
             </select>
             {/* Caret */}
-            <svg className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg className={`pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-400'
+            }`} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
@@ -392,8 +422,12 @@ const Charts: React.FC = () => {
               onClick={() => toggleSensor(sensorType.key)}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-all ${
                 isSelected
-                  ? 'bg-white border-gray-300 text-gray-900 shadow-sm'
-                  : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300'
+                  ? isDarkMode
+                    ? 'bg-slate-700 border-slate-600 text-white shadow-sm'
+                    : 'bg-white border-gray-300 text-gray-900 shadow-sm'
+                  : isDarkMode
+                    ? 'bg-slate-800 border-slate-700 text-gray-300 hover:bg-slate-700 hover:border-slate-600'
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300'
               }`}
             >
               {config?.icon}
@@ -407,7 +441,9 @@ const Charts: React.FC = () => {
         })}
       </div>
       
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+      <div className={`rounded-lg p-4 border ${
+        isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-100'
+      }`}>
         <ResponsiveContainer width="100%" height={420}>
           {renderChart()}
         </ResponsiveContainer>
@@ -425,19 +461,23 @@ const Charts: React.FC = () => {
             return (
               <div 
                 key={sensorType.key}
-                className="bg-gray-50 rounded-lg p-4 border border-gray-100"
+                className={`rounded-lg p-4 border ${
+                  isDarkMode 
+                    ? 'bg-slate-700 border-slate-600' 
+                    : 'bg-gray-50 border-gray-100'
+                }`}
               >
                 <div className="flex items-center space-x-2 mb-2">
                   <div 
                     className="w-3 h-3 rounded-full" 
                     style={{ backgroundColor: config.color }}
                   />
-                  <span className="text-gray-700 text-sm font-medium">{config.name}</span>
+                  <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{config.name}</span>
                 </div>
-                <div className="text-gray-900 text-2xl font-bold">
+                <div className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   {sensorStats.current.toFixed(1)}{config.unit}
                 </div>
-                <div className="text-gray-500 text-xs">
+                <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   Média: {sensorStats.avg.toFixed(1)}{config.unit}
                 </div>
               </div>

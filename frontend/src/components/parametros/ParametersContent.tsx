@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Gauge, Plus, Settings, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import TipoParametroModal from '../modals/TipoParametroModal';
 
 import type { TipoParametroDto, TipoAlertaDto, ParameterDto, CreateParameterDto, UpdateParameterDto, ParameterFormData } from '../../interfaces/parameters';
@@ -14,6 +15,7 @@ import { getStations as getStationsAPI } from '../../services/api/stations';
 
 const ParametersContent: React.FC = () => {
   const { token } = useAuth();
+  const { isDarkMode } = useTheme();
   const [parameters, setParameters] = useState<ParameterDto[]>([]);
   const [tipoParametros, setTipoParametros] = useState<TipoParametroDto[]>([]);
   const [tipoAlertas, setTipoAlertas] = useState<TipoAlertaDto[]>([]);
@@ -203,15 +205,19 @@ const ParametersContent: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen ">
-        <div className="text-lg text-zinc-600">Carregando parâmetros...</div>
+      <div className={`flex items-center justify-center min-h-screen ${
+        isDarkMode ? 'bg-gradient-to-b from-slate-900 to-slate-800' : 'bg-white'
+      }`}>
+        <div className={`text-lg ${isDarkMode ? 'text-gray-200' : 'text-zinc-600'}`}>Carregando parâmetros...</div>
       </div>
     );
   }
 
   if (error && !parameters.length) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-zinc-50 to-white">
+      <div className={`flex items-center justify-center min-h-screen ${
+        isDarkMode ? 'bg-gradient-to-b from-slate-900 to-slate-800' : 'bg-gradient-to-b from-zinc-50 to-white'
+      }`}>
         <div className="text-red-500 text-lg">{error}</div>
       </div>
     );
@@ -222,21 +228,33 @@ const ParametersContent: React.FC = () => {
       <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-8 max-w-full mx-auto">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-zinc-800 tracking-tight">Parâmetros</h1>
-            <p className="text-base md:text-lg text-zinc-600">Gerencie e monitore todos os parâmetros utilizados</p>
+            <h1 className={`text-3xl md:text-4xl font-extrabold tracking-tight ${
+              isDarkMode ? 'text-white' : 'text-zinc-800'
+            }`}>Parâmetros</h1>
+            <p className={`text-base md:text-lg ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
+              Gerencie e monitore todos os parâmetros utilizados
+            </p>
           </div>
           {token && (
             <div className="flex gap-4">
               <button
                 onClick={handleAddParameter}
-                className="bg-slate-900 text-white rounded-lg py-3 px-8 flex items-center gap-2 text-base font-semibold hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
+                className={`rounded-lg py-3 px-8 flex items-center gap-2 text-base font-semibold transition-colors duration-300 shadow-sm cursor-pointer ${
+                  isDarkMode
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-slate-900 text-white hover:bg-slate-800'
+                }`}
               >
                 <Plus className="h-5 w-5" />
                 Adicionar Parâmetro
               </button>
               <button
                 onClick={() => setShowTipoParametroModal(true)}
-                className="bg-slate-900 text-white rounded-lg py-3 px-8 flex items-center gap-2 text-base font-semibold hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
+                className={`rounded-lg py-3 px-8 flex items-center gap-2 text-base font-semibold transition-colors duration-300 shadow-sm cursor-pointer ${
+                  isDarkMode
+                    ? 'bg-purple-600 text-white hover:bg-purple-700'
+                    : 'bg-slate-900 text-white hover:bg-slate-800'
+                }`}
               >
                 <Settings className="h-5 w-5" />
                 Gerenciar Tipos
@@ -245,7 +263,7 @@ const ParametersContent: React.FC = () => {
           )}
         </div>
 
-        <div className="border-b border-zinc-200">
+        <div className={`border-b ${isDarkMode ? 'border-slate-700' : 'border-zinc-200'}`}>
           
         </div>
 
@@ -257,24 +275,30 @@ const ParametersContent: React.FC = () => {
                 return (
                   <div
                     key={param.id}
-                    className="bg-white rounded-xl border border-zinc-300 p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300"
+                    className={`rounded-xl border p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300 ${
+                      isDarkMode
+                        ? 'bg-slate-800 border-slate-700'
+                        : 'bg-white border-zinc-300'
+                    }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="bg-zinc-100 rounded-lg p-2">
-                        <Gauge className="h-6 w-6 text-zinc-700" />
+                      <div className={`rounded-lg p-2 ${isDarkMode ? 'bg-slate-700' : 'bg-zinc-100'}`}>
+                        <Gauge className={`h-6 w-6 ${isDarkMode ? 'text-gray-300' : 'text-zinc-700'}`} />
                       </div>
-                      <h2 className="text-lg font-bold text-zinc-800">
+                      <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                         {tipoParametro?.nome || 'Tipo não encontrado'}
                       </h2>
                       <div className="ml-auto bg-lime-500 text-white rounded-full px-3 py-1 text-xs font-semibold">Ativo</div>
                     </div>
-                    <div className="bg-zinc-100 rounded-lg p-4">
-                      <span className="flex items-center gap-2 text-sm font-bold text-zinc-700">
+                    <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-slate-700' : 'bg-zinc-100'}`}>
+                      <span className={`flex items-center gap-2 text-sm font-bold ${
+                        isDarkMode ? 'text-gray-200' : 'text-zinc-700'
+                      }`}>
                         <Gauge className="h-4 w-4" />
                         {tipoParametro?.metrica || 'N/A'}
                       </span>
                     </div>
-                    <p className="text-sm text-zinc-600">
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
                       <strong>Estação:</strong> {station?.name || station?.macAddress || 'Estação não encontrada'}<br />
                       <strong>Tipo de Parâmetro:</strong> {tipoParametro?.nome || 'N/A'}<br />
                       <strong>JSON ID:</strong> {tipoParametro?.jsonId || 'N/A'}<br />
@@ -285,7 +309,11 @@ const ParametersContent: React.FC = () => {
                       <div className="flex justify-center gap-4">
                         <button
                           onClick={() => handleEditParameter(param.id)}
-                          className="bg-white border border-zinc-400 rounded-lg py-3 px-10 flex items-center justify-center gap-2 text-base font-semibold text-zinc-800 hover:bg-zinc-100 transition-colors duration-300 shadow-sm cursor-pointer"
+                          className={`border rounded-lg py-3 px-10 flex items-center justify-center gap-2 text-base font-semibold transition-colors duration-300 shadow-sm cursor-pointer ${
+                            isDarkMode
+                              ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+                              : 'bg-white border-zinc-400 text-zinc-800 hover:bg-zinc-100'
+                          }`}
                         >
                           <Settings className="h-5 w-5" />
                           Configurar
@@ -313,14 +341,14 @@ const ParametersContent: React.FC = () => {
         )}
         {(isAddModalOpen || isEditModalOpen) && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-lg space-y-4">
+            <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-xl p-6 w-full max-w-lg space-y-4`}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-zinc-800">
+                <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                   {isAddModalOpen ? 'Adicionar Parâmetro' : 'Editar Parâmetro'}
                 </h2>
                 <button
                   onClick={handleModalClose}
-                  className="text-zinc-600 hover:text-zinc-800 cursor-pointer"
+                  className={`${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-zinc-600 hover:text-zinc-800'} cursor-pointer`}
                 >
                   <X className="h-6 w-6" />
                 </button>
@@ -328,15 +356,15 @@ const ParametersContent: React.FC = () => {
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <form onSubmit={handleParameterSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700">Estação</label>
+                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>Estação</label>
                   <select
                     name="stationId"
                     value={formData.stationId}
                     onChange={handleInputChange}
                     className={`mt-1 w-full rounded-md border p-2 text-sm ${
                       isEditModalOpen 
-                        ? 'bg-zinc-100 border-zinc-200 text-zinc-500 cursor-not-allowed' 
-                        : 'border-zinc-300'
+                        ? `${isDarkMode ? 'bg-slate-900 border-slate-700 text-gray-500' : 'bg-zinc-100 border-zinc-200 text-zinc-500'} cursor-not-allowed`
+                        : isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-zinc-300 text-zinc-800'
                     }`}
                     required={isAddModalOpen}
                     disabled={isEditModalOpen}
@@ -349,21 +377,21 @@ const ParametersContent: React.FC = () => {
                     ))}
                   </select>
                   {isEditModalOpen && (
-                    <p className="mt-1 text-xs text-zinc-500">
+                    <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-zinc-500'}`}>
                       A estação não pode ser alterada após a criação
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700">Tipo de Parâmetro</label>
+                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>Tipo de Parâmetro</label>
                   <select
                     name="tipoParametroId"
                     value={formData.tipoParametroId}
                     onChange={handleInputChange}
                     className={`mt-1 w-full rounded-md border p-2 text-sm ${
                       isEditModalOpen 
-                        ? 'bg-zinc-100 border-zinc-200 text-zinc-500 cursor-not-allowed' 
-                        : 'border-zinc-300'
+                        ? `${isDarkMode ? 'bg-slate-900 border-slate-700 text-gray-500' : 'bg-zinc-100 border-zinc-200 text-zinc-500'} cursor-not-allowed`
+                        : isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-zinc-300 text-zinc-800'
                     }`}
                     required={isAddModalOpen}
                     disabled={isEditModalOpen}
@@ -376,13 +404,13 @@ const ParametersContent: React.FC = () => {
                     ))}
                   </select>
                   {isEditModalOpen && (
-                    <p className="mt-1 text-xs text-zinc-500">
+                    <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-zinc-500'}`}>
                       O tipo de parâmetro não pode ser alterado após a criação
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700">
+                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>
                     Tipo de Alerta (opcional)
                     {isEditModalOpen && (
                       <span className="text-blue-600 font-normal"> - Campo editável</span>
@@ -392,7 +420,9 @@ const ParametersContent: React.FC = () => {
                     name="tipoAlertaId"
                     value={formData.tipoAlertaId}
                     onChange={handleInputChange}
-                    className="mt-1 w-full rounded-md border border-zinc-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className={`mt-1 w-full rounded-md border p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-zinc-300 text-zinc-800'
+                    }`}
                   >
                     <option value="">Nenhum</option>
                     {tipoAlertas.map((tipoAlerta) => (
@@ -411,13 +441,19 @@ const ParametersContent: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleModalClose}
-                    className="bg-white border border-gray-300 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
+                    className={`border rounded-lg py-3 px-8 text-base font-semibold transition-colors duration-300 cursor-pointer ${
+                      isDarkMode 
+                        ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600' 
+                        : 'bg-white border-gray-300 text-zinc-800 hover:bg-gray-50'
+                    }`}
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="bg-slate-900 text-white rounded-lg py-3 px-8 text-base font-semibold hover:bg-slate-800 transition-colors duration-300 cursor-pointer"
+                    className={`text-white rounded-lg py-3 px-8 text-base font-semibold transition-colors duration-300 cursor-pointer ${
+                      isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'
+                    }`}
                   >
                     Salvar
                   </button>
@@ -428,18 +464,18 @@ const ParametersContent: React.FC = () => {
         )}
         {isDeleteModalOpen && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md space-y-4">
+            <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-xl p-6 w-full max-w-md space-y-4`}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-zinc-800">Confirmar Exclusão</h2>
+                <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Confirmar Exclusão</h2>
                 <button
                   onClick={handleModalClose}
-                  className="text-zinc-600 hover:text-zinc-800 cursor-pointer"
+                  className={`${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-zinc-600 hover:text-zinc-800'} cursor-pointer`}
                 >
                   <X className="h-6 w-6" />
                 </button>
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
-              <p className="text-sm text-zinc-600">
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
                 Tem certeza que deseja deletar o parâmetro{' '}
                 <span className="font-semibold">
                   {(() => {
@@ -456,7 +492,11 @@ const ParametersContent: React.FC = () => {
               <div className="flex justify-end gap-2">
                 <button
                   onClick={handleModalClose}
-                  className="bg-white border border-gray-300 text-zinc-800 rounded-lg py-3 px-8 text-base font-semibold hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
+                  className={`border rounded-lg py-3 px-8 text-base font-semibold transition-colors duration-300 cursor-pointer ${
+                    isDarkMode 
+                      ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600' 
+                      : 'bg-white border-gray-300 text-zinc-800 hover:bg-gray-50'
+                  }`}
                 >
                   Cancelar
                 </button>

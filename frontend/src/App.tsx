@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/navigation/Layout';
 import Dashboard from './pages/dashboard/Dashboard';
 import Estacoes from './pages/estacoes/Estacoes';
@@ -25,6 +26,7 @@ const App: React.FC = () => {
     <Router>
       <AuthProvider>
         <NotificationProvider>
+          <ThemeProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
@@ -52,6 +54,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          </ThemeProvider>
         </NotificationProvider>
       </AuthProvider>
     </Router>

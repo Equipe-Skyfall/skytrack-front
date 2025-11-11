@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ModalExcluirEstacaoProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ const ModalExcluirEstacao: React.FC<ModalExcluirEstacaoProps> = ({
   message,
   stationName,
 }) => {
+  const { isDarkMode } = useTheme();
   
   const displayTitle = title || 'Confirmar Exclusão';
   const displayMessage = message || (stationName ? `Tem certeza que deseja excluir a estação "${stationName}"?` : 'Tem certeza que deseja excluir esta estação?');
@@ -34,13 +36,14 @@ const ModalExcluirEstacao: React.FC<ModalExcluirEstacaoProps> = ({
     >
       <div
         className={`
-          bg-white p-6 rounded-lg shadow-xl w-full max-w-md
+          p-6 rounded-lg shadow-xl w-full max-w-md
           transition-all duration-300 ease-in-out
           ${
             isOpen
               ? "opacity-100 scale-100"
               : "opacity-0 scale-95 pointer-events-none"
           }
+          ${isDarkMode ? 'bg-slate-800' : 'bg-white'}
         `}
         onClick={handleContentClick}
       >
@@ -50,15 +53,19 @@ const ModalExcluirEstacao: React.FC<ModalExcluirEstacaoProps> = ({
           </svg>
         </div>
 
-        <h2 className="text-xl text-center font-bold mb-3">{displayTitle}</h2>
+        <h2 className={`text-xl text-center font-bold mb-3 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>{displayTitle}</h2>
         
-        <p className="text-gray-600 text-center mb-6">{displayMessage}</p>
+        <p className={`text-center mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{displayMessage}</p>
 
         <div className="flex justify-end gap-4 mt-4">
           <button
             type="button"
             onClick={onClose}
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+            className={`font-bold py-2 px-4 rounded ${
+              isDarkMode 
+                ? 'bg-slate-700 hover:bg-slate-600 text-white' 
+                : 'bg-gray-300 hover:bg-gray-400 text-gray-800'
+            }`}
           >
             Cancelar
           </button>

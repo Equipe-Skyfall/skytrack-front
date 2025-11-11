@@ -6,6 +6,7 @@ import ModalEdicaoEstacao from "../modals/modalEdicaoEstacao";
 import ModalExcluirEstacao from "../modals/modalExcluirEstacao";
 import ModalHistoricoEstacao from "../modals/ModalHistoricoEstacao";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
 import Pagination from "../pagination/pagination";
 import type {
   PaginationData,
@@ -23,6 +24,7 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
   onDeleteClick,
   isUserLoggedIn,
 }) => {
+  const { isDarkMode } = useTheme();
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   const displayStatus = {
@@ -32,46 +34,65 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
 
   return (
     <>
-      <div className="bg-white rounded-xl border border-zinc-300 p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+      <div className={`rounded-xl border p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300 ${
+        isDarkMode 
+          ? 'bg-slate-800 border-slate-700' 
+          : 'bg-white border-zinc-300'
+      }`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-zinc-100 rounded-lg p-2">
-              <MapPin className="h-5 w-5 text-zinc-700" />
+            <div className={`rounded-lg p-2 ${isDarkMode ? 'bg-slate-700' : 'bg-zinc-100'}`}>
+              <MapPin className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-zinc-700'}`} />
             </div>
-            <h3 className="text-lg font-bold text-zinc-800 font-poppins">{station.name}</h3>
+            <h3 className={`text-lg font-bold font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
+              {station.name}
+            </h3>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-semibold font-poppins ${station.status === 'ACTIVE' ? 'bg-lime-500 text-white' : 'bg-red-500 text-white'
-            }`}>
+          <div className={`px-3 py-1 rounded-full text-xs font-semibold font-poppins ${
+            station.status === 'ACTIVE' ? 'bg-lime-500 text-white' : 'bg-red-500 text-white'
+          }`}>
             {displayStatus[station.status] || station.status}
           </div>
         </div>
-        <div className="bg-zinc-100 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-sm text-zinc-600 font-poppins">
+        <div className={`rounded-lg p-3 ${isDarkMode ? 'bg-slate-700' : 'bg-zinc-100'}`}>
+          <div className={`flex items-center gap-2 text-sm font-poppins ${
+            isDarkMode ? 'text-gray-300' : 'text-zinc-600'
+          }`}>
             <MapPin className="h-4 w-4" />
             <span>{station.address || 'Endereço não informado'}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-zinc-600 font-poppins">
+        <div className={`flex items-center gap-2 text-sm font-poppins ${
+          isDarkMode ? 'text-gray-300' : 'text-zinc-600'
+        }`}>
           <Wifi className="h-4 w-4" />
           <span className="font-mono">MAC: {station.macAddress || 'Não configurado'}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-zinc-600 font-poppins">
+        <div className={`flex items-center gap-2 text-sm font-poppins ${
+          isDarkMode ? 'text-gray-300' : 'text-zinc-600'
+        }`}>
           <Activity className="h-4 w-4" />
           <span className="font-mono">Coords: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}</span>
         </div>
-        <p className="text-sm text-zinc-600 font-poppins">
+        <p className={`text-sm font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
           <strong>Descrição:</strong> {station.description || 'Sem descrição'}
         </p>
-        <div className="text-xs text-zinc-500 font-poppins">
+        <div className={`text-xs font-poppins ${isDarkMode ? 'text-gray-400' : 'text-zinc-500'}`}>
           Criado: {new Date(station.createdAt).toLocaleDateString("pt-BR")} |
           Atualizado: {new Date(station.updatedAt).toLocaleDateString("pt-BR")}
         </div>
         {isUserLoggedIn && (
-          <div className="flex justify-center gap-4 pt-4 border-t border-zinc-200">
+          <div className={`flex justify-center gap-4 pt-4 border-t ${
+            isDarkMode ? 'border-slate-700' : 'border-zinc-200'
+          }`}>
             {/* Botão de Histórico - NOVO */}
             <button
               onClick={() => setShowHistoryModal(true)}
-              className="bg-slate-900 text-white rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold font-poppins hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
+              className={`rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold font-poppins transition-colors duration-300 shadow-sm cursor-pointer ${
+                isDarkMode
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-slate-900 text-white hover:bg-slate-800'
+              }`}
             >
               <History className="h-5 w-5" />
               Histórico
@@ -79,7 +100,11 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
 
             <button
               onClick={onConfigurarClick}
-              className="bg-white border border-gray-300 rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold text-zinc-800 hover:bg-gray-50 transition-colors duration-300 shadow-sm cursor-pointer"
+              className={`rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold transition-colors duration-300 shadow-sm cursor-pointer border ${
+                isDarkMode
+                  ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+                  : 'bg-white border-gray-300 text-zinc-800 hover:bg-gray-50'
+              }`}
             >
               <Settings className="h-5 w-5" />
               Configurar
@@ -114,6 +139,7 @@ function getStatusColor(status: "ACTIVE" | "INACTIVE"): string {
 
 const Estacao: React.FC = () => {
   const { token } = useAuth();
+  const { isDarkMode } = useTheme();
 
   const [listaDeEstacoes, setListaDeEstacoes] = useState<Station[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -290,15 +316,19 @@ const Estacao: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-zinc-50 to-white">
-        <div className="text-lg text-zinc-600">Carregando estações...</div>
+      <div className={`flex items-center justify-center min-h-screen ${
+        isDarkMode ? 'bg-gradient-to-b from-slate-900 to-slate-800' : 'bg-gradient-to-b from-zinc-50 to-white'
+      }`}>
+        <div className={`text-lg ${isDarkMode ? 'text-gray-200' : 'text-zinc-600'}`}>Carregando estações...</div>
       </div>
     );
   }
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-zinc-50 to-white">
-        <div className="text-red-500 text-lg">Erro: {error}</div>
+      <div className={`flex items-center justify-center min-h-screen ${
+        isDarkMode ? 'bg-gradient-to-b from-slate-900 to-slate-800' : 'bg-gradient-to-b from-zinc-50 to-white'
+      }`}>
+        <div className={`text-lg ${isDarkMode ? 'text-red-400' : 'text-red-500'}`}>Erro: {error}</div>
       </div>
     );
   }
@@ -308,13 +338,21 @@ const Estacao: React.FC = () => {
       <main className="p-4 md:p-6 lg:p-8 space-y-8 max-w-full mx-auto">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-zinc-800 tracking-tight">Estações Pluviométricas</h1>
-            <p className="text-base md:text-lg text-zinc-600">Gerencie e monitore todas as estações de medição</p>
+            <h1 className={`text-3xl md:text-4xl font-extrabold tracking-tight ${
+              isDarkMode ? 'text-white' : 'text-zinc-800'
+            }`}>Estações Pluviométricas</h1>
+            <p className={`text-base md:text-lg ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
+              Gerencie e monitore todas as estações de medição
+            </p>
           </div>
           {token && (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-slate-900 text-white rounded-lg py-2.5 px-6 flex items-center gap-2 text-sm font-semibold hover:bg-slate-800 transition-colors duration-300 shadow-sm cursor-pointer"
+              className={`rounded-lg py-2.5 px-6 flex items-center gap-2 text-sm font-semibold transition-colors duration-300 shadow-sm cursor-pointer ${
+                isDarkMode
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-slate-900 text-white hover:bg-slate-800'
+              }`}
             >
               <Plus className="h-5 w-5" />
               Cadastrar Estação

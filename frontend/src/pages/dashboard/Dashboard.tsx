@@ -1,15 +1,17 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Charts from '../../components/dashboard/Charts';
+import ExportCSVModal from '../../components/dashboard/ExportCSVModal';
 import { useStations } from '../../hooks/stations/useStations';
 import { useAlerts } from '../../hooks/alerts/useAlerts';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Radio, AlertTriangle } from 'lucide-react';
+import { Radio, AlertTriangle, Download } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { stations, loading: loadingStations, error: errorStations } = useStations();
   const { activeAlerts, loading: loadingAlerts, error: errorAlerts } = useAlerts();
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const activeStations = stations.filter(s => s.status === 'ACTIVE');
 
@@ -19,9 +21,24 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen font-poppins flex">
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 w-full">
-        <h1 className={`text-3xl font-bold font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
-          Dashboard
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className={`text-3xl font-bold font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
+            Dashboard
+          </h1>
+          
+          {/* Botão de Exportar CSV */}
+          <button
+            onClick={() => setShowExportModal(true)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 active:scale-95 ${
+              isDarkMode
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
+          >
+            <Download className="h-5 w-5" />
+            Exportar
+          </button>
+        </div>
 
         {loading ? (
           <div className={`text-lg font-poppins ${isDarkMode ? 'text-gray-200' : 'text-zinc-600'}`}>Carregando dashboard...</div>
@@ -95,6 +112,12 @@ const Dashboard: React.FC = () => {
           </>
         )}
       </main>
+
+      {/* Modal de Exportação CSV */}
+      <ExportCSVModal 
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+      />
     </div>
   );
 };

@@ -178,7 +178,7 @@ const ConteudoEducacao: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen font-poppins">
+    <div className="min-h-screen font-poppins p-8">
       <main className="flex-1 space-y-8 relative">
         <button
           onClick={() => window.history.back()}

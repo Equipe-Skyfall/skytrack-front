@@ -1,6 +1,6 @@
 // components/dashboard/ExportCSVModal.tsx
 import React, { useState } from 'react';
-import { X, Download, FileText, CheckSquare, Square, FileSpreadsheet } from 'lucide-react';
+import { X, Download, FileText, CheckSquare, Square, FileSpreadsheet, BarChart3, Building2, MapPin, Check } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { toast } from 'react-toastify';
 import { useStations } from '../../hooks/stations/useStations';
@@ -778,11 +778,27 @@ const ExportCSVModal: React.FC<ExportCSVModalProps> = ({ isOpen, onClose }) => {
             <h3 className={`text-sm font-semibold mb-2 ${isDarkMode ? 'text-blue-300' : 'text-blue-900'}`}>
               Coisas a serem exportadas:
             </h3>
-            <div className={`space-y-1 text-sm ${isDarkMode ? 'text-blue-200' : 'text-blue-800'}`}>
-              <div>📊 <strong>{selectedParameters.length}</strong> Parâmetro{selectedParameters.length !== 1 ? 's' : ''}</div>
-              <div>🏢 <strong>{selectedStations.length}</strong> Estação{selectedStations.length !== 1 ? 'ões' : ''}</div>
-              {includeStationInfo && <div>📍 Detalhes das estações incluídos</div>}
-              {includeAlerts && <div>✓ Coluna de alertas incluída nas leituras</div>}
+            <div className={`space-y-2 text-sm ${isDarkMode ? 'text-blue-200' : 'text-blue-800'}`}>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                <strong>{selectedParameters.length}</strong> Parâmetro{selectedParameters.length !== 1 ? 's' : ''}
+              </div>
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                <strong>{selectedStations.length}</strong> Estação{selectedStations.length !== 1 ? 'ões' : ''}
+              </div>
+              {includeStationInfo && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Detalhes das estações incluídos
+                </div>
+              )}
+              {includeAlerts && (
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4" />
+                  Coluna de alertas incluída nas leituras
+                </div>
+              )}
             </div>
           </div>
         </div>

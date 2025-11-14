@@ -131,7 +131,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${AUTH_BASE}/auth/login`, {
+      // Primeiro tenta solicitar o código 2FA
+      const response = await fetch(`${AUTH_BASE}/auth/request-2fa-code`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -160,11 +161,148 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error(data.message || `Erro ${response.status}: Falha no login`);
       }
 
-      const newToken = data.data?.token;
-      if (!newToken) {
-        throw new Error('Token não retornado pelo servidor');
+      // Log para debug - REMOVER DEPOIS
+      console.log('Resposta completa do servidor:', data);
+      console.log('data.data:', data.data);
+
+      // Verifica múltiplos formatos de resposta possíveis
+      const sessionToken = data.data?.sessionToken || data.sessionToken || data.data?.session_token;
+      
+      if (sessionToken) {
+        console.log('SessionToken encontrado:', sessionToken);
+        return {
+          requires2FA: true,
+          sessionToken: sessionToken
+        };
       }
 
+      // Se por algum motivo retornar token diretamente (sem 2FA)
+      const newToken = data.data?.token || data.token;
+      if (newToken) {
+        console.log('Token JWT encontrado, fazendo login direto');
+        setToken(newToken);
+
+        const decodedToken = decodeJWT(newToken);
+        if (!decodedToken) {
+          throw new Error('Falha ao decodificar o token');
+        }
+
+        const newUser: ApiUser = {
+          id: decodedToken.userId || '',
+          email: decodedToken.email || email,
+          username: decodedToken.username || email.split('@')[0],
+          role: decodedToken.role || 'USER',
+        };
+        setUser(newUser);
+        localStorage.setItem('skytrack_user', JSON.stringify(newUser));
+        localStorage.setItem('skytrack_token', newToken);
+
+        navigate('/dashboard', { replace: true });
+        return;
+      }
+
+      console.error('Resposta sem sessionToken ou token:', data);
+      throw new Error('Resposta inesperada do servidor: ' + JSON.stringify(data));
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Falha no login');
+    }
+  };
+
+  const request2FACode = async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${AUTH_BASE}/auth/request-2fa-code`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+
+      let data;
+      try {
+        const text = await response.text();
+        if (text) {
+          data = JSON.parse(text);
+        } else {
+          throw new Error(`Erro ${response.status}: Resposta vazia do servidor`);
+        }
+      } catch (e) {
+        if (e instanceof Error && e.message.includes('Erro')) {
+          throw e;
+        }
+        throw new Error(`Erro ${response.status}: Falha ao processar resposta`);
+      }
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || `Erro ${response.status}: Falha ao solicitar código`);
+      }
+
+      // Log para debug - REMOVER DEPOIS
+      console.log('Resposta request-2fa-code completa:', data);
+
+      const sessionToken = data.data?.sessionToken || data.sessionToken || data.data?.session_token;
+      
+      if (!sessionToken) {
+        console.error('SessionToken não encontrado na resposta:', data);
+        throw new Error('Token de sessão não retornado pelo servidor: ' + JSON.stringify(data));
+      }
+
+      console.log('SessionToken recebido para reenvio');
+      return {
+        requires2FA: true,
+        sessionToken: sessionToken
+      };
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Falha ao solicitar código 2FA');
+    }
+  };
+
+  const verify2FA = async (sessionToken: string, code: string) => {
+    try {
+      const response = await fetch(`${AUTH_BASE}/auth/verify-2fa`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ sessionToken, code }),
+      });
+
+      let data;
+      try {
+        const text = await response.text();
+        if (text) {
+          data = JSON.parse(text);
+        } else {
+          throw new Error(`Erro ${response.status}: Resposta vazia do servidor`);
+        }
+      } catch (e) {
+        if (e instanceof Error && e.message.includes('Erro')) {
+          throw e;
+        }
+        throw new Error(`Erro ${response.status}: Falha ao processar resposta`);
+      }
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || `Erro ${response.status}: Código inválido`);
+      }
+
+      // Log para debug - REMOVER DEPOIS
+      console.log('Resposta verify-2fa completa:', data);
+      console.log('data.data:', data.data);
+
+      // Verifica múltiplos formatos de resposta possíveis para o token
+      const newToken = data.data?.token || data.token || data.data?.accessToken || data.accessToken;
+      
+      if (!newToken) {
+        console.error('Token não encontrado na resposta:', data);
+        throw new Error('Token não retornado pelo servidor: ' + JSON.stringify(data));
+      }
+
+      console.log('Token JWT recebido, fazendo login...');
       setToken(newToken);
 
       const decodedToken = decodeJWT(newToken);
@@ -172,19 +310,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Falha ao decodificar o token');
       }
 
-  const newUser: ApiUser = {
+      const newUser: ApiUser = {
         id: decodedToken.userId || '',
-        email: decodedToken.email || email,
-        username: decodedToken.username || email.split('@')[0],
+        email: decodedToken.email || '',
+        username: decodedToken.username || '',
         role: decodedToken.role || 'USER',
       };
+      
       setUser(newUser);
       localStorage.setItem('skytrack_user', JSON.stringify(newUser));
       localStorage.setItem('skytrack_token', newToken);
 
+      console.log('Login 2FA bem-sucedido! Redirecionando...');
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Falha no login');
+      throw new Error(error instanceof Error ? error.message : 'Falha ao verificar código 2FA');
     }
   };
 
@@ -242,7 +382,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-  <AuthContext.Provider value={{ ...authService, login, logout, updateUser }}>
+  <AuthContext.Provider value={{ ...authService, login, logout, updateUser, request2FACode, verify2FA }}>
       {isCheckingAuth ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-lg text-zinc-600">Carregando...</div>

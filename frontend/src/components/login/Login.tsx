@@ -14,24 +14,65 @@ import {
 } from "lucide-react";
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import TwoFactorAuthModal from '../modals/TwoFactorAuthModal';
 
 const ConteudoLogin: React.FC = () => {
-  const { login } = useAuth();
+  const { login, verify2FA, request2FACode } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      await login(email, password);
+      const result = await login(email, password);
+      
+      // Se o resultado contém um sessionToken, significa que precisa de 2FA
+      if (result && typeof result === 'object' && 'sessionToken' in result && result.requires2FA) {
+        setSessionToken(result.sessionToken);
+        setShowTwoFactorModal(true);
+      }
+      // Caso contrário, o login foi bem-sucedido e o AuthContext já navegou
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     }
+  };
+
+  const handleVerify2FA = async (code: string) => {
+    if (!sessionToken) {
+      throw new Error('Sessão inválida');
+    }
+    
+    try {
+      await verify2FA(sessionToken, code);
+      setShowTwoFactorModal(false);
+      // O AuthContext já deve navegar para o dashboard após verificação bem-sucedida
+    } catch (err) {
+      throw err; // Propaga o erro para o modal mostrar
+    }
+  };
+
+  const handleResend2FACode = async () => {
+    try {
+      const result = await request2FACode(email, password);
+      if (result && 'sessionToken' in result) {
+        setSessionToken(result.sessionToken);
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const handleBack2FA = () => {
+    setShowTwoFactorModal(false);
+    setSessionToken(null);
+    setPassword(''); // Limpa a senha por segurança
   };
 
   const handlePublicEntry = () => {
@@ -238,6 +279,17 @@ const ConteudoLogin: React.FC = () => {
           </form>
         </div>
       </div>
+
+      {/* Modal de Autenticação em Dois Fatores */}
+      <TwoFactorAuthModal
+        isOpen={showTwoFactorModal}
+        email={email}
+        password={password}
+        sessionToken={sessionToken}
+        onVerify={handleVerify2FA}
+        onResendCode={handleResend2FACode}
+        onBack={handleBack2FA}
+      />
     </div>
   );
 };

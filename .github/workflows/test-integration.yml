@@ -1,13 +1,13 @@
-name: Frontend CI/CD
+name: Integration Tests (Test Branch)
 
 on:
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [ "test" ]
   push:
-    branches: [ "main" ]
+    branches: [ "test" ]
 
 jobs:
-  test:
+  integration-test:
     runs-on: ubuntu-latest
 
     defaults:
@@ -34,8 +34,8 @@ jobs:
       - name: Run type checking
         run: npm run typecheck
 
-      - name: Run tests
-        run: npm test
+      - name: Run integration tests with coverage
+        run: npm run test:coverage
 
       - name: Build project
         run: npm run build

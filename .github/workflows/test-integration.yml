@@ -11,50 +11,63 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout frontend repository
         uses: actions/checkout@v4
+        with:
+          path: frontend-repo
+
+      - name: Checkout backend repository
+        uses: actions/checkout@v4
+        with:
+          repository: Equipe-Skyfall/skytrack-back
+          path: backend-repo
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # Backend: Rodar testes de integração com PostgreSQL real
+      # Backend: Preparar e rodar em background
       - name: Install backend dependencies
-        working-directory: ./skytrack-back
+        working-directory: ./backend-repo
         run: npm ci
 
       - name: Setup Prisma
-        working-directory: ./skytrack-back
+        working-directory: ./backend-repo
         env:
           DATABASE_URL: postgresql://postgres:123456789Skytrack!@db.autuucgxzwdmnjxbvyfw.supabase.co:5432/postgres
         run: npx prisma generate
 
-      - name: Run backend integration tests
-        working-directory: ./skytrack-back
+      - name: Start backend server
+        working-directory: ./backend-repo
         env:
           DATABASE_URL: postgresql://postgres:123456789Skytrack!@db.autuucgxzwdmnjxbvyfw.supabase.co:5432/postgres
           NODE_ENV: test
           PORT: 3000
-        run: npm test
+        run: |
+          npm run start:dev &
+          sleep 10
 
-      # Frontend: Testes unitários
+      # Frontend: Testar integração
       - name: Install frontend dependencies
-        working-directory: ./frontend
+        working-directory: ./frontend-repo/frontend
         run: npm ci
 
       - name: Run frontend linting
-        working-directory: ./frontend
+        working-directory: ./frontend-repo/frontend
         run: npm run lint
 
       - name: Run frontend type checking
-        working-directory: ./frontend
+        working-directory: ./frontend-repo/frontend
         run: npm run typecheck
 
       - name: Run frontend tests
-        working-directory: ./frontend
+        working-directory: ./frontend-repo/frontend
+        env:
+          VITE_API_URL: http://localhost:3000
         run: npm test
 
       - name: Build frontend
-        working-directory: ./frontend
+        working-directory: ./frontend-repo/frontend
         run: npm run build

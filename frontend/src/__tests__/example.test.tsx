@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from '@jest/globals';
 
-// Componente de exemplo para testar
 function Hello({ name }: { name: string }) {
   return <h1>Hello, {name}!</h1>;
 }

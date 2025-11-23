@@ -14,9 +14,9 @@ import type {
   StationFormData,
   EstacaoCardProps
 } from '../../interfaces/stations';
+import { API_BASE } from "../../services/api/config";
 
-const API_URL = 'https://sky-track-backend.vercel.app/api/stations';
-
+const API_URL = API_BASE+"/api/stations"
 const EstacaoCard: React.FC<EstacaoCardProps> = ({
   station,
   onConfigurarClick,

@@ -53,12 +53,20 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   useEffect(() => {
-    // Load alerts for both public users and authenticated users.
-    // If user exists we may later add user-specific behavior, but alerts
-    // themselves should be visible to anonymous visitors as well.
+    // Só faz polling se houver usuário autenticado ou se for acesso público permitido
+    // Para evitar requests desnecessários antes da autenticação
+    if (!user) {
+      console.log('🔐 NotificationContext - Usuário não autenticado, aguardando...');
+      return;
+    }
+
+    console.log('👤 NotificationContext - Usuário autenticado, iniciando polling de alertas');
     loadAlerts();
     const interval = setInterval(loadAlerts, 60000); // Polling every 60s
-    return () => clearInterval(interval);
+    return () => {
+      console.log('🛑 NotificationContext - Limpando interval de polling');
+      clearInterval(interval);
+    };
   }, [user]);
 
   const markAllAsRead = () => {

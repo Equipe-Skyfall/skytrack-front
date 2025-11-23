@@ -75,10 +75,8 @@ export const useAlerts = () => {
   const activeAlerts = alerts.filter(a => (a as any).active !== false);
   const historyAlerts = alerts.filter(a => (a as any).active === false);
 
-  useEffect(() => {
-    // Carregar alertas sempre, mesmo sem usuário autenticado (para usuários públicos)
-    loadAlerts();
-  }, [loadAlerts]);
+  // Removido useEffect automático - apenas carrega quando explicitamente chamado
+  // Use loadAlerts() manualmente quando necessário
 
   return {
     alerts,

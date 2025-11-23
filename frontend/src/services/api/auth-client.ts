@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const AUTH_BASE = (import.meta.env.VITE_AUTH_URL as string) || 'http://localhost:3001';
+import { AUTH_BASE } from './config';
 
 // Create axios instance specifically for auth service
 const authClient = axios.create({

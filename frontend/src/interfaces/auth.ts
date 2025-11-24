@@ -16,7 +16,9 @@ export interface User {
 export interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void | { requires2FA: boolean; sessionToken: string }>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
+  request2FACode: (email: string, password: string) => Promise<{ requires2FA: boolean; sessionToken: string }>;
+  verify2FA: (sessionToken: string, code: string) => Promise<void>;
 }

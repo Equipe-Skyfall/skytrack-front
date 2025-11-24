@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import {
   BookOpen,
   TriangleAlert,
@@ -10,11 +11,14 @@ import {
   LogIn,
   Settings,
   User,
+  Moon,
+  Sun,
   // BarChart3 // DESATIVADO - usado em Relatórios
 } from "lucide-react";
 
 const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -56,7 +60,11 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      <div className="w-[17.7rem] bg-slate-900 text-white h-screen fixed left-0 top-0 p-4 flex flex-col overflow-y-auto z-50 transition-all duration-300">
+      <div className={`w-[17.7rem] h-screen fixed left-0 top-0 p-4 flex flex-col overflow-y-auto z-50 transition-all duration-300 ${
+        isDarkMode 
+          ? 'bg-slate-950 text-white' 
+          : 'bg-slate-900 text-white'
+      }`}>
         {/* Logo - Alinhado à esquerda */}
         <div className="flex items-center justify-start mb-2 pl-1">
           <img
@@ -64,7 +72,7 @@ const Sidebar: React.FC = () => {
             src="https://c.animaapp.com/j2YDbmTu/img/4-13@2x.png"
             alt="SkyTrack Logo"
           />
-          <h2 className="text-xl font-bold font-poppins leading-[1.8rem]">
+          <h2 className="text-xl font-bold font-poppins leading-[1.8rem] text-white">
             SkyTrack
           </h2>
         </div>
@@ -76,20 +84,30 @@ const Sidebar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] transition-colors group hover:bg-white hover:text-black ${
-                  location.pathname === item.path ? 'bg-white text-black' : ''
+                className={`flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] transition-colors group ${
+                  isDarkMode 
+                    ? location.pathname === item.path 
+                      ? 'bg-zinc-700 text-white' 
+                      : 'hover:bg-zinc-800 text-white'
+                    : location.pathname === item.path 
+                      ? 'bg-white text-black' 
+                      : 'hover:bg-white hover:text-black text-white'
                 }`}
               >
                 <span
                   className={`ml-[1.2rem] text-lg ${
-                    location.pathname === item.path ? 'text-black' : 'text-white group-hover:text-black'
+                    isDarkMode
+                      ? location.pathname === item.path ? 'text-white' : 'text-gray-300 group-hover:text-white'
+                      : location.pathname === item.path ? 'text-black' : 'text-white group-hover:text-black'
                   }`}
                 >
                   {item.icon}
                 </span>
                 <span
                   className={`flex-1 text-center text-[0.8rem] font-normal font-poppins leading-[1.8rem] ${
-                    location.pathname === item.path ? 'text-black' : 'text-white group-hover:text-black'
+                    isDarkMode
+                      ? location.pathname === item.path ? 'text-white' : 'text-gray-300 group-hover:text-white'
+                      : location.pathname === item.path ? 'text-black' : 'text-white group-hover:text-black'
                   }`}
                 >
                   {item.label}
@@ -100,11 +118,32 @@ const Sidebar: React.FC = () => {
 
           {/* Botões de login/logoff */}
           <div className="space-y-2">
+            {/* Botão Dark Mode */}
+            <button
+              onClick={toggleTheme}
+              className={`flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] text-white transition-colors group ${
+                isDarkMode
+                  ? 'bg-slate-900 hover:bg-slate-800'
+                  : 'bg-slate-800 hover:bg-slate-700'
+              }`}
+            >
+              <span className="ml-[1.2rem] text-lg">
+                {isDarkMode ? <Sun className="text-yellow-400" /> : <Moon className="text-blue-300" />}
+              </span>
+              <span className="flex-1 text-center text-[0.8rem] font-normal font-poppins leading-[1.8rem]">
+                {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
+              </span>
+            </button>
+
             {/* Logoff vermelho apenas para ADMIN */}
             {isAdmin && (
               <button
                 onClick={handleLogoffClick}
-                className="flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] bg-white text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                className={`flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] transition-colors ${
+                  isDarkMode
+                    ? 'bg-zinc-700 text-red-400 hover:bg-zinc-600 hover:text-red-300'
+                    : 'bg-white text-red-600 hover:bg-red-50 hover:text-red-700'
+                }`}
               >
                 <span className="ml-[1.2rem] text-lg">
                   <LogIn />
@@ -119,7 +158,11 @@ const Sidebar: React.FC = () => {
             {!isAdmin && (
               <Link
                 to="/login"
-                className="flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] bg-white text-black transition-colors hover:bg-gray-100"
+                className={`flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] transition-colors ${
+                  isDarkMode
+                    ? 'bg-zinc-700 text-white hover:bg-zinc-600'
+                    : 'bg-white text-black hover:bg-gray-100'
+                }`}
               >
                 <span className="ml-[1.2rem] text-lg">
                   <LogIn />
@@ -136,13 +179,23 @@ const Sidebar: React.FC = () => {
       {/* Modal de confirmação de Logoff */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-80 shadow-md">
-            <h2 className="text-lg font-bold font-poppins mb-4">Confirmar Logoff</h2>
-            <p className="text-sm font-normal font-poppins mb-6">Deseja realmente fazer logoff?</p>
+          <div className={`rounded-lg p-6 w-80 shadow-md ${
+            isDarkMode ? 'bg-slate-800' : 'bg-white'
+          }`}>
+            <h2 className={`text-lg font-bold font-poppins mb-4 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>Confirmar Logoff</h2>
+            <p className={`text-sm font-normal font-poppins mb-6 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}>Deseja realmente fazer logoff?</p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={cancelLogoff}
-                className="bg-white border border-gray-300 text-black py-2 px-4 rounded hover:bg-gray-50 transition-colors font-poppins"
+                className={`border py-2 px-4 rounded transition-colors font-poppins ${
+                  isDarkMode
+                    ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+                    : 'bg-white border-gray-300 text-black hover:bg-gray-50'
+                }`}
               >
                 Não
               </button>

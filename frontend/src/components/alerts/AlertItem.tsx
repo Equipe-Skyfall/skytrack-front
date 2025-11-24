@@ -1,6 +1,7 @@
 // components/alerts/AlertItem.tsx
 import React from 'react';
 import { AlertTriangle, AlertCircle, Info, MapPin, Clock, CheckCircle } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type Alert = {
   id?: string;
@@ -23,6 +24,8 @@ type Props = {
 };
 
 const AlertItem: React.FC<Props> = ({ alert }) => {
+  const { isDarkMode } = useTheme();
+  
   const getLevelConfig = (level: string) => {
     switch (level) {
       case 'critical':
@@ -30,21 +33,21 @@ const AlertItem: React.FC<Props> = ({ alert }) => {
           icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
           badge: "bg-red-500 text-white",
           border: "border-l-red-500",
-          bg: "bg-red-50/80 hover:bg-red-50"
+          bg: isDarkMode ? "bg-red-900/20 hover:bg-red-900/30" : "bg-red-50/80 hover:bg-red-50"
         };
       case 'warning':
         return {
-          icon: <AlertCircle className="h-5 w-5 text-slate-600" />, // Mudei para slate
-          badge: "bg-slate-600 text-white", // Mudei para slate
-          border: "border-l-slate-500", // Mudei para slate
-          bg: "bg-slate-50/80 hover:bg-slate-50" // Mudei para slate
+          icon: <AlertCircle className={`h-5 w-5 ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`} />,
+          badge: isDarkMode ? "bg-slate-600 text-white" : "bg-slate-600 text-white",
+          border: isDarkMode ? "border-l-slate-600" : "border-l-slate-500",
+          bg: isDarkMode ? "bg-slate-700/50 hover:bg-slate-700/70" : "bg-slate-50/80 hover:bg-slate-50"
         };
       default:
         return {
           icon: <Info className="h-5 w-5 text-blue-500" />,
           badge: "bg-blue-500 text-white",
           border: "border-l-blue-500",
-          bg: "bg-blue-50/80 hover:bg-blue-50"
+          bg: isDarkMode ? "bg-blue-900/20 hover:bg-blue-900/30" : "bg-blue-50/80 hover:bg-blue-50"
         };
     }
   };
@@ -72,11 +75,15 @@ const AlertItem: React.FC<Props> = ({ alert }) => {
   const config = getLevelConfig(alert.level);
 
   return (
-    <div className={`${config.bg} ${config.border} border-l-4 rounded-lg p-4 transition-all duration-200 hover:shadow-md cursor-pointer border border-slate-200 hover:border-slate-300`}>
+    <div className={`${config.bg} ${config.border} border-l-4 rounded-lg p-4 transition-all duration-200 hover:shadow-md cursor-pointer border ${
+      isDarkMode ? 'border-slate-600 hover:border-slate-500' : 'border-slate-200 hover:border-slate-300'
+    }`}>
       <div className="flex items-start gap-3">
         {/* Ícone do alerta */}
         <div className="flex-shrink-0 mt-0.5">
-          <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-200">
+          <div className={`p-2 rounded-lg shadow-sm border ${
+            isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-slate-200'
+          }`}>
             {config.icon}
           </div>
         </div>
@@ -88,7 +95,11 @@ const AlertItem: React.FC<Props> = ({ alert }) => {
               {getLevelText(alert.level)}
             </span>
             {alert.read && (
-              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200 flex items-center gap-1">
+              <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
+                isDarkMode 
+                  ? 'bg-green-900/30 text-green-400 border border-green-700' 
+                  : 'bg-green-100 text-green-800 border border-green-200'
+              }`}>
                 <CheckCircle className="h-3 w-3" />
                 Lido
               </span>
@@ -96,12 +107,16 @@ const AlertItem: React.FC<Props> = ({ alert }) => {
           </div>
 
           {/* Mensagem principal */}
-          <h3 className="font-semibold text-slate-900 text-sm mb-2 leading-tight">
+          <h3 className={`font-semibold text-sm mb-2 leading-tight ${
+            isDarkMode ? 'text-white' : 'text-slate-900'
+          }`}>
             {alert.description}
           </h3>
 
           {/* Informações secundárias */}
-          <div className="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+          <div className={`flex items-center gap-3 text-xs flex-wrap ${
+            isDarkMode ? 'text-gray-400' : 'text-slate-500'
+          }`}>
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />
               <span>Estação {alert.stationId.slice(0, 8)}...</span>
@@ -115,8 +130,12 @@ const AlertItem: React.FC<Props> = ({ alert }) => {
 
           {/* Informações técnicas (condensadas) */}
           {(alert.threshold || alert.durationMinutes) && (
-            <div className="mt-2 pt-2 border-t border-slate-200/50">
-              <div className="flex items-center gap-4 text-xs text-slate-400 flex-wrap">
+            <div className={`mt-2 pt-2 border-t ${
+              isDarkMode ? 'border-slate-600/50' : 'border-slate-200/50'
+            }`}>
+              <div className={`flex items-center gap-4 text-xs flex-wrap ${
+                isDarkMode ? 'text-gray-500' : 'text-slate-400'
+              }`}>
                 {alert.threshold && (
                   <span>Limite: {alert.threshold}</span>
                 )}

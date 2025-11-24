@@ -36,7 +36,6 @@ const Charts: React.FC = () => {
     loadStationReadings,
   } = useSensorReadings();
 
-
   // Stations hook for dropdown
   const { stations } = useStations();
 
@@ -75,7 +74,7 @@ const Charts: React.FC = () => {
     };
 
     load();
-  }, [selectedStationId]); // Remove loadReadings, loadStationReadings from deps to prevent infinite loops
+  }, [selectedStationId]);
 
   // Transform readings to chart data
   const chartData = readings.map(reading => {
@@ -117,7 +116,6 @@ const Charts: React.FC = () => {
         name: sensorType.label,
         color: sensorType.color,
         unit: sensorType.unit,
-        // icons removed (mocked); UI uses a colored dot instead
       };
     }
 
@@ -130,8 +128,6 @@ const Charts: React.FC = () => {
       icon: <TrendingUp className="h-4 w-4" />
     };
   };
-
-  // Removed getSensorIcon — icons were mocked. Use colored dot + label instead.
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -168,7 +164,7 @@ const Charts: React.FC = () => {
   const renderChart = () => {
     if (loading) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex items-center justify-center h-64 sm:h-96">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         </div>
       );
@@ -176,7 +172,7 @@ const Charts: React.FC = () => {
 
     if (error) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex items-center justify-center h-64 sm:h-96">
           <div className="text-red-400 text-center">
             <TrendingUp className="h-12 w-12 mx-auto mb-2" />
             <p>Erro ao carregar dados: {error}</p>
@@ -185,39 +181,40 @@ const Charts: React.FC = () => {
       );
     }
 
-    // Show loading spinner while data is being fetched
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center h-96">
-          <div className="text-gray-400 text-center">
-            <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin mx-auto mb-2"></div>
-            <p>Carregando dados...</p>
-          </div>
-        </div>
-      );
-    }
-
     // Only show "no data" message AFTER loading is complete
     if (!loading && !hasData) {
       return (
-        <div className="flex items-center z-10 fixed justify-center h-96 w-full text-center ">
-          <div className="text-gray-400 text-center items-center  m mb-2 m-auto">
-            <TrendingUp className="h-12 w-12" />
-            <p >Nenhum dado disponível</p>
+        <div className="flex items-center justify-center h-64 sm:h-96 w-full text-center">
+          <div className="text-gray-400 text-center items-center mb-2 m-auto">
+            <TrendingUp className="h-12 w-12 mx-auto" />
+            <p>Nenhum dado disponível</p>
           </div>
         </div>
       );
     }
 
-    const commonProps = {
+    // Configurações diferentes para mobile e desktop
+    const mobileProps = {
+      data: chartData,
+      margin: { top: 10, right: 5, left: 0, bottom: 10 },
+    };
+
+    const desktopProps = {
       data: chartData,
       margin: { top: 20, right: 30, left: 20, bottom: 5 },
     };
+
+    const commonProps = window.innerWidth < 640 ? mobileProps : desktopProps;
 
     const renderSensorLines = () => {
       return Array.from(selectedSensors).map(sensor => {
         const config = getSensorConfig(sensor);
         if (!config) return null;
+
+        // Configurações diferentes para mobile
+        const isMobile = window.innerWidth < 640;
+        const strokeWidth = isMobile ? 2 : 3;
+        const dotRadius = isMobile ? 2 : 4;
 
         if (activeChart === 'area') {
           return (
@@ -228,7 +225,7 @@ const Charts: React.FC = () => {
               stroke={config.color}
               fill={config.color}
               fillOpacity={0.3}
-              strokeWidth={2}
+              strokeWidth={strokeWidth}
               name={config.name}
               className="chart-line-glow"
             />
@@ -250,8 +247,8 @@ const Charts: React.FC = () => {
               type="monotone"
               dataKey={config.key}
               stroke={config.color}
-              strokeWidth={3}
-              dot={{ fill: config.color, strokeWidth: 2, r: 4 }}
+              strokeWidth={strokeWidth}
+              dot={{ fill: config.color, strokeWidth: strokeWidth - 1, r: dotRadius }}
               name={config.name}
               className="chart-line-glow"
             />
@@ -261,6 +258,11 @@ const Charts: React.FC = () => {
     };
 
     const ChartComponent = activeChart === 'area' ? AreaChart : activeChart === 'bar' ? BarChart : LineChart;
+
+    // Configurações de fonte diferentes para mobile
+    const isMobile = window.innerWidth < 640;
+    const fontSize = isMobile ? 10 : 12;
+    const yAxisWidth = isMobile ? 30 : 40;
 
     return (
       <ChartComponent {...commonProps}>
@@ -281,10 +283,22 @@ const Charts: React.FC = () => {
           </defs>
         )}
         <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#475569' : '#e5e7eb'} />
-        <XAxis dataKey="time" tick={{ fill: isDarkMode ? '#d1d5db' : '#6b7280', fontSize: 12 }} />
-        <YAxis tick={{ fill: isDarkMode ? '#d1d5db' : '#6b7280', fontSize: 12 }} />
+        <XAxis 
+          dataKey="time" 
+          tick={{ fill: isDarkMode ? '#d1d5db' : '#6b7280', fontSize }} 
+        />
+        <YAxis 
+          tick={{ fill: isDarkMode ? '#d1d5db' : '#6b7280', fontSize }} 
+          width={yAxisWidth}
+        />
         <Tooltip content={<CustomTooltip />} />
-        <Legend wrapperStyle={{ color: isDarkMode ? '#d1d5db' : '#374151' }} />
+        <Legend 
+          wrapperStyle={{ 
+            color: isDarkMode ? '#d1d5db' : '#374151',
+            fontSize: `${fontSize}px`,
+            paddingTop: '10px'
+          }} 
+        />
         {renderSensorLines()}
       </ChartComponent>
     );
@@ -318,7 +332,8 @@ const Charts: React.FC = () => {
         ? 'bg-slate-800 border-slate-700' 
         : 'bg-white border-gray-200'
     }`}>
-      <div className="flex items-center justify-between mb-6">
+      {/* Header - Desktop layout mantido, mobile adaptado */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center mb-2">
             <TrendingUp className={`w-5 h-5 mr-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`} />
@@ -330,7 +345,10 @@ const Charts: React.FC = () => {
             {hasData ? `${readings.length} leituras` : 'Aguardando dados...'}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        
+        {/* Chart Type Selector and Station Selector */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          {/* Chart Type Selector */}
           <div className={`flex rounded-lg p-1 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
             <button
               onClick={() => setActiveChart('line')}
@@ -441,17 +459,18 @@ const Charts: React.FC = () => {
         })}
       </div>
       
+      {/* Chart Container - Altura diferente para mobile e desktop */}
       <div className={`rounded-lg p-4 border ${
         isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-100'
       }`}>
-        <ResponsiveContainer width="100%" height={420}>
+        <ResponsiveContainer width="100%" height={400} className="sm:!h-[420px]">
           {renderChart()}
         </ResponsiveContainer>
       </div>
       
       {/* Statistics Cards */}
       {stats && (
-        <div className="grid grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-3 sm:grid-cols-3 gap-4 mt-6">
           {sensorTypes.map(sensorType => {
             const config = getSensorConfig(sensorType.key);
             const sensorStats = stats[sensorType.key];

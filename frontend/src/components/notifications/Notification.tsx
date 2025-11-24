@@ -29,37 +29,42 @@ const Notification: React.FC = () => {
       
       // Toast no estilo do sistema com dark mode
       toast.info(
-        <div className="flex items-start gap-3 p-1">
-          <div className={`p-2 rounded-lg ${
+        <div className="flex items-start gap-2 sm:gap-3 p-1">
+          <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${
             alert.level === 'critical' 
               ? isDarkMode ? 'bg-red-900/30' : 'bg-red-100'
               : isDarkMode ? 'bg-slate-700' : 'bg-slate-100'
           }`}>
-            {alert.level === 'critical' ? '🚨' : '⚠️'}
+            <span className="text-base sm:text-lg">{alert.level === 'critical' ? '🚨' : '⚠️'}</span>
           </div>
-          <div className="flex-1">
-            <strong className={`text-sm font-semibold block ${
+          <div className="flex-1 min-w-0">
+            <strong className={`text-xs sm:text-sm font-semibold block truncate ${
               isDarkMode ? 'text-white' : 'text-slate-800'
             }`}>
               {message}
             </strong>
-            <p className={`text-xs mt-1 ${
+            <p className={`text-xs mt-0.5 sm:mt-1 truncate ${
               isDarkMode ? 'text-gray-400' : 'text-slate-500'
             }`}>
-              {new Date(alert.createdAt).toLocaleString('pt-BR')}
+              {new Date(alert.createdAt).toLocaleString('pt-BR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              })}
             </p>
           </div>
         </div>,
         {
-          position: 'bottom-right',
+          position: window.innerWidth < 640 ? 'top-center' : 'bottom-right',
           autoClose: 6000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          className: isDarkMode 
+          className: `${isDarkMode 
             ? '!bg-slate-800 !border !border-slate-700 !rounded-xl !shadow-lg'
-            : '!bg-white !border !border-slate-200 !rounded-xl !shadow-lg'
+            : '!bg-white !border !border-slate-200 !rounded-xl !shadow-lg'} !max-w-[calc(100vw-2rem)] sm:!max-w-md`
         }
       );
     });
@@ -106,18 +111,18 @@ const Notification: React.FC = () => {
   return (
     <>
       {/* Ícone de notificação limpo */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         <button
           onClick={handleOpenModal}
-          className={`relative group rounded-xl p-3 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg ${
+          className={`relative group rounded-xl p-2.5 sm:p-3 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-lg ${
             isDarkMode 
               ? 'bg-slate-800 hover:bg-slate-700' 
               : 'bg-slate-900 hover:bg-slate-800'
           }`}
         >
-          <Bell className="h-6 w-6 text-white group-hover:text-white transition-colors" />
+          <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-white group-hover:text-white transition-colors" />
           {unreadCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center shadow-lg animate-pulse">
+            <span className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center shadow-lg animate-pulse">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -126,27 +131,27 @@ const Notification: React.FC = () => {
 
       {/* Modal limpo sem borda feia */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-xl w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-lg ${
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className={`rounded-xl w-full max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-hidden shadow-lg ${
             isDarkMode ? 'bg-slate-800' : 'bg-white'
           }`}>
             
             {/* Header do modal */}
-            <div className={`p-6 ${
+            <div className={`p-4 sm:p-6 ${
               isDarkMode ? 'bg-slate-900' : 'bg-slate-900'
             }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`rounded-lg p-2 ${
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div className={`rounded-lg p-1.5 sm:p-2 shrink-0 ${
                     isDarkMode ? 'bg-slate-700' : 'bg-slate-800'
                   }`}>
-                    <Bell className="h-6 w-6 text-white" />
+                    <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">
+                  <div className="min-w-0">
+                    <h2 className="text-lg sm:text-xl font-bold text-white truncate">
                       Notificações
                     </h2>
-                    <p className={`text-sm mt-1 ${
+                    <p className={`text-xs sm:text-sm mt-0.5 sm:mt-1 truncate ${
                       isDarkMode ? 'text-gray-300' : 'text-slate-300'
                     }`}>
                       {unreadCount > 0 ? `${unreadCount} não lida${unreadCount !== 1 ? 's' : ''}` : 'Todas lidas'}
@@ -155,30 +160,30 @@ const Notification: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setShowModal(false)}
-                  className={`p-2 rounded-lg transition-colors duration-300 cursor-pointer ${
+                  className={`p-2 rounded-lg transition-colors duration-300 cursor-pointer shrink-0 ${
                     isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-800'
                   }`}
                 >
-                  <X className="h-5 w-5 text-white" />
+                  <X className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </button>
               </div>
             </div>
 
             {/* Filtros */}
-            <div className={`px-6 py-3 border-b ${
+            <div className={`px-4 sm:px-6 py-2 sm:py-3 border-b ${
               isDarkMode 
                 ? 'bg-slate-700 border-slate-600' 
                 : 'bg-slate-50 border-slate-200'
             }`}>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <Filter className={`h-4 w-4 ${isDarkMode ? 'text-gray-300' : 'text-slate-600'}`} />
-                  <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-slate-700'}`}>Filtrar:</span>
+                  <Filter className={`h-3 w-3 sm:h-4 sm:w-4 ${isDarkMode ? 'text-gray-300' : 'text-slate-600'}`} />
+                  <span className={`text-xs sm:text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-slate-700'}`}>Filtrar:</span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 sm:gap-2">
                   <button
                     onClick={() => setFilter('all')}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
                       filter === 'all' 
                         ? isDarkMode
                           ? 'bg-blue-600 text-white shadow-sm'
@@ -192,7 +197,7 @@ const Notification: React.FC = () => {
                   </button>
                   <button
                     onClick={() => setFilter('unread')}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
                       filter === 'unread' 
                         ? isDarkMode
                           ? 'bg-blue-600 text-white shadow-sm'
@@ -209,7 +214,7 @@ const Notification: React.FC = () => {
             </div>
 
             {/* Corpo do modal */}
-            <div className={`p-6 max-h-[50vh] overflow-y-auto ${
+            <div className={`p-3 sm:p-6 max-h-[55vh] sm:max-h-[50vh] overflow-y-auto ${
               isDarkMode ? 'bg-slate-800' : 'bg-slate-50'
             }`}>
               {filteredAlerts.length === 0 ? (
@@ -239,7 +244,7 @@ const Notification: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-2 sm:space-y-4">
                   {filteredAlerts.map(alert => (
                     <AlertItem
                       key={alert.id}
@@ -258,18 +263,18 @@ const Notification: React.FC = () => {
             </div>
 
             {/* Footer do modal */}
-            <div className={`border-t px-6 py-4 ${
+            <div className={`border-t px-3 sm:px-6 py-3 sm:py-4 ${
               isDarkMode 
                 ? 'border-slate-700 bg-slate-800' 
                 : 'border-slate-200 bg-white'
             }`}>
-              <div className="flex justify-between items-center">
-                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-slate-600'}`}>
+              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0">
+                <span className={`text-xs sm:text-sm text-center sm:text-left ${isDarkMode ? 'text-gray-300' : 'text-slate-600'}`}>
                   {filteredAlerts.length} de {alerts.length} notificação{alerts.length !== 1 ? 'es' : ''}
                 </span>
                 <button
                   onClick={handleMarkAsRead}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer ${
+                  className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
                     unreadCount > 0 
                       ? isDarkMode
                         ? 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 hover:scale-105 active:scale-95'
@@ -280,8 +285,8 @@ const Notification: React.FC = () => {
                   }`}
                   disabled={unreadCount === 0}
                 >
-                  {unreadCount > 0 ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                  {unreadCount > 0 ? 'Marcar como lidas' : 'Todas lidas'}
+                  {unreadCount > 0 ? <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                  <span className="truncate">{unreadCount > 0 ? 'Marcar como lidas' : 'Todas lidas'}</span>
                 </button>
               </div>
             </div>

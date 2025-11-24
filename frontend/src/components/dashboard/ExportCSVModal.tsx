@@ -525,24 +525,24 @@ const ExportCSVModal: React.FC<ExportCSVModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className={`rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl ${
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
+      <div className={`rounded-xl w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl ${
         isDarkMode ? 'bg-slate-800' : 'bg-white'
       }`}>
         
         {/* Header */}
-        <div className={`p-6 border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-slate-700' : 'bg-blue-100'}`}>
-                  <FileText className={`h-6 w-6 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+        <div className={`p-4 sm:p-6 border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className={`p-2 rounded-lg shrink-0 ${isDarkMode ? 'bg-slate-700' : 'bg-blue-100'}`}>
+                  <FileText className={`h-5 w-5 sm:h-6 sm:w-6 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                 </div>
-                <div>
-                  <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
+                <div className="min-w-0">
+                  <h2 className={`text-base sm:text-xl font-bold truncate ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                     Exportar Dados CSV
                   </h2>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-zinc-600'}`}>
+                  <p className={`text-xs sm:text-sm hidden sm:block ${isDarkMode ? 'text-gray-400' : 'text-zinc-600'}`}>
                     Selecione estações e parâmetros para gerar seu relatório
                   </p>
                 </div>
@@ -550,7 +550,7 @@ const ExportCSVModal: React.FC<ExportCSVModalProps> = ({ isOpen, onClose }) => {
             </div>
             <button
               onClick={onClose}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-lg transition-colors shrink-0 ${
                 isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
               }`}
             >
@@ -560,26 +560,26 @@ const ExportCSVModal: React.FC<ExportCSVModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+        <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(95vh-180px)] sm:max-h-[calc(90vh-200px)]">
           
           {/* Estações */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <label className={`text-sm font-semibold ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>
+          <div className="mb-4 sm:mb-6">
+            <div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
+              <label className={`text-xs sm:text-sm font-semibold ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>
                 Estações ({selectedStations.length}/{stations.length})
               </label>
               <button
                 onClick={toggleAllStations}
-                className={`text-xs font-medium px-3 py-1 rounded ${
+                className={`text-xs font-medium px-2 sm:px-3 py-1 rounded ${
                   isDarkMode
                     ? 'bg-slate-700 hover:bg-slate-600 text-blue-400'
                     : 'bg-blue-50 hover:bg-blue-100 text-blue-600'
                 }`}
               >
-                {selectedStations.length === stations.length ? 'Desmarcar Todas' : 'Selecionar Todas'}
+                {selectedStations.length === stations.length ? 'Desmarcar' : 'Selecionar'}
               </button>
             </div>
-            <div className={`border rounded-lg p-3 max-h-40 overflow-y-auto ${
+            <div className={`border rounded-lg p-2 sm:p-3 max-h-32 sm:max-h-40 overflow-y-auto ${
               isDarkMode ? 'border-slate-700 bg-slate-700/30' : 'border-slate-200 bg-slate-50'
             }`}>
               {stations.map(station => (
@@ -591,14 +591,14 @@ const ExportCSVModal: React.FC<ExportCSVModalProps> = ({ isOpen, onClose }) => {
                   }`}
                 >
                   {selectedStations.includes(station.id) ? (
-                    <CheckSquare className={`h-4 w-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                    <CheckSquare className={`h-3 w-3 sm:h-4 sm:w-4 shrink-0 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                   ) : (
-                    <Square className={`h-4 w-4 ${isDarkMode ? 'text-gray-500' : 'text-slate-400'}`} />
+                    <Square className={`h-3 w-3 sm:h-4 sm:w-4 shrink-0 ${isDarkMode ? 'text-gray-500' : 'text-slate-400'}`} />
                   )}
-                  <span className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>
+                  <span className={`text-xs sm:text-sm flex-1 truncate ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>
                     {station.name}
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded ml-auto ${
+                  <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded shrink-0 ${
                     station.status === 'ACTIVE'
                       ? isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'
                       : isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'
@@ -611,16 +611,16 @@ const ExportCSVModal: React.FC<ExportCSVModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Parâmetros */}
-          <div className="mb-6">
-            <label className={`text-sm font-semibold mb-3 block ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>
+          <div className="mb-4 sm:mb-6">
+            <label className={`text-xs sm:text-sm font-semibold mb-2 sm:mb-3 block ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>
               Parâmetros a Exportar
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               {availableParameters.map(param => (
                 <div
                   key={param.id}
                   onClick={() => toggleParameter(param.id)}
-                  className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer border transition-all ${
+                  className={`flex items-center gap-2 p-2 sm:p-3 rounded-lg cursor-pointer border transition-all ${
                     selectedParameters.includes(param.id)
                       ? isDarkMode
                         ? 'bg-blue-900/20 border-blue-600'
@@ -631,11 +631,11 @@ const ExportCSVModal: React.FC<ExportCSVModalProps> = ({ isOpen, onClose }) => {
                   }`}
                 >
                   {selectedParameters.includes(param.id) ? (
-                    <CheckSquare className={`h-5 w-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                    <CheckSquare className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                   ) : (
-                    <Square className={`h-5 w-5 ${isDarkMode ? 'text-gray-500' : 'text-slate-400'}`} />
+                    <Square className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${isDarkMode ? 'text-gray-500' : 'text-slate-400'}`} />
                   )}
-                  <span className={`text-sm font-medium ${
+                  <span className={`text-xs sm:text-sm font-medium ${
                     selectedParameters.includes(param.id)
                       ? isDarkMode ? 'text-blue-300' : 'text-blue-700'
                       : isDarkMode ? 'text-gray-300' : 'text-zinc-700'
@@ -804,13 +804,13 @@ const ExportCSVModal: React.FC<ExportCSVModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className={`p-6 border-t flex justify-end gap-3 ${
+        <div className={`p-4 sm:p-6 border-t flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 ${
           isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'
         }`}>
           <button
             onClick={onClose}
             disabled={exporting}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors w-full sm:w-auto ${
               isDarkMode
                 ? 'bg-slate-700 hover:bg-slate-600 text-white'
                 : 'bg-slate-200 hover:bg-slate-300 text-zinc-800'
@@ -821,7 +821,7 @@ const ExportCSVModal: React.FC<ExportCSVModalProps> = ({ isOpen, onClose }) => {
           <button
             onClick={handleExport}
             disabled={exporting || selectedStations.length === 0 || selectedParameters.length === 0}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all w-full sm:w-auto ${
               exporting || selectedStations.length === 0 || selectedParameters.length === 0
                 ? isDarkMode
                   ? 'bg-slate-700 text-gray-500 cursor-not-allowed'

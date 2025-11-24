@@ -201,7 +201,7 @@ const Perfil: React.FC = () => {
   }
 
   return (
-    <div className={`flex flex-col min-h-screen w-full font-['Poppins'] p-8 relative ${
+    <div className={`flex flex-col min-h-screen w-full font-['Poppins'] p-4 sm:p-6 md:p-8 relative ${
       isDarkMode ? 'bg-gradient-to-b from-slate-900 to-slate-800' : 'bg-white'
     }`}>
       {successMessage && (
@@ -209,34 +209,32 @@ const Perfil: React.FC = () => {
           {successMessage}
         </div>
       )}
-      <h1 className={`text-3xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-black'}`}>Perfil</h1>
-      <span className={`text-base mb-6 ${isDarkMode ? 'text-gray-300' : 'text-black'}`}>Gerencie todos os perfis do site</span>
+      <h1 className={`text-2xl sm:text-3xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-black'}`}>Perfil</h1>
+      <span className={`text-sm sm:text-base mb-4 sm:mb-6 ${isDarkMode ? 'text-gray-300' : 'text-black'}`}>Gerencie todos os perfis do site</span>
 
       {/* Usuário principal */}
       {usuarioPrincipal && (
-        <div className="flex flex-row items-stretch mb-8">
+        <div className="flex flex-row items-stretch mb-6 sm:mb-8">
           <div className="w-1.5 rounded-lg bg-lime-500" />
-          <div className={`flex-1 rounded-lg border p-8 flex flex-col ml-2 relative ${
+          <div className={`flex-1 rounded-lg border p-4 sm:p-6 md:p-8 flex flex-col ml-2 relative ${
             isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-900 border-zinc-500'
           }`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-6">
-                <div className={`w-16 h-16 rounded-lg flex items-center justify-center ${
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full sm:w-auto">
+                <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center ${
                   isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-zinc-100 text-gray-400'
                 }`}>
-                  <User size={40} />
+                  <User size={28} className="sm:w-10 sm:h-10" />
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-zinc-100'}`}>{usuarioPrincipal.nome}</span>
-                </div>
-                <div className="flex-1 flex justify-end">
-                  <span className="px-4 py-1 rounded-xl text-xs font-normal bg-lime-500 text-black align-middle min-w-[64px] text-center">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 flex-1">
+                  <span className={`text-xl sm:text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-zinc-100'}`}>{usuarioPrincipal.nome}</span>
+                  <span className="px-3 sm:px-4 py-1 rounded-xl text-xs font-normal bg-lime-500 text-black min-w-[64px] text-center">
                     {usuarioPrincipal.status}
                   </span>
                 </div>
               </div>
               <button
-                className={`w-44 h-10 rounded-md border text-xs font-bold flex items-center justify-center gap-2 transition-colors ${
+                className={`w-full sm:w-44 h-10 rounded-md border text-xs font-bold flex items-center justify-center gap-2 transition-colors ${
                   isDarkMode 
                     ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600' 
                     : 'bg-white border-black text-black hover:bg-gray-200'
@@ -286,19 +284,21 @@ const Perfil: React.FC = () => {
         initialData={editUserInitialData}
       />
             </div>
-            <div className={`flex flex-row gap-16 mt-2 text-sm ${isDarkMode ? 'text-gray-200' : 'text-zinc-100'}`}>
-              <div className="w-72 h-24 flex flex-col justify-start">
-                <div className="leading-7">ID: {usuarioPrincipal.id}</div>
-                <div className="leading-7">Nome: {usuarioPrincipal.nome}</div>
-                <div className="leading-7">Email: {usuarioPrincipal.email}</div>
-                <div className="leading-7">Role: {usuarioPrincipal.role}</div>
+            <div className={`flex flex-col sm:flex-row gap-4 sm:gap-8 md:gap-16 mt-2 text-xs sm:text-sm ${
+              isDarkMode ? 'text-gray-200' : 'text-zinc-100'
+            }`}>
+              <div className="flex-1 flex flex-col justify-start">
+                <div className="leading-6 sm:leading-7">ID: {usuarioPrincipal.id}</div>
+                <div className="leading-6 sm:leading-7">Nome: {usuarioPrincipal.nome}</div>
+                <div className="leading-6 sm:leading-7">Email: {usuarioPrincipal.email}</div>
+                <div className="leading-6 sm:leading-7">Role: {usuarioPrincipal.role}</div>
               </div>
-              <div className="w-72 h-24 flex flex-col justify-start">
+              <div className="flex-1 flex flex-col justify-start">
                 {usuarioPrincipal.createdAt && (
-                  <div className="leading-7">Membro desde: {new Date(usuarioPrincipal.createdAt).toLocaleDateString()}</div>
+                  <div className="leading-6 sm:leading-7">Membro desde: {new Date(usuarioPrincipal.createdAt).toLocaleDateString()}</div>
                 )}
                 {usuarioPrincipal.updatedAt && (
-                  <div className="leading-7">Última atualização: {new Date(usuarioPrincipal.updatedAt).toLocaleDateString()}</div>
+                  <div className="leading-6 sm:leading-7">Última atualização: {new Date(usuarioPrincipal.updatedAt).toLocaleDateString()}</div>
                 )}
               </div>
             </div>
@@ -308,10 +308,10 @@ const Perfil: React.FC = () => {
 
       {/* Outros usuários */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>Outros usuários</span>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+          <span className={`text-lg sm:text-xl font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>Outros usuários</span>
           <button
-            className={`flex items-center gap-2 w-48 h-11 rounded-lg text-sm font-normal px-4 py-2 transition ${
+            className={`flex items-center justify-center gap-2 w-full sm:w-48 h-11 rounded-lg text-sm font-normal px-4 py-2 transition ${
               isDarkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'
             }`}
             onClick={() => setIsAddModalOpen(true)}
@@ -326,29 +326,29 @@ const Perfil: React.FC = () => {
         onSubmit={({ email, username, password, confirmPassword }) => handleAddUser({ email, username, password, confirmPassword })}
       />
         </div>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 sm:gap-6">
           {outrosUsuarios.length > 0 ? (
             outrosUsuarios.map((u: Usuario) => (
               <div key={u.id} className="flex flex-row items-stretch">
                 <div className={`w-1.5 rounded-lg ${u.status === 'Ativo' ? 'bg-lime-500' : 'bg-zinc-400'}`} />
-                <div className={`flex-1 rounded-lg border flex items-center justify-between px-8 py-5 ml-2 ${
+                <div className={`flex-1 rounded-lg border flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 md:px-8 py-4 sm:py-5 ml-2 gap-3 sm:gap-4 ${
                   isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-zinc-500'
                 }`}>
-                  <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 w-full">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                  <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
+                    <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
                       isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-zinc-100 text-gray-400'
                     }`}>
-                      <User size={28} />
+                      <User size={22} className="sm:w-7 sm:h-7" />
                     </div>
-                    <span className={`text-base font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>{u.nome}</span>
-                    <span className={`px-4 py-1 rounded-xl text-xs font-normal min-w-[64px] text-center ${u.status === 'Ativo' ? 'bg-lime-500 text-black' : 'bg-neutral-300 text-black'}`}>
+                    <span className={`text-sm sm:text-base font-bold flex-1 ${isDarkMode ? 'text-white' : 'text-black'}`}>{u.nome}</span>
+                    <span className={`px-3 sm:px-4 py-1 rounded-xl text-xs font-normal min-w-[64px] text-center ${u.status === 'Ativo' ? 'bg-lime-500 text-black' : 'bg-neutral-300 text-black'}`}>
                       {u.status}
                     </span>
                   </div>
                   <button
-                    className={`w-36 h-10 rounded-lg border text-sm font-semibold flex items-center justify-center gap-2 transition-colors ml-6 shadow-sm ${
+                    className={`w-full sm:w-36 h-10 rounded-lg border text-sm font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm ${
                       isDarkMode 
-                        ? 'bg-purple-600 border-purple-600 hover:bg-purple-700 text-white' 
+                        ? 'bg-blue-600 border-purple-600 hover:bg-blue-700 text-white' 
                         : 'bg-slate-900 border-slate-900 hover:bg-slate-800 text-white'
                     }`}
                     onClick={() => {

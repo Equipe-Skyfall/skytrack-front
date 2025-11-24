@@ -20,31 +20,31 @@ const ModalExcluirEstacao: React.FC<ModalExcluirEstacaoProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
   
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const displayTitle = title || 'Confirmar Exclusão';
   const displayMessage = message || (stationName ? `Tem certeza que deseja excluir a estação "${stationName}"?` : 'Tem certeza que deseja excluir esta estação?');
   
   const handleContentClick = (e: React.MouseEvent) => e.stopPropagation();
 
+  if (!isOpen) return null;
+
   return (
     <div
-      className={`
-        fixed inset-0 flex justify-center items-center z-50
-        transition-all duration-300 ease-in-out
-        ${isOpen ? "backdrop-blur-sm" : "bg-opacity-0 pointer-events-none"}
-      `}
+      className="fixed inset-0 flex justify-center items-center z-50 bg-black/30 backdrop-blur-sm"
       onClick={onClose} 
     >
       <div
-        className={`
-          p-6 rounded-lg shadow-xl w-full max-w-md
-          transition-all duration-300 ease-in-out
-          ${
-            isOpen
-              ? "opacity-100 scale-100"
-              : "opacity-0 scale-95 pointer-events-none"
-          }
-          ${isDarkMode ? 'bg-slate-800' : 'bg-white'}
-        `}
+        className={`p-6 rounded-lg shadow-xl w-full max-w-md ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}
         onClick={handleContentClick}
       >
         <div className="flex justify-center mb-4">

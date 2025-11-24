@@ -19,17 +19,17 @@ const Dashboard: React.FC = () => {
   const error = errorStations || errorAlerts;
 
   return (
-    <div className="min-h-screen font-poppins flex">
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 w-full">
-        <div className="flex items-center justify-between">
-          <h1 className={`text-3xl font-bold font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
+    <div className="min-h-screen font-poppins">
+      <main className="space-y-6 sm:space-y-8 w-full">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <h1 className={`text-2xl sm:text-3xl font-bold font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
             Dashboard
           </h1>
           
           {/* Botão de Exportar CSV */}
           <button
             onClick={() => setShowExportModal(true)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 active:scale-95 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 active:scale-95 w-full sm:w-auto justify-center ${
               isDarkMode
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
                 : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -46,26 +46,26 @@ const Dashboard: React.FC = () => {
           <div className={`text-lg font-poppins ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>Erro: {error}</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               {/* Card de Estações Ativas */}
-              <div className={`rounded-xl border p-6 flex items-center gap-4 shadow-md ${
+              <div className={`rounded-xl border p-4 sm:p-6 flex items-center gap-4 shadow-md ${
                 isDarkMode 
                   ? 'bg-slate-800 border-slate-700' 
                   : 'bg-white border-blue-200'
               }`}>
-                <div className={`rounded-lg p-3 flex items-center justify-center ${
+                <div className={`rounded-lg p-2 sm:p-3 flex items-center justify-center shrink-0 ${
                   isDarkMode ? 'bg-slate-700' : 'bg-blue-100'
                 }`}>
-                  <Radio className={`h-8 w-8 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                  <Radio className={`h-6 w-6 sm:h-8 sm:w-8 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className={`text-lg font-semibold mb-1 font-poppins ${
+                  <h2 className={`text-base sm:text-lg font-semibold mb-1 font-poppins ${
                     isDarkMode ? 'text-blue-300' : 'text-blue-900'
                   }`}>Estações Ativas</h2>
-                  <div className={`text-3xl font-bold mb-2 font-poppins ${
+                  <div className={`text-2xl sm:text-3xl font-bold mb-2 font-poppins ${
                     isDarkMode ? 'text-blue-400' : 'text-blue-700'
                   }`}>{activeStations.length}</div>
-                  <ul className={`text-sm space-y-1 font-poppins ${
+                  <ul className={`text-xs sm:text-sm space-y-1 font-poppins ${
                     isDarkMode ? 'text-blue-200' : 'text-blue-800'
                   }`}>
                     {activeStations.map(estacao => (
@@ -75,24 +75,24 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
               {/* Card de Alertas Ativos */}
-              <div className={`rounded-xl border p-6 flex items-center gap-4 shadow-md ${
+              <div className={`rounded-xl border p-4 sm:p-6 flex items-center gap-4 shadow-md ${
                 isDarkMode 
                   ? 'bg-slate-800 border-slate-700' 
                   : 'bg-white border-red-200'
               }`}>
-                <div className={`rounded-lg p-3 flex items-center justify-center ${
+                <div className={`rounded-lg p-2 sm:p-3 flex items-center justify-center shrink-0 ${
                   isDarkMode ? 'bg-slate-700' : 'bg-red-100'
                 }`}>
-                  <AlertTriangle className={`h-8 w-8 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
+                  <AlertTriangle className={`h-6 w-6 sm:h-8 sm:w-8 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className={`text-lg font-semibold mb-1 font-poppins ${
+                  <h2 className={`text-base sm:text-lg font-semibold mb-1 font-poppins ${
                     isDarkMode ? 'text-red-300' : 'text-red-900'
                   }`}>Alertas Ativos</h2>
-                  <div className={`text-3xl font-bold mb-2 font-poppins ${
+                  <div className={`text-2xl sm:text-3xl font-bold mb-2 font-poppins ${
                     isDarkMode ? 'text-red-400' : 'text-red-700'
                   }`}>{activeAlerts.length}</div>
-                  <ul className={`text-sm space-y-1 font-poppins ${
+                  <ul className={`text-xs sm:text-sm space-y-1 font-poppins ${
                     isDarkMode ? 'text-red-200' : 'text-red-800'
                   }`}>
                     {activeAlerts.map(alerta => (

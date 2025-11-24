@@ -11,6 +11,17 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSubmit }
   // role removido, sempre ADMIN
   const [error, setError] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
 
   // Animação: transição de escala e opacidade
   // O modal só é renderizado se isOpen for true, mas a animação é feita via Tailwind
@@ -33,18 +44,19 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSubmit }
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/10 transition-opacity duration-300"
+      className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30 transition-opacity duration-300 p-4 overflow-y-auto"
       onClick={onClose}
+      style={{ touchAction: 'none' }}
     >
       <div
-        className={`rounded-xl shadow-lg w-full max-w-2xl p-8 relative transform transition-all duration-300 ease-out scale-100 opacity-100 ${
+        className={`rounded-xl shadow-lg w-full max-w-md sm:max-w-lg md:max-w-2xl p-4 sm:p-6 md:p-8 relative transform transition-all duration-300 ease-out scale-100 opacity-100 max-h-[90vh] overflow-y-auto ${
           isDarkMode ? 'bg-slate-800' : 'bg-white'
         }`}
         onClick={e => e.stopPropagation()}
       >
-        <button className={`absolute top-4 right-4 text-2xl ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-zinc-800 hover:text-black'}`} onClick={onClose}>&times;</button>
-        <h2 className={`text-2xl font-bold mb-6 font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Criar Novo Usuário</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <button className={`absolute top-3 right-3 sm:top-4 sm:right-4 text-2xl ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-zinc-800 hover:text-black'}`} onClick={onClose}>&times;</button>
+        <h2 className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Criar Novo Usuário</h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:gap-4">
           <div>
             <label className={`block text-sm font-medium font-poppins mb-1 ${isDarkMode ? 'text-gray-200' : 'text-zinc-700'}`}>Nome de Usuário</label>
             <input 
@@ -90,11 +102,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSubmit }
             />
           </div>
           {/* Campo Tipo removido, sempre ADMIN */}
-          {error && <div className="text-red-500 text-sm font-poppins">{error}</div>}
-          <div className="flex justify-between mt-4">
+          {error && <div className="text-red-500 text-xs sm:text-sm font-poppins">{error}</div>}
+          <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 mt-3 sm:mt-4">
           <button 
             type="button" 
-            className={`px-6 py-2 rounded border transition-colors ${
+            className={`px-4 sm:px-6 py-2 rounded border transition-colors text-sm sm:text-base w-full sm:w-auto ${
               isDarkMode 
                 ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600' 
                 : 'bg-white border-gray-300 text-zinc-800 hover:bg-gray-50'
@@ -105,7 +117,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSubmit }
           </button>
           <button 
             type="submit" 
-            className={`px-6 py-2 rounded font-semibold transition-colors ${
+            className={`px-4 sm:px-6 py-2 rounded font-semibold transition-colors text-sm sm:text-base w-full sm:w-auto ${
               isDarkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'
             }`}
           >

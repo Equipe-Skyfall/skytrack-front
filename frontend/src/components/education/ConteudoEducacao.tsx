@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, BarChart2, Calculator, BookOpen, AlertTriangle, TrendingUp } from 'lucide-react';
+import { BarChart2, Calculator, BookOpen, AlertTriangle, TrendingUp } from 'lucide-react';
 import CardEducacao from './CardEducacao';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -178,29 +178,15 @@ const ConteudoEducacao: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen font-poppins p-8">
-      <main className="flex-1 space-y-8 relative">
-        <button
-          onClick={() => window.history.back()}
-          className={`absolute top-6 left-6 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 cursor-pointer md:hidden border ${
-            isDarkMode 
-              ? 'text-white hover:text-gray-300 bg-slate-800 border-slate-700' 
-              : 'text-slate-900 hover:text-slate-700 bg-white border-gray-300'
-          }`}
-          aria-label="Voltar para o Dashboard"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          Voltar
-        </button>
-
-        <header className="space-y-4">
+    <div className="min-h-screen font-poppins">
+      <main className="flex-1 space-y-6 sm:space-y-8 relative">
+        <header className="space-y-3 sm:space-y-4">
           <div className="flex items-center gap-3">
-            <BookOpen className={`h-8 w-8 ${isDarkMode ? 'text-white' : 'text-slate-900'}`} />
-            <h1 className={`text-3xl font-bold font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
+            <h1 className={`text-2xl sm:text-3xl font-bold font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
               Centro Educacional
             </h1>
           </div>
-          <p className={`text-base font-poppins max-w-3xl ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
+          <p className={`text-sm sm:text-base font-poppins max-w-3xl ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
             Aprenda sobre meteorologia e compreenda os fundamentos científicos por trás das medições e alertas meteorológicos.
           </p>
         </header>
@@ -208,12 +194,12 @@ const ConteudoEducacao: React.FC = () => {
         {/* Navegação por Tabs */}
         <div className={`rounded-lg shadow-md overflow-hidden ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-gray-200'}`}>
           {/* Tab Headers */}
-          <div className={`flex flex-wrap border-b ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
+          <div className={`flex overflow-x-auto border-b scrollbar-hide ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-0 px-4 py-3 text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2 ${
+                className={`flex-shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap ${
                   activeTab === tab.id
                     ? isDarkMode 
                       ? 'bg-slate-900 text-white' 
@@ -230,14 +216,14 @@ const ConteudoEducacao: React.FC = () => {
           </div>
 
           {/* Tab Content */}
-          <div className="p-6 md:p-8">
+          <div className="p-4 sm:p-6 md:p-8">
             {activeTab === 'dashboard' && (
-              <div className="space-y-6 animate-fadeIn">
-                <div className="mb-6">
-                  <h2 className={`text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Dados em Tempo Real</h2>
-                  <p className={`text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Visualize dados meteorológicos ao vivo e compreenda seu significado.</p>
+              <div className="space-y-4 sm:space-y-6 animate-fadeIn">
+                <div className="mb-4 sm:mb-6">
+                  <h2 className={`text-xl sm:text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Dados em Tempo Real</h2>
+                  <p className={`text-sm sm:text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Visualize dados meteorológicos ao vivo e compreenda seu significado.</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   {estatisticasDashboard.map((item, index) => (
                     <CardEducacao
                       key={index}
@@ -251,12 +237,12 @@ const ConteudoEducacao: React.FC = () => {
             )}
 
             {activeTab === 'formulas' && (
-              <div className="space-y-6 animate-fadeIn">
-                <div className="mb-6">
-                  <h2 className={`text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Fórmulas Meteorológicas</h2>
-                  <p className={`text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Compreenda os cálculos científicos por trás dos dados meteorológicos.</p>
+              <div className="space-y-4 sm:space-y-6 animate-fadeIn">
+                <div className="mb-4 sm:mb-6">
+                  <h2 className={`text-xl sm:text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Fórmulas Meteorológicas</h2>
+                  <p className={`text-sm sm:text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Compreenda os cálculos científicos por trás dos dados meteorológicos.</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {conceitosEstatisticos.map((item, index) => (
                     <CardEducacao
                       key={index}
@@ -270,12 +256,12 @@ const ConteudoEducacao: React.FC = () => {
             )}
 
             {activeTab === 'parametros' && (
-              <div className="space-y-6 animate-fadeIn">
-                <div className="mb-6">
-                  <h2 className={`text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Parâmetros Monitorados</h2>
-                  <p className={`text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Guia completo sobre cada parâmetro monitorado pelas estações meteorológicas.</p>
+              <div className="space-y-4 sm:space-y-6 animate-fadeIn">
+                <div className="mb-4 sm:mb-6">
+                  <h2 className={`text-xl sm:text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Parâmetros Monitorados</h2>
+                  <p className={`text-sm sm:text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Guia completo sobre cada parâmetro monitorado pelas estações meteorológicas.</p>
                 </div>
-                <div className="space-y-8">
+                <div className="space-y-4 sm:space-y-8">
                   {parametrosMeteorologicos.map((item, index) => (
                     <CardEducacao
                       key={index}
@@ -289,12 +275,12 @@ const ConteudoEducacao: React.FC = () => {
             )}
 
             {activeTab === 'alertas' && (
-              <div className="space-y-6 animate-fadeIn">
-                <div className="mb-6">
-                  <h2 className={`text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Sistema de Alertas</h2>
-                  <p className={`text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Compreenda os critérios e limiares utilizados para emissão de alertas meteorológicos.</p>
+              <div className="space-y-4 sm:space-y-6 animate-fadeIn">
+                <div className="mb-4 sm:mb-6">
+                  <h2 className={`text-xl sm:text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Sistema de Alertas</h2>
+                  <p className={`text-sm sm:text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Compreenda os critérios e limiares utilizados para emissão de alertas meteorológicos.</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <CardEducacao
                     tipo="conceito"
                     dados={{
@@ -340,12 +326,12 @@ const ConteudoEducacao: React.FC = () => {
             )}
 
             {activeTab === 'estatistica' && (
-              <div className="space-y-6 animate-fadeIn">
-                <div className="mb-6">
-                  <h2 className={`text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Análise Estatística</h2>
-                  <p className={`text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Métodos estatísticos aplicados à análise de séries temporais meteorológicas.</p>
+              <div className="space-y-4 sm:space-y-6 animate-fadeIn">
+                <div className="mb-4 sm:mb-6">
+                  <h2 className={`text-xl sm:text-2xl font-bold font-poppins mb-2 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>Análise Estatística</h2>
+                  <p className={`text-sm sm:text-base font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>Métodos estatísticos aplicados à análise de séries temporais meteorológicas.</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   <CardEducacao
                     tipo="conceito"
                     dados={{

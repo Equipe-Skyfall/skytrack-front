@@ -13,10 +13,16 @@ import {
   User,
   Moon,
   Sun,
+  X,
   // BarChart3 // DESATIVADO - usado em Relatórios
 } from "lucide-react";
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const location = useLocation();
@@ -60,13 +66,25 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      <div className={`w-[17.7rem] h-screen fixed left-0 top-0 p-4 flex flex-col overflow-y-auto z-50 transition-all duration-300 ${
+      {/* Overlay para mobile */}
+      {isOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`w-[17.7rem] h-screen fixed left-0 top-0 p-4 flex flex-col overflow-y-auto z-50 transition-transform duration-300 ${
         isDarkMode 
           ? 'bg-slate-950 text-white' 
           : 'bg-slate-900 text-white'
+      } ${
+        isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
-        {/* Logo - Alinhado à esquerda */}
-        <div className="flex items-center justify-start mb-2 pl-1">
+        {/* Logo e botão fechar (mobile) */}
+        <div className="flex items-center justify-between mb-2 pl-1">
+          <div className="flex items-center">
           <img
             className="w-[6rem] h-[6rem] mr-1"
             src="https://c.animaapp.com/j2YDbmTu/img/4-13@2x.png"
@@ -75,6 +93,16 @@ const Sidebar: React.FC = () => {
           <h2 className="text-xl font-bold font-poppins leading-[1.8rem] text-white">
             SkyTrack
           </h2>
+          </div>
+          
+          {/* Botão fechar (apenas mobile) */}
+          <button
+            onClick={onClose}
+            className="lg:hidden p-2 hover:bg-slate-800 rounded-lg transition-colors"
+            aria-label="Fechar menu"
+          >
+            <X className="h-6 w-6" />
+          </button>
         </div>
 
         {/* Menu com botões de login/logoff no final */}
@@ -84,6 +112,7 @@ const Sidebar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={onClose}
                 className={`flex items-center w-[15.4rem] h-[3.3rem] mx-auto rounded-[0.3rem] transition-colors group ${
                   isDarkMode 
                     ? location.pathname === item.path 

@@ -335,8 +335,8 @@ const Relatorios: React.FC = () => {
 
                     <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 bg-purple-100 rounded-xl">
-                                <Gauge className="h-6 w-6 text-purple-600" />
+                            <div className="p-3 bg-blue-100 rounded-xl">
+                                <Gauge className="h-6 w-6 text-blue-600" />
                             </div>
                             <div>
                                 <h3 className="text-sm font-semibold text-slate-600">Leituras de Sensores</h3>

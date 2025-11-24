@@ -48,6 +48,17 @@ const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
         status: "INACTIVE",
     });
 
+    React.useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
     useEffect(() => {
         if (isOpen) {
             if (initialData) {
@@ -85,28 +96,19 @@ const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
         onClose();
     };
 
+    if (!isOpen) return null;
+
     return (
         <div
-            className={`
- fixed inset-0 flex justify-center items-center z-50
- transition-all duration-300 ease-in-out
- ${isOpen ? "backdrop-blur-sm" : "bg-opacity-0 pointer-events-none"}
- `}
+            className="fixed inset-0 flex justify-center items-center z-50 bg-black/30 backdrop-blur-sm overflow-y-auto"
             onClick={handleClose}
+            style={{ touchAction: 'none' }}
         >
             <div
-                className={`
- p-6 rounded-lg shadow-xl w-full max-w-xl
- transition-all duration-300 ease-in-out
- ${isOpen
-                        ? "opacity-100 scale-100"
-                        : "opacity-0 scale-95 pointer-events-none"
-                    }
- ${isDarkMode ? 'bg-slate-800' : 'bg-white'}
- `}
+                className={`p-4 sm:p-6 rounded-lg shadow-xl w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 className={`text-xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
+                <h2 className={`text-lg sm:text-xl font-bold mb-3 sm:mb-4 ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                     Editar Estação
                 </h2>
 
@@ -214,10 +216,10 @@ const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-4 mt-4">
+                    <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 mt-4">
                         <button
                             type="button" onClick={handleClose}
-                            className={`font-bold py-2 px-4 rounded ${
+                            className={`font-bold py-2 px-4 rounded text-sm sm:text-base w-full sm:w-auto ${
                                 isDarkMode 
                                     ? 'bg-slate-700 hover:bg-slate-600 text-white' 
                                     : 'bg-gray-300 hover:bg-gray-400 text-gray-800'
@@ -227,7 +229,7 @@ const ModalEdicaoEstacao: React.FC<ModalEdicaoProps> = ({
                         </button>
                         <button
                             type="submit"
-                            className={`font-bold py-2 px-4 rounded ${
+                            className={`font-bold py-2 px-4 rounded text-sm sm:text-base w-full sm:w-auto ${
                                 isDarkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-slate-900 hover:bg-slate-700 text-white'
                             }`}
                         >

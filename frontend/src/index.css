@@ -26,6 +26,16 @@
   .animate-fadeIn {
     animation: fadeIn 0.4s ease-out;
   }
+
+  /* Esconde a scrollbar mas mantém a funcionalidade de scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
 }
 
 /* :root {

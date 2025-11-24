@@ -186,22 +186,22 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className={`rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
+      <div className={`rounded-xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
         {/* Header */}
-        <div className={`flex items-center justify-between p-6 border-b ${isDarkMode ? 'border-slate-700' : 'border-zinc-200'}`}>
-          <div className="flex items-center gap-3">
-            <Calendar className={`h-6 w-6 ${isDarkMode ? 'text-gray-300' : 'text-zinc-700'}`} />
-            <div>
-              <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
+        <div className={`flex items-center justify-between p-4 sm:p-6 border-b ${isDarkMode ? 'border-slate-700' : 'border-zinc-200'}`}>
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <Calendar className={`h-5 w-5 sm:h-6 sm:w-6 shrink-0 ${isDarkMode ? 'text-gray-300' : 'text-zinc-700'}`} />
+            <div className="min-w-0 flex-1">
+              <h2 className={`text-base sm:text-xl font-bold truncate ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
                 Histórico de Dados
               </h2>
-              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
+              <p className={`text-xs sm:text-sm truncate ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
                 Estação: {stationName}
               </p>
               <div className={`text-xs space-y-1 mt-1 ${isDarkMode ? 'text-gray-400' : 'text-zinc-500'}`}>
-                <div>ID: {stationId}</div>
-                {stationMac && <div>MAC: {stationMac}</div>}
+                <div className="truncate">ID: {stationId}</div>
+                {stationMac && <div className="truncate">MAC: {stationMac}</div>}
                 <div className="flex items-center gap-2">
                   {connectionTested && (
                     <>
@@ -213,7 +213,7 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleRetry}
               disabled={loading}
@@ -222,7 +222,7 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
               }`}
               title="Recarregar dados"
             >
-              <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''} ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`} />
+              <RefreshCw className={`h-4 w-4 sm:h-5 sm:w-5 ${loading ? 'animate-spin' : ''} ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`} />
             </button>
             <button
               onClick={onClose}
@@ -230,13 +230,13 @@ const ModalHistoricoEstacao: React.FC<ModalHistoricoEstacaoProps> = ({
                 isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-zinc-100'
               }`}
             >
-              <X className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`} />
+              <X className={`h-4 w-4 sm:h-5 sm:w-5 ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`} />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-4 sm:p-6">
           {loading ? (
             <div className="text-center py-8">
               <RefreshCw className={`h-8 w-8 animate-spin mx-auto mb-4 ${isDarkMode ? 'text-gray-400' : 'text-zinc-400'}`} />

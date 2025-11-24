@@ -34,47 +34,47 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
 
   return (
     <>
-      <div className={`rounded-xl border p-6 space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300 ${
+      <div className={`rounded-xl border p-4 sm:p-6 space-y-3 sm:space-y-4 shadow-md hover:shadow-lg transition-shadow duration-300 ${
         isDarkMode 
           ? 'bg-slate-800 border-slate-700' 
           : 'bg-white border-zinc-300'
       }`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`rounded-lg p-2 ${isDarkMode ? 'bg-slate-700' : 'bg-zinc-100'}`}>
-              <MapPin className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-zinc-700'}`} />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className={`rounded-lg p-2 shrink-0 ${isDarkMode ? 'bg-slate-700' : 'bg-zinc-100'}`}>
+              <MapPin className={`h-4 w-4 sm:h-5 sm:w-5 ${isDarkMode ? 'text-gray-300' : 'text-zinc-700'}`} />
             </div>
-            <h3 className={`text-lg font-bold font-poppins ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
+            <h3 className={`text-base sm:text-lg font-bold font-poppins truncate ${isDarkMode ? 'text-white' : 'text-zinc-800'}`}>
               {station.name}
             </h3>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-semibold font-poppins ${
+          <div className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold font-poppins shrink-0 ${
             station.status === 'ACTIVE' ? 'bg-lime-500 text-white' : 'bg-red-500 text-white'
           }`}>
             {displayStatus[station.status] || station.status}
           </div>
         </div>
-        <div className={`rounded-lg p-3 ${isDarkMode ? 'bg-slate-700' : 'bg-zinc-100'}`}>
-          <div className={`flex items-center gap-2 text-sm font-poppins ${
+        <div className={`rounded-lg p-2 sm:p-3 ${isDarkMode ? 'bg-slate-700' : 'bg-zinc-100'}`}>
+          <div className={`flex items-center gap-2 text-xs sm:text-sm font-poppins ${
             isDarkMode ? 'text-gray-300' : 'text-zinc-600'
           }`}>
-            <MapPin className="h-4 w-4" />
-            <span>{station.address || 'Endereço não informado'}</span>
+            <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="truncate">{station.address || 'Endereço não informado'}</span>
           </div>
         </div>
-        <div className={`flex items-center gap-2 text-sm font-poppins ${
+        <div className={`flex items-center gap-2 text-xs sm:text-sm font-poppins ${
           isDarkMode ? 'text-gray-300' : 'text-zinc-600'
         }`}>
-          <Wifi className="h-4 w-4" />
-          <span className="font-mono">MAC: {station.macAddress || 'Não configurado'}</span>
+          <Wifi className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="font-mono text-xs sm:text-sm truncate">MAC: {station.macAddress || 'Não configurado'}</span>
         </div>
-        <div className={`flex items-center gap-2 text-sm font-poppins ${
+        <div className={`flex items-center gap-2 text-xs sm:text-sm font-poppins ${
           isDarkMode ? 'text-gray-300' : 'text-zinc-600'
         }`}>
-          <Activity className="h-4 w-4" />
-          <span className="font-mono">Coords: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}</span>
+          <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="font-mono text-xs sm:text-sm truncate">Coords: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}</span>
         </div>
-        <p className={`text-sm font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
+        <p className={`text-xs sm:text-sm font-poppins ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
           <strong>Descrição:</strong> {station.description || 'Sem descrição'}
         </p>
         <div className={`text-xs font-poppins ${isDarkMode ? 'text-gray-400' : 'text-zinc-500'}`}>
@@ -82,38 +82,38 @@ const EstacaoCard: React.FC<EstacaoCardProps> = ({
           Atualizado: {new Date(station.updatedAt).toLocaleDateString("pt-BR")}
         </div>
         {isUserLoggedIn && (
-          <div className={`flex justify-center gap-4 pt-4 border-t ${
+          <div className={`flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 pt-3 sm:pt-4 border-t ${
             isDarkMode ? 'border-slate-700' : 'border-zinc-200'
           }`}>
             {/* Botão de Histórico - NOVO */}
             <button
               onClick={() => setShowHistoryModal(true)}
-              className={`rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold font-poppins transition-colors duration-300 shadow-sm cursor-pointer ${
+              className={`rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-sm sm:text-base font-semibold font-poppins transition-colors duration-300 shadow-sm cursor-pointer ${
                 isDarkMode
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-slate-900 text-white hover:bg-slate-800'
               }`}
             >
-              <History className="h-5 w-5" />
+              <History className="h-4 w-4 sm:h-5 sm:w-5" />
               Histórico
             </button>
 
             <button
               onClick={onConfigurarClick}
-              className={`rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold transition-colors duration-300 shadow-sm cursor-pointer border ${
+              className={`rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-sm sm:text-base font-semibold transition-colors duration-300 shadow-sm cursor-pointer border ${
                 isDarkMode
                   ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
                   : 'bg-white border-gray-300 text-zinc-800 hover:bg-gray-50'
               }`}
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
               Configurar
             </button>
             <button
               onClick={onDeleteClick}
-              className="bg-red-600 text-white rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-base font-semibold hover:bg-red-700 transition-colors duration-300 shadow-sm cursor-pointer"
+              className="bg-red-600 text-white rounded-lg py-2 px-4 flex items-center justify-center gap-2 text-sm sm:text-base font-semibold hover:bg-red-700 transition-colors duration-300 shadow-sm cursor-pointer"
             >
-              <Trash2 className="h-5 w-5" />
+              <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
               Excluir
             </button>
           </div>
@@ -335,10 +335,10 @@ const Estacao: React.FC = () => {
 
   return (
     <div className="min-h-screen font-poppins">
-      <main className="p-4 md:p-6 lg:p-8 space-y-8 max-w-full mx-auto">
-        <div className="flex justify-between items-center">
+      <main className="space-y-8 max-w-full mx-auto">
+        <div className="space-y-4">
           <div className="space-y-2">
-            <h1 className={`text-3xl md:text-4xl font-extrabold tracking-tight ${
+            <h1 className={`text-2xl md:text-3xl font-bold font-poppins ${
               isDarkMode ? 'text-white' : 'text-zinc-800'
             }`}>Estações Pluviométricas</h1>
             <p className={`text-base md:text-lg ${isDarkMode ? 'text-gray-300' : 'text-zinc-600'}`}>
@@ -348,13 +348,13 @@ const Estacao: React.FC = () => {
           {token && (
             <button
               onClick={() => setIsModalOpen(true)}
-              className={`rounded-lg py-2.5 px-6 flex items-center gap-2 text-sm font-semibold transition-colors duration-300 shadow-sm cursor-pointer ${
+              className={`rounded-lg py-2 sm:py-2.5 px-4 sm:px-6 flex items-center justify-center gap-2 text-sm font-semibold transition-colors duration-300 shadow-sm cursor-pointer w-full sm:w-auto ${
                 isDarkMode
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-slate-900 text-white hover:bg-slate-800'
               }`}
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
               Cadastrar Estação
             </button>
           )}

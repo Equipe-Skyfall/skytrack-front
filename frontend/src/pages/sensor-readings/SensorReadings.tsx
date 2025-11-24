@@ -187,7 +187,7 @@ const SensorReadings: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+          <div className="bg-blue-50 border border-purple-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <BarChart3 className="h-6 w-6 text-purple-600" />
               <h3 className="font-semibold text-purple-900 font-poppins">Controles Flexíveis</h3>

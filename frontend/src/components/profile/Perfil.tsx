@@ -4,6 +4,7 @@ import EditUserModal from '../modals/EditUserModal';
 import AddUserModal from '../modals/AddUserModal';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { AUTH_BASE } from '../../services/api/config';
 
 type Usuario = {
   id: string;
@@ -43,7 +44,7 @@ const Perfil: React.FC = () => {
   // Função para adicionar usuário
   const handleAddUser = async (data: { email: string; username: string; password: string; confirmPassword: string }) => {
     try {
-      const response = await fetch('https://auth.skytrack.space/users', {
+      const response = await fetch(`${AUTH_BASE}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +76,7 @@ const Perfil: React.FC = () => {
   const handleEditUser = async (data: { email: string; username: string; password: string }) => {
     try {
       if (!editUserId) throw new Error('Usuário para edição não selecionado');
-      const response = await fetch(`https://auth.skytrack.space/users/${editUserId}`, {
+      const response = await fetch(`${AUTH_BASE}/users/${editUserId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +111,7 @@ const Perfil: React.FC = () => {
         setLoading(true);
 
         // Buscar perfil do usuário atual
-        const profileResponse = await fetch('https://auth.skytrack.space/auth/profile', {
+        const profileResponse = await fetch(`${AUTH_BASE}/auth/profile`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -129,7 +130,7 @@ const Perfil: React.FC = () => {
         }
 
         // Buscar todos os usuários
-        const usersResponse = await fetch('https://auth.skytrack.space/users', {
+        const usersResponse = await fetch(`${AUTH_BASE}/users`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -259,7 +260,7 @@ const Perfil: React.FC = () => {
         onDelete={async () => {
           if (!editUserId) return;
           try {
-            const response = await fetch(`https://auth.skytrack.space/users/${editUserId}`, {
+            const response = await fetch(`${AUTH_BASE}/users/${editUserId}`, {
               method: 'DELETE',
               headers: {
                 ...(token ? { 'Authorization': `Bearer ${token}` } : {}),

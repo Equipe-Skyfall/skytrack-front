@@ -7,25 +7,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0', // Bind to all interfaces for VPS access
     port: 5173,
-    proxy: {
-      '/api': {
-        target: 'https://apitest.skytrack.space',
-        changeOrigin: true,
-        secure: true,
-        configure: (proxy) => {
-          // Type assertion to access event emitter methods
-          const proxyServer = proxy as any;
-          proxyServer.on('error', (err: Error) => {
-            console.log('proxy error', err);
-          });
-          proxyServer.on('proxyReq', (proxyReq: any, req: any) => {
-            console.log('Sending Request to the Target:', req.method, req.url);
-          });
-          proxyServer.on('proxyRes', (proxyRes: any, req: any) => {
-            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
-          });
-        },
-      }
-    }
+    // Proxy removed to ensure all network calls use explicit env-configured URLs
+    // If you need a dev proxy later, add it here and prefer `VITE_API_URL` in code.
   }
 })

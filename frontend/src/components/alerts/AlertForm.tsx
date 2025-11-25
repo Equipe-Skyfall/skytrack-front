@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, X } from 'lucide-react';
 import type { AlertFormData } from '../../interfaces/alerts';
+import { API_BASE } from '../../services/api/config';
 
 type Props = {
   value: AlertFormData;
@@ -21,7 +22,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
 
   useEffect(() => {
     let mounted = true;
-    const base = (import.meta.env.VITE_API_URL as string) || 'https://api.skytrack.space/';
+    const base = API_BASE;
 
     async function loadStations() {
       setLoadingStations(true);
@@ -90,7 +91,7 @@ const AlertForm: React.FC<Props> = ({ value, onChange, onCancel, onSubmit, submi
 
   useEffect(() => {
     let mounted = true;
-  const base = (import.meta.env.VITE_API_URL as string) || import.meta.env.VITE_API_URL || 'https://api.skytrack.space';
+  const base = API_BASE;
     async function loadParametersForStation(stationId?: string) {
       setLoadingParams(true);
       try {
